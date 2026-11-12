@@ -126,6 +126,43 @@ namespace StashNet.Crafting
         public static void Finalizer() => CraftingNetwork.InCraftClick = false;
     }
 
+    /// <summary>Cancelling a queued craft at a Crafting Terminal: mark the refund window.</summary>
+    [HarmonyPatch(typeof(XUiC_RecipeStack), nameof(XUiC_RecipeStack.HandleOnPress))]
+    public static class CancelCraftPatch
+    {
+        public static void Prefix() => CraftingNetwork.InCancel = CraftingNetwork.Active;
+
+        public static void Finalizer() => CraftingNetwork.InCancel = false;
+    }
+
+    /// <summary>
+    /// During a cancel, vanilla refunds each ingredient with AddItem(stack, playSound). Send it to
+    /// the network instead (owner request, 2026-11-12). Anything the network can't take comes back
+    /// to the backpack, then the ground - same as vanilla's fallback.
+    /// </summary>
+    [HarmonyPatch(typeof(XUiM_PlayerInventory), nameof(XUiM_PlayerInventory.AddItem), new[] { typeof(ItemStack), typeof(bool) })]
+    public static class CancelRefundToNetworkPatch
+    {
+        public static bool Prefix(ItemStack _itemStack, ref bool __result)
+        {
+            if (!CraftingNetwork.InCancel || !CraftingNetwork.TryRefundToNetwork(_itemStack)) return true;
+            __result = true;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// SERVER: crafts that finish while nobody has the Crafting Terminal open go into the block's
+    /// own output slots. Move them into the network. Never while the station is open/locked by a
+    /// player (their screen holds its own copy of the output and writes it back on close).
+    /// </summary>
+    [HarmonyPatch(typeof(TileEntityWorkstation), nameof(TileEntityWorkstation.UpdateTick))]
+    public static class WorkstationOutputToNetworkPatch
+    {
+        public static void Postfix(TileEntityWorkstation __instance, World world) =>
+            CraftingOutputServer.TryMoveOutput(world, __instance);
+    }
+
     /// <summary>
     /// Ingredients pulled from the network land in the backpack before vanilla takes them, so a
     /// craft count whose shortfall doesn't fit in the backpack can't start. Cap the craft-count

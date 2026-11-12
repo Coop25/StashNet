@@ -31,6 +31,14 @@ namespace StashNet.Crafting
         /// <summary>Set while vanilla is handling a Craft button click (ItemActionEntryCraft.OnActivated).</summary>
         public static bool InCraftClick { get; set; }
 
+        /// <summary>Set while vanilla cancels a queued craft (XUiC_RecipeStack.HandleOnPress): refunds go to the network.</summary>
+        public static bool InCancel { get; set; }
+
+        private const float OutputMoveInterval = 0.5f;
+        private static float outputTimer;
+        /// <summary>Free stacks in the network per the last listing (minus what we've sent since).</summary>
+        private static int freeStacks;
+
         public static bool IsCraftingTerminal(Block block) =>
             block != null && block.Properties.Contains("StashNetCraftingTerminal");
 
@@ -40,6 +48,8 @@ namespace StashNet.Crafting
             windowGroup = group;
             Active = true;
             stockByType.Clear();
+            freeStacks = 0;
+            outputTimer = 0f;
             RequestListing();
         }
 
@@ -56,13 +66,66 @@ namespace StashNet.Crafting
             if (!Active) return;
             refreshTimer += dt;
             if (refreshTimer >= RefreshInterval) RequestListing();
+            outputTimer += dt;
+            if (outputTimer >= OutputMoveInterval)
+            {
+                outputTimer = 0f;
+                MoveOutputToNetwork();
+            }
         }
+
+        /// <summary>
+        /// Window open: finished crafts land in the on-screen output slots. Move them into the
+        /// network when it clearly has room; otherwise leave them there (vanilla behavior).
+        /// </summary>
+        private static void MoveOutputToNetwork()
+        {
+            XUiC_WorkstationOutputGrid grid = windowGroup?.GetChildByType<XUiC_WorkstationOutputGrid>();
+            if (grid == null) return;
+            ItemStack[] slots = grid.GetSlots();
+            var request = NewRequest(TerminalOp.Deposit);
+            for (int i = 0; i < slots.Length; i++)
+            {
+                ItemStack s = slots[i];
+                if (s == null || s.IsEmpty() || !Storable(s.itemValue)) continue;
+                int stacksNeeded = (s.count + Math.Max(1, s.itemValue.ItemClass.Stacknumber.Value) - 1) / Math.Max(1, s.itemValue.ItemClass.Stacknumber.Value);
+                if (stacksNeeded > freeStacks) continue;
+                freeStacks -= stacksNeeded;
+                request.Items.Add(new ItemAmount(Drives.ItemCodec.NameOf(s.itemValue), Drives.ItemCodec.EncodeVariant(s.itemValue), s.count));
+                slots[i] = ItemStack.Empty.Clone();
+            }
+            if (request.Items.Count == 0) return;
+            // Removed from the output first, then sent; leftovers come back to the backpack (never lost).
+            grid.SetSlots(slots);
+            grid.UpdateData(slots);
+            grid.IsDirty = true;
+            TerminalClient.Send(request);
+            RequestListing();
+        }
+
+        /// <summary>Cancelled-craft refund: send it to the network instead of the backpack.</summary>
+        public static bool TryRefundToNetwork(ItemStack stack)
+        {
+            if (!Active || stack == null || stack.IsEmpty() || !Storable(stack.itemValue)) return false;
+            var request = NewRequest(TerminalOp.Deposit);
+            request.Items.Add(new ItemAmount(Drives.ItemCodec.NameOf(stack.itemValue), Drives.ItemCodec.EncodeVariant(stack.itemValue), stack.count));
+            TerminalClient.Send(request);
+            RequestListing();
+            return true;
+        }
+
+        private static bool Storable(ItemValue iv) =>
+            iv != null && !Blocks.DriveRules.IsDrive(iv) && Drives.ItemCodec.CanStore(iv);
+
+        private static TerminalRequest NewRequest(TerminalOp op) =>
+            new TerminalRequest { Op = op, X = stationPos.x, Y = stationPos.y, Z = stationPos.z };
 
         /// <summary>Called by TerminalClient for every response; uses listings that answer our requests.</summary>
         public static void OnResponse(TerminalResponse response)
         {
             if (!listRequests.Remove(response.RequestId) || !Active) return;
             stockByType.Clear();
+            freeStacks = response.HasListing ? Math.Max(0, response.MaxStacks - response.UsedStacks) : 0;
             if (response.HasListing)
             {
                 foreach (ItemAmount a in response.Listing)

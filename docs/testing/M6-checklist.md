@@ -5,7 +5,7 @@
 **About 15 minutes**, single-player in your throwaway world (creative mode is fine for getting materials).
 
 ## 0. Loads cleanly
-- [ ] F1: `[StashNet] Loaded v0.7.2 (16 methods patched)` (10 crafting hooks), and no red errors mentioning StashNet, blocks.xml, or recipes.xml.
+- [ ] F1: `[StashNet] Loaded v0.7.3 (19 methods patched)` (13 crafting hooks), and no red errors mentioning StashNet, blocks.xml, or recipes.xml.
 
 ## 1. The block
 - [ ] Crafting menu: **Crafting Terminal** shows up (needs a Workbench + a Storage Terminal + 4 electrical parts). Or `giveself stashnetCraftingTerminal`.
@@ -21,7 +21,7 @@
 
 ## 3. Normal workbench rules still apply
 - [ ] Recipes you haven't unlocked are still locked.
-- [ ] Cancel a queued craft: the ingredients come back to your **backpack** (vanilla behavior).
+- [ ] Cancel a queued craft: see section 6 (since v0.7.3 refunds go to storage).
 - [ ] The output appears in the output slots as usual.
 
 ## 4. Doesn't leak into other places
@@ -31,6 +31,13 @@
 ## 5. Backpack full
 - [ ] Fill your backpack, then craft something whose ingredients are all in the network.
 - [ ] **Expected:** either it crafts (if the pulled items fit), or it's refused with "missing resources". Nothing disappears: the network totals stay correct.
+
+## 6. Cancel and output go to storage (v0.7.3)
+- [ ] Queue a craft whose ingredients came from the network, then **cancel** it. **Expected:** the ingredients go back into **storage** (check the Storage Terminal), not your backpack.
+- [ ] Craft something with the Crafting Terminal **open**: within about a second of finishing, the item leaves the output slots and appears in **storage**.
+- [ ] Queue a longer craft, **close** the Crafting Terminal, wait for it to finish, then check the Storage Terminal. The item is in **storage**, and the Crafting Terminal's output slots are empty.
+- [ ] Fill storage completely, then finish a craft. It **stays in the output slots** (vanilla behavior). Nothing is lost.
+- [ ] A plain vanilla workbench: cancel and output still behave normally (backpack / output slots).
 
 ## Report back
 PASS/FAIL per section. If counts look wrong, a screenshot of the recipe's "have/need" panel helps.
