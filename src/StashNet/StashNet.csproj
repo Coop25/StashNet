@@ -15,6 +15,11 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Game-free logic is compiled straight into the mod so the game only loads one DLL. -->
+  <ItemGroup>
+    <Compile Include="..\StashNet.Core\**\*.cs" Exclude="..\StashNet.Core\obj\**;..\StashNet.Core\bin\**" LinkBase="Core" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="Assembly-CSharp"><HintPath>$(GameManaged)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="LogLibrary"><HintPath>$(GameManaged)\LogLibrary.dll</HintPath><Private>false</Private></Reference>

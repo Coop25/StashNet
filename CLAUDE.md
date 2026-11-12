@@ -36,7 +36,13 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Already runs other DLL mods with EAC off, including storage-related ones (WraithsStorageSolutions, DarkfireAutoSortChest). Watch for conflicts.
 - Milestone 0: ✅ done 2026-11-12. All in-game checks passed, including 1,000-type item metadata through save/reload, container, and drop/pickup.
 - Milestone 1: ✅ done 2026-11-12. The owner reports all checklist sections work. The log shows `Loaded v0.1.0 (5 methods patched)` with no StashNet errors.
-- Current milestone: 2 (drives hold items), not started.
+- Current milestone: 2 (drives hold items). Code done (plan: `docs/superpowers/plans/2026-11-12-m2-drives-hold-items.md`); waiting on the in-game checklist `docs/testing/M2-checklist.md`.
+
+## Drive storage design (M2)
+- `src/StashNet.Core/` is game-free (netstandard2.0) with xUnit tests in `tests/StashNet.Core.Tests/` (`dotnet test`). Its sources are compiled into the mod DLL via a `<Compile Include>` link, so there is no second DLL.
+- Drive contents = `DriveContents` serialized as `SND1` text in item metadata key `StashNetDrive`.
+- Items are stored by NAME. Non-plain items use our own name-based "variant" encoding (`src/StashNet/Drives/ItemCodec.cs`). **Never store the game's binary ItemValue format.** It uses numeric IDs that shift when mods change, and its reader branches on the item class mid-read.
+- Never lose items: move into the destination first, then remove from the source only what arrived. Unreadable drive data is refused and never overwritten.
 - Testing world: the owner reuses one throwaway world for all StashNet testing (started in M0).
 - Game logs: `G:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\output_log_client__*.txt` (newest = latest session). Read-only, OK to check.
 

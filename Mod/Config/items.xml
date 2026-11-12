@@ -4,6 +4,9 @@
 		<!-- Basic Drive: early-game storage drive. Contents are stored on the item itself (Milestone 2). -->
 		<item name="stashnetDriveBasic">
 			<property name="Tags" value="stashnetDrive" />
+			<!-- Capacity (balance numbers live here): distinct item types / total items. -->
+			<property name="StashNetMaxTypes" value="15" />
+			<property name="StashNetMaxItems" value="1500" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
 			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
