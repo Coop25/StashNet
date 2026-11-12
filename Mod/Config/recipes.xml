@@ -20,6 +20,13 @@
 			<ingredient name="resourceDuctTape" count="1" />
 		</recipe>
 
+		<!-- Needs a real workbench, so it can't skip workbench progression. -->
+		<recipe name="stashnetCraftingTerminal" count="1">
+			<ingredient name="workbench" count="1" />
+			<ingredient name="stashnetTerminal" count="1" />
+			<ingredient name="resourceElectricParts" count="4" />
+		</recipe>
+
 		<recipe name="stashnetDriveBasic" count="1">
 			<ingredient name="resourceElectricParts" count="2" />
 			<ingredient name="resourceScrapPolymers" count="2" />

@@ -135,10 +135,14 @@ namespace StashNet.Network
         private static bool IsValid(World world, EntityPlayer player, Vector3i pos)
         {
             if (world == null || player == null) return false;
-            if (!(world.GetBlock(pos).Block is BlockStashNetTerminal)) return false;
+            if (!IsTerminalBlock(world.GetBlock(pos).Block)) return false;
             var center = new Vector3(pos.x + 0.5f, pos.y + 0.5f, pos.z + 0.5f);
             return (player.position - center).magnitude <= MaxReach;
         }
+
+        /// <summary>Storage Terminal, or Crafting Terminal (a workbench block marked StashNetCraftingTerminal).</summary>
+        public static bool IsTerminalBlock(Block block) =>
+            block is BlockStashNetTerminal || (block != null && block.Properties.Contains("StashNetCraftingTerminal"));
 
         /// <summary>Drives can't go in drives, and the item must exist in this game.</summary>
         private static bool Storable(ItemAmount a)

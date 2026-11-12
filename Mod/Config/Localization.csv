@@ -5,6 +5,9 @@ stashnetDriveBay,blocks,Block,,,Drive Bay
 stashnetDriveBayDesc,blocks,Block,,,"Holds up to 4 storage drives. Only accepts drives. Protected by its network Core's code."
 stashnetTerminal,blocks,Block,,,Storage Terminal
 stashnetTerminalDesc,blocks,Block,,,"Browse, search, deposit and withdraw everything stored on your network's drives."
+stashnetCraftingTerminal,blocks,Block,,,Crafting Terminal
+stashnetCraftingTerminalDesc,blocks,Block,,,"A workbench wired into your storage network. Same recipes and skills as a workbench, but it can use ingredients stored on the network's drives (within 6 blocks of a Storage Core)."
+stashnetFetchingIngredients,UI,XUi,,,Fetching ingredients from storage... click Craft again.
 stashnetDriveBasic,items,Item,,,Basic Drive
 stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds 24 stacks, like a small chest. Its contents stay on the drive, even when removed. Only readable inside a StashNet network."
 stashnetUseTerminal,UI,HUD,,,Press {0} to Use

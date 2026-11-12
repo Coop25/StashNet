@@ -103,5 +103,20 @@
 			<property name="SortOrder2" value="0002" />
 		</block>
 
+		<!-- Crafting Terminal (M6): a vanilla workbench in every way (screen, recipes, perk gates, queue,
+		     output) whose recipes can also use ingredients from the nearby StashNet network.
+		     Hooks: src/StashNet/Crafting/. UnlockedBy is not inherited; the recipe needs a workbench anyway. -->
+		<block name="stashnetCraftingTerminal">
+			<property name="Extends" value="workbench" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
+			<property name="StashNetCraftingTerminal" value="true" />
+			<property name="WorkstationName" value="workbench" />
+			<property name="WorkstationWindow" value="workstation_workbench" />
+			<property name="CustomIcon" value="workbench" />
+			<property name="CustomIconTint" value="7FFFB0" />
+			<property name="DescriptionKey" value="stashnetCraftingTerminalDesc" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0003" />
+		</block>
+
 	</append>
 </configs>

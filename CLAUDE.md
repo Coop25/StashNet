@@ -42,7 +42,12 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 4: ✅ accepted by the owner 2026-11-12 (asked to move on). The v0.5.0 session loaded cleanly (first build against the game's own runtime, lockable Core). ⚠️ v0.5.1 (drive locking removed) had **not been launched in-game** when M5 started, and the M4 checklist results were not reported. Re-check the log for v0.5.1 before claiming it works.
 
 - Milestone 5: ✅ done 2026-11-12 (v0.6.1). The owner confirmed drive unload and the tier/durability bars work. The v0.6.0 and v0.6.1 sessions loaded with 6 patches and no StashNet errors, which also covers v0.5.x's lock changes loading. Scope (owner): unload only, with no fill/wipe/format.
-- Current milestone: 6 (Crafting Terminal), not started.
+- Current milestone: 6 (Crafting Terminal, v0.7.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m6-crafting-terminal.md`); waiting on `docs/testing/M6-checklist.md`.
+
+## Crafting Terminal (M6)
+- The block `Extends="workbench"` with `WorkstationName=workbench`, `WorkstationWindow=workstation_workbench`, and marker property `StashNetCraftingTerminal`. It's a real vanilla workbench.
+- `src/StashNet/Crafting/`: while its window is open, `CraftingNetwork` caches the network's plain items (List request every 2 s). Hooks make GetItemCount/GetAllItemStacks/HasItems/BuildRecipeInfosList include that stock. On a Craft click (`ItemActionEntryCraft.OnActivated`), the HasItems postfix withdraws the shortfall into the backpack, and vanilla then takes ingredients from the backpack as usual. Remote clients: async, so "click Craft again".
+- Harmony note: patched methods must be declared on the patched type (`XUiC_WorkstationWindowGroup.Update/OnOpen/OnClose` are). Otherwise Harmony patches the base class for everything.
 
 ## Drive unload (M5)
 - Shift-click a drive while a terminal is open → the client empties it in place and tags it (`StashNetPending` token) → `DriveUnload` request → the server inserts and returns leftovers in `TerminalResponse.ReturnToDrive` → the client refills the tagged drive (backpack, then toolbelt). If the drive isn't found, the leftovers go to the backpack.

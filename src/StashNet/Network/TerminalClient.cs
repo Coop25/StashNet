@@ -82,6 +82,7 @@ namespace StashNet.Network
             if (overflow.Count > 0) response.Messages.Add(new TerminalMessage("stashnetBackpackFull", -1));
 
             XUiC_StashNetTerminal.Current?.OnResponse(response);
+            Crafting.CraftingNetwork.OnResponse(response);
 
             // After updating the screen, so the Return's (newer) listing is what stays displayed.
             if (overflow.Count > 0)
