@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using StashNet.Core.Protocol;
 using StashNet.Network;
@@ -121,6 +122,78 @@ namespace StashNet.Crafting
             foreach (ItemStack need in needs)
             {
                 if (RawCount(inventory, need.itemValue) < need.count * multiplier) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Largest craft count (≤ <paramref name="upTo"/>) whose network shortfall fits in the
+        /// backpack: empty unlocked slots are shared between ingredients; existing partial stacks
+        /// of an ingredient absorb some of its shortfall first. Always at least 1.
+        /// </summary>
+        public static int MaxCraftsThatFit(XUiM_PlayerInventory inventory, EntityPlayerLocal player, Recipe recipe, int upTo)
+        {
+            var perCraft = new List<(ItemValue item, float amount)>();
+            int tier = recipe.craftingTier == -1 ? recipe.GetCraftingTier(player) : recipe.craftingTier;
+            foreach (ItemStack ing in recipe.ingredients)
+            {
+                if (ing == null || ing.itemValue.type == 0) continue;
+                if (ing.itemValue.HasQuality) return upTo; // vanilla already limits these to 1
+                float amount = PerCraftAmount(recipe, ing, player, tier);
+                if (amount >= 1f) perCraft.Add((ing.itemValue, amount));
+            }
+            if (perCraft.Count == 0) return upTo;
+
+            int lo = 1, hi = upTo;
+            if (!Fits(inventory, player.bag, perCraft, 1)) return 1; // vanilla will refuse; nothing to cap
+            while (lo < hi)
+            {
+                int mid = lo + (hi - lo + 1) / 2;
+                if (Fits(inventory, player.bag, perCraft, mid)) lo = mid; else hi = mid - 1;
+            }
+            return lo;
+        }
+
+        /// <summary>Ingredient amount per craft, using the same modifiers as vanilla's craft-count math.</summary>
+        private static float PerCraftAmount(Recipe recipe, ItemStack ing, EntityPlayerLocal player, int tier)
+        {
+            float amount = ing.count;
+            if (!recipe.UseIngredientModifier) return amount;
+            amount = (int)EffectManager.GetValue(PassiveEffects.CraftingIngredientCount, null, ing.count, player, recipe,
+                FastTags<TagGroup.Global>.Parse(ing.itemValue.ItemClass.GetItemName()),
+                calcEquipment: true, calcHoldingItem: true, calcProgression: true, calcBuffs: true, calcChallenges: true, tier);
+            if (amount > 0f)
+            {
+                amount = (int)(amount * XUiM_Recipes.GetCraftingInputModifier(recipe));
+                if (XUiM_Recipes.CraftingInputModifier > 0f) amount = UnityEngine.Mathf.Max(1f, amount);
+            }
+            return amount;
+        }
+
+        private static bool Fits(XUiM_PlayerInventory inventory, Bag bag, List<(ItemValue item, float amount)> perCraft, int crafts)
+        {
+            int emptySlots = 0;
+            PackedBoolArray locked = bag.LockedSlots;
+            for (int i = 0; i < bag.SlotCount; i++)
+            {
+                if (bag.ItemGrid[i].IsEmpty() && !(locked != null && i < locked.Length && locked[i])) emptySlots++;
+            }
+
+            int slotsNeeded = 0;
+            foreach (var (item, amount) in perCraft)
+            {
+                int shortfall = (int)Math.Ceiling(amount * crafts) - RawCount(inventory, item);
+                if (shortfall <= 0) continue;
+                int stackSize = Math.Max(1, item.ItemClass.Stacknumber.Value);
+                int partialRoom = 0;
+                for (int i = 0; i < bag.SlotCount; i++)
+                {
+                    ItemStack s = bag.ItemGrid[i];
+                    if (!s.IsEmpty() && s.itemValue.type == item.type && !s.itemValue.HasQuality) partialRoom += Math.Max(0, stackSize - s.count);
+                }
+                int remaining = shortfall - partialRoom;
+                if (remaining > 0) slotsNeeded += (remaining + stackSize - 1) / stackSize;
+                if (slotsNeeded > emptySlots) return false;
             }
             return true;
         }

@@ -4,7 +4,7 @@
 	<DisplayName value="StashNet" />
 	<Description value="Drive-based storage network: cores, drive bays, terminals, and a crafting terminal." />
 	<Author value="Coop25" />
-	<Version value="0.7.1" />
+	<Version value="0.7.2" />
 	<Website value="https://github.com/Coop25/StashNet" />
 	<SkipWithAntiCheat value="true" />
 </xml>

@@ -125,4 +125,22 @@ namespace StashNet.Crafting
 
         public static void Finalizer() => CraftingNetwork.InCraftClick = false;
     }
+
+    /// <summary>
+    /// Ingredients pulled from the network land in the backpack before vanilla takes them, so a
+    /// craft count whose shortfall doesn't fit in the backpack can't start. Cap the craft-count
+    /// max (and the "max" button) to what actually fits. Owner's choice, 2026-11-12.
+    /// </summary>
+    [HarmonyPatch(typeof(XUiC_RecipeCraftCount), nameof(XUiC_RecipeCraftCount.calcMaxCraftable))]
+    public static class CraftCountCapPatch
+    {
+        public static void Postfix(XUiC_RecipeCraftCount __instance, ref int __result)
+        {
+            if (!CraftingNetwork.Active || __result <= 1) return;
+            Recipe recipe = __instance.recipe;
+            EntityPlayerLocal player = __instance.xui?.playerUI?.entityPlayer;
+            if (recipe == null || player == null) return;
+            __result = CraftingNetwork.MaxCraftsThatFit(__instance.xui.PlayerInventory, player, recipe, __result);
+        }
+    }
 }
