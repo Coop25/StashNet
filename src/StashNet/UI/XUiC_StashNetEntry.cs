@@ -45,9 +45,32 @@ namespace StashNet.UI
                 case "stashnet_count":
                     value = item.HasValue ? FormatCount(item.Value.Count) : "";
                     return true;
+                // Quality/durability bar, same rules and colors as vanilla item slots.
+                case "stashnet_hasdurability":
+                    value = HasDurability ? "true" : "false";
+                    return true;
+                case "stashnet_nodurability":
+                    value = item.HasValue && !HasDurability ? "true" : "false";
+                    return true;
+                case "stashnet_durabilitycolor":
+                    value = colorFormatter.Format(QualityInfo.GetQualityColor(display?.Quality ?? 0));
+                    return true;
+                case "stashnet_durabilityfill":
+                    value = DurabilityFill(display).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+                    return true;
                 default:
                     return base.GetBindingValueInternal(ref value, bindingName);
             }
+        }
+
+        private bool HasDurability => item.HasValue && (display?.ItemClass?.ShowQualityBar ?? false);
+
+        /// <summary>Fraction of durability left (vanilla formula); 1 for items without wear.</summary>
+        internal static float DurabilityFill(ItemValue iv)
+        {
+            if (iv == null || iv.MaxUseTimes == 0 || iv.MaxUseTimesUI == 0) return 1f;
+            float fill = (iv.MaxUseTimes - iv.UseTimes) / iv.MaxUseTimesUI;
+            return fill < 0f ? 0f : fill > 1f ? 1f : fill;
         }
 
         private static string FormatCount(int n)

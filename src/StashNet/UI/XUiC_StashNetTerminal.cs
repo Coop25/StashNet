@@ -176,8 +176,21 @@ namespace StashNet.UI
 
         public void SetHover(ItemAmount? item)
         {
-            hoverName = item.HasValue ? DisplayName(item.Value.Name) : "";
+            hoverName = item.HasValue ? HoverText(item.Value) : "";
             RefreshBindings();
+        }
+
+        /// <summary>Name, plus tier and durability for tools/weapons/armor, e.g. "Steel Pickaxe (T6, 50%)".</summary>
+        private static string HoverText(ItemAmount item)
+        {
+            string name = DisplayName(item.Name);
+            if (item.Variant == null || !ItemCodec.TryDecode(item.Name, item.Variant, out ItemValue iv, out _)) return name;
+            if (iv.HasQuality && (iv.ItemClass?.ShowQualityBar ?? false))
+            {
+                int percent = (int)Math.Round(XUiC_StashNetEntry.DurabilityFill(iv) * 100f);
+                return $"{name} (T{iv.Quality}, {percent}%)";
+            }
+            return name;
         }
 
         public override bool GetBindingValueInternal(ref string value, string bindingName)

@@ -5,7 +5,7 @@
 **About 10 minutes**, single-player in your throwaway world.
 
 ## 0. Loads cleanly
-- [ ] F1: `[StashNet] Loaded v0.6.0 (6 methods patched)`, and no red errors mentioning StashNet.
+- [ ] F1: `[StashNet] Loaded v0.6.1 (6 methods patched)`, and no red errors mentioning StashNet.
 - [ ] (Also confirms v0.5.1's lock changes load fine, since that version was never launched.)
 
 ## 1. Unload a drive
@@ -26,6 +26,12 @@
 - [ ] Shift-click an **empty** drive: "That drive is empty." Nothing happens.
 - [ ] Shift-click a drive on your **toolbelt**: it unloads too.
 - [ ] **Deposit all** (top-right button) still never moves drives.
+
+## 5. Tool/weapon tier + durability bars (v0.6.1)
+- [ ] Store a couple of tools/weapons of **different tiers** with **different wear** (e.g. a fresh T1 and a half-worn T6 hammer).
+- [ ] Each shows its **own icon** with a **colored bar** along the bottom: the color matches the tier (same colors as your backpack), and the length matches the durability left.
+- [ ] For those items, the count moves to the top-right corner, and resources still show their count bottom-right with no bar.
+- [ ] Hovering shows e.g. **"Claw Hammer (T6, 50%)"**.
 
 ## Report back
 PASS/FAIL per section. Logs: `%APPDATA%\7DaysToDie\logs\`.
