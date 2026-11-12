@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using StashNet.Blocks;
 using StashNet.Core.Network;
 using StashNet.Core.Protocol;
@@ -58,6 +59,10 @@ namespace StashNet.Network
                     break;
                 case TerminalOp.DriveUnload:
                     Deposit(net, req, resp.ReturnToDrive, resp);
+                    // Leftovers stay on the drive, not in the backpack: use the matching message.
+                    resp.Messages = resp.Messages
+                        .Select(m => m.Key == "stashnetNetworkFull" ? new TerminalMessage("stashnetDriveLeftovers", -1) : m)
+                        .ToList();
                     int unloaded = 0;
                     foreach (ItemAmount a in req.Items) unloaded += a.Count;
                     foreach (ItemAmount a in resp.ReturnToDrive) unloaded -= a.Count;

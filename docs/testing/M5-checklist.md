@@ -17,7 +17,7 @@
 ## 2. Network fills up mid-unload
 - [ ] Fill the network until only a stack or two is free.
 - [ ] Shift-click a drive holding more than that.
-- [ ] **Expected:** part of it moves in, with "Storage full - some items stayed in your backpack" (the leftovers actually stay **on the drive**). `stashnet drive` on that drive shows the leftovers with the correct counts.
+- [ ] **Expected:** part of it moves in, with "Storage full - the rest stayed on the drive." `stashnet drive` on that drive shows the leftovers with the correct counts.
 
 ## 3. Weapons survive
 - [ ] Put a weapon with mods/wear on a drive, then unload the drive. Withdraw the weapon from the Terminal. Quality, durability, and mods are intact.
