@@ -45,7 +45,7 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Current milestone: 6 (Crafting Terminal, v0.7.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m6-crafting-terminal.md`); waiting on `docs/testing/M6-checklist.md`.
 
 ## Crafting Terminal (M6)
-- The block `Extends="workbench"` with `WorkstationName=workbench`, `WorkstationWindow=workstation_workbench`, and marker property `StashNetCraftingTerminal`. It's a real vanilla workbench.
+- The block `Extends="workbench"` with `WorkstationWindow=workstation_workbench` (recipes via the inherited `CraftingAreaRecipes`; **never set `WorkstationName`**: data is filed under it but looked up by block name, so the window won't open), and marker property `StashNetCraftingTerminal`. It's a real vanilla workbench.
 - `src/StashNet/Crafting/`: while its window is open, `CraftingNetwork` caches the network's plain items (List request every 2 s). Hooks make GetItemCount/GetAllItemStacks/HasItems/BuildRecipeInfosList include that stock. On a Craft click (`ItemActionEntryCraft.OnActivated`), the HasItems postfix withdraws the shortfall into the backpack, and vanilla then takes ingredients from the backpack as usual. Remote clients: async, so "click Craft again".
 - Harmony note: patched methods must be declared on the patched type (`XUiC_WorkstationWindowGroup.Update/OnOpen/OnClose` are). Otherwise Harmony patches the base class for everything.
 

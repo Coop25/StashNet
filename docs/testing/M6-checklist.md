@@ -5,7 +5,7 @@
 **About 15 minutes**, single-player in your throwaway world (creative mode is fine for getting materials).
 
 ## 0. Loads cleanly
-- [ ] F1: `[StashNet] Loaded v0.7.0 (15 methods patched)` (9 new crafting hooks), and no red errors mentioning StashNet, blocks.xml, or recipes.xml.
+- [ ] F1: `[StashNet] Loaded v0.7.1 (15 methods patched)` (9 new crafting hooks), and no red errors mentioning StashNet, blocks.xml, or recipes.xml.
 
 ## 1. The block
 - [ ] Crafting menu: **Crafting Terminal** shows up (needs a Workbench + a Storage Terminal + 4 electrical parts). Or `giveself stashnetCraftingTerminal`.

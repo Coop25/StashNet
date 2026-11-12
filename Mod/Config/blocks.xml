@@ -109,7 +109,9 @@
 		<block name="stashnetCraftingTerminal">
 			<property name="Extends" value="workbench" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
 			<property name="StashNetCraftingTerminal" value="true" />
-			<property name="WorkstationName" value="workbench" />
+			<!-- Do NOT set WorkstationName: the game files workstation data under it but looks it up by
+			     block name, so the screen wouldn't open (v0.7.0 bug). Recipes come from the inherited
+			     CraftingAreaRecipes="player,workbench"; the screen from WorkstationWindow. -->
 			<property name="WorkstationWindow" value="workstation_workbench" />
 			<property name="CustomIcon" value="workbench" />
 			<property name="CustomIconTint" value="7FFFB0" />
