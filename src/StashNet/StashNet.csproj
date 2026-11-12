@@ -11,8 +11,22 @@
     <ModStageDir>$(MSBuildThisFileDirectory)..\..\dist\StashNet\</ModStageDir>
   </PropertyGroup>
 
+  <!-- Compile against the GAME's own runtime libraries (Unity's mscorlib etc.), not the standard
+       .NET Framework ones: the game's API uses types (e.g. ReadOnlySpan) that only exist there,
+       and type identities must match what the game actually runs. -->
+  <PropertyGroup>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <NoStandardLib>true</NoStandardLib>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="mscorlib"><HintPath>$(GameManaged)\mscorlib.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System.Xml"><HintPath>$(GameManaged)\System.Xml.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System.Xml.Linq"><HintPath>$(GameManaged)\System.Xml.Linq.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System"><HintPath>$(GameManaged)\System.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System.Core"><HintPath>$(GameManaged)\System.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="netstandard"><HintPath>$(GameManaged)\netstandard.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 
   <!-- Game-free logic is compiled straight into the mod so the game only loads one DLL. -->
