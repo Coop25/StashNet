@@ -37,7 +37,13 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 0: ✅ done 2026-11-12. All in-game checks passed, including 1,000-type item metadata through save/reload, container, and drop/pickup.
 - Milestone 1: ✅ done 2026-11-12. The owner reports all checklist sections work. The log shows `Loaded v0.1.0 (5 methods patched)` with no StashNet errors.
 - Milestone 2: ✅ done 2026-11-12. All checklist sections pass (capacity limits, weapon with mod/wear/ammo round-trip, full backpack, moves and save/reload, no drive-in-drive). The log shows 0 StashNet errors.
-- Current milestone: 3 (network + Storage Terminal), not started.
+- Current milestone: 3a (network + basic Terminal screen). Code done (plan: `docs/superpowers/plans/2026-11-12-m3a-network-terminal.md`); waiting on the in-game checklist `docs/testing/M3a-checklist.md`. 3b = search/sort polish + multiplayer (server-authoritative) support.
+
+## Network + terminal design (M3a)
+- `StashNetNetwork.TryOpen` re-scans and reloads on **every** operation (no cached state). Terminal → nearest Core whose `StashNetRadius` reaches it (cube distance) → Drive Bays within that radius of the Core.
+- `NetworkStorage` (Core, tested) pools drives: insert prefers drives holding the item, then the most free room.
+- Terminal = custom Block class `BlockStashNetTerminal` (XML `Class="StashNet.Blocks.StashNetTerminal, StashNet"`); the UI is `Mod/Config/XUi_InGame/` + `src/StashNet/UI/`.
+- 3a works in single-player / host only. Remote clients get a "not supported yet" tooltip.
 
 ## Drive storage design (M2)
 - `src/StashNet.Core/` is game-free (netstandard2.0) with xUnit tests in `tests/StashNet.Core.Tests/` (`dotnet test`). Its sources are compiled into the mod DLL via a `<Compile Include>` link, so there is no second DLL.

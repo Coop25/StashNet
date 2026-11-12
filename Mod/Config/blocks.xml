@@ -4,6 +4,8 @@
 		<!-- Scrap Storage Core: the network's brain. No behavior yet (network: M3, password: M4, heat: M7). -->
 		<block name="stashnetScrapCore">
 			<property name="CreativeMode" value="Player" />
+			<!-- Network reach in blocks (cube distance). Bays and Terminals within this range join. -->
+			<property name="StashNetRadius" value="6" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
@@ -62,9 +64,10 @@
 			<property name="SortOrder2" value="0001" />
 		</block>
 
-		<!-- Storage Terminal: browse the network. No behavior yet (UI: M3). -->
+		<!-- Storage Terminal: browse the network (src/StashNet/Blocks/BlockStashNetTerminal.cs). -->
 		<block name="stashnetTerminal">
 			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="StashNet.Blocks.StashNetTerminal, StashNet" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Electrical/monitorKeyboardMousePCPrefab.prefab" />

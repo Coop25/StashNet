@@ -7,3 +7,19 @@ stashnetTerminal,blocks,Block,,,Storage Terminal
 stashnetTerminalDesc,blocks,Block,,,"Browse, search, deposit and withdraw everything stored on your network's drives."
 stashnetDriveBasic,items,Item,,,Basic Drive
 stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds up to 15 item types (1500 items). Its contents stay on the drive, even when removed. Only readable inside a StashNet network."
+stashnetUseTerminal,UI,HUD,,,Press {0} to Use
+stashnetTerminalTitle,UI,XUi,,,STORAGE TERMINAL
+stashnetDepositAllTip,UI,XUi,,,Deposit all (backpack)
+stashnetUsage,UI,XUi,,,"{0}/{1} types   {2}/{3} items   ({4} drives)"
+stashnetDeposited,UI,XUi,,,Deposited {0} items.
+stashnetNoCore,UI,XUi,,,No Storage Core in range. Place a Core within 6 blocks of this Terminal.
+stashnetNoBays,UI,XUi,,,No Drive Bays in range of the Core.
+stashnetNoDrives,UI,XUi,,,No drives in the Drive Bays.
+stashnetSkippedBays,UI,XUi,,,{0} bay(s) skipped (someone has them open).
+stashnetSkippedDrives,UI,XUi,,,{0} drive(s) unreadable and skipped.
+stashnetItemMissing,UI,XUi,,,That item no longer exists in this game; it stays on the drive.
+stashnetBackpackFull,UI,XUi,,,Backpack full - the rest stayed in storage.
+stashnetNetworkFull,UI,XUi,,,Storage full - some items stayed in your backpack.
+stashnetNothingDeposited,UI,XUi,,,Nothing deposited (storage full or nothing storable).
+stashnetCantStore,UI,XUi,,,That can't be stored on a drive.
+stashnetMpUnsupported,UI,XUi,,,StashNet terminals don't support multiplayer clients yet (coming soon).

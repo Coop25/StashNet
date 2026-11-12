@@ -106,26 +106,11 @@ namespace StashNet.Dev
                     missing.Add(missingName ?? e.Name);
                     continue;
                 }
-                int maxStack = Math.Max(1, template.ItemClass.Stacknumber.Value);
-                int remaining = e.Count;
-                while (remaining > 0)
+                int moved = BagTransfer.GiveToBag(bag, template, e.Count, e.Variant == null, out backpackFull);
+                if (moved > 0)
                 {
-                    int n = Math.Min(remaining, maxStack);
-                    var stack = new ItemStack(template.Clone(), n);
-                    if (e.Variant == null) bag.TryStackItem(0, stack); // only plain items merge into existing stacks
-                    if (stack.count > 0 && bag.AddItem(stack)) stack.count = 0;
-                    int moved = n - stack.count;
-                    if (moved > 0)
-                    {
-                        contents.Extract(e.Name, e.Variant, moved);
-                        remaining -= moved;
-                        total += moved;
-                    }
-                    if (moved < n)
-                    {
-                        backpackFull = true;
-                        break;
-                    }
+                    contents.Extract(e.Name, e.Variant, moved);
+                    total += moved;
                 }
                 if (backpackFull) break;
             }
