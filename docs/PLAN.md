@@ -151,7 +151,7 @@ Each milestone ends with something you can load and try in-game. A detailed step
 | **0** | **Setup + proof of concept.** Dev tools, empty mod that loads, answers to the 4 unknowns. | Game loads with mod; log shows "StashNet loaded". |
 | **1** | **Blocks & items exist.** Core, Drive Bay, Basic Drive, Storage Terminal — vanilla looks, tinted icons, recipes. Bay only accepts drives. | Craft and place everything; put drives in a bay. |
 | **2** | **Drives hold items.** Game-free storage library + tests; saving contents on the drive item. | Items survive save/reload and moving a drive between bays. |
-| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ M3b ✅ single-player / ⚠️ multiplayer untested, M4 ✅ (lock on bays + terminals; drive locking dropped), M5 ✅ (unload only) + tier/durability bars, M6 ✅ Crafting Terminal (+ craft cap, cancel/output to storage) (v0.7.3), M7 built (v0.8.0, awaiting in-game test, branch m7-heat) (2026-11-12). Next: M7 test, then M8.* | |
+| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ M3b ✅ single-player / ⚠️ multiplayer untested, M4 ✅ (lock on bays + terminals; drive locking dropped), M5 ✅ (unload only) + tier/durability bars, M6 ✅ Crafting Terminal (+ craft cap, cancel/output to storage) (v0.7.3), M7 ✅ Heat (v0.8.0) (2026-11-12). Next: M8.* | |
 | **3** | **Network + Storage Terminal.** Proximity discovery, combined view, search/sort, deposit/withdraw. | One screen shows every drive's contents; take and put items. |
 | **4** | **Password.** Core lock guards bays + terminals, allowed list. (Drive locking dropped.) | A second player is locked out until they enter the code. |
 | **5** | **Drive Port.** Unload / load / format. | Empty a full drive into the network; load another network's drive. |
