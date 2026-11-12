@@ -1,0 +1,29 @@
+<configs>
+	<append xpath="/recipes">
+		<!-- Early-game: all craftable in the backpack from scavenged materials. Tune in playtesting. -->
+		<recipe name="stashnetScrapCore" count="1">
+			<ingredient name="resourceScrapIron" count="20" />
+			<ingredient name="resourceElectricParts" count="5" />
+			<ingredient name="resourceDuctTape" count="2" />
+		</recipe>
+
+		<recipe name="stashnetDriveBay" count="1">
+			<ingredient name="resourceScrapIron" count="15" />
+			<ingredient name="resourceWood" count="10" />
+			<ingredient name="resourceElectricParts" count="2" />
+		</recipe>
+
+		<recipe name="stashnetTerminal" count="1">
+			<ingredient name="resourceScrapIron" count="10" />
+			<ingredient name="resourceElectricParts" count="6" />
+			<ingredient name="resourceScrapPolymers" count="4" />
+			<ingredient name="resourceDuctTape" count="1" />
+		</recipe>
+
+		<recipe name="stashnetDriveBasic" count="1">
+			<ingredient name="resourceElectricParts" count="2" />
+			<ingredient name="resourceScrapPolymers" count="2" />
+			<ingredient name="resourceDuctTape" count="1" />
+		</recipe>
+	</append>
+</configs>

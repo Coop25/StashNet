@@ -1,0 +1,9 @@
+Key,File,Type,UsedInMainMenu,NoTranslate,english
+stashnetScrapCore,blocks,Block,,,Scrap Storage Core
+stashnetScrapCoreDesc,blocks,Block,,,"The heart of a StashNet storage network. Drive Bays and Terminals nearby connect to it. Crude, but it works."
+stashnetDriveBay,blocks,Block,,,Drive Bay
+stashnetDriveBayDesc,blocks,Block,,,"Holds up to 4 storage drives. Only accepts drives. Can be locked with a code."
+stashnetTerminal,blocks,Block,,,Storage Terminal
+stashnetTerminalDesc,blocks,Block,,,"Browse, search, deposit and withdraw everything stored on your network's drives."
+stashnetDriveBasic,items,Item,,,Basic Drive
+stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds up to 15 item types (1500 items). Its contents stay on the drive, even when removed. Only readable inside a StashNet network."

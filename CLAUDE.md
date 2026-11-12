@@ -35,4 +35,9 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Game install path: G:\SteamLibrary\steamapps\common\7 Days To Die
 - Already runs other DLL mods with EAC off, including storage-related ones (WraithsStorageSolutions, DarkfireAutoSortChest). Watch for conflicts.
 - Milestone 0: ✅ done 2026-11-12. All in-game checks passed, including 1,000-type item metadata through save/reload, container, and drop/pickup.
-- Current milestone: 1 (blocks & items exist), not started.
+- Current milestone: 1 (blocks & items exist). Code done (plan: `docs/superpowers/plans/2026-11-12-m1-blocks-items.md`); waiting on the in-game checklist `docs/testing/M1-checklist.md`.
+
+## Mod content conventions
+- Every block and item name starts with `stashnet`. Drives carry the item tag `stashnetDrive`, and code checks the tag, never names.
+- The Drive Bay is a `CompositeTileEntity` with `TEFeatureStorage` + `TEFeatureLockable` + our marker `TEFeatureStashNetDriveBay`.
+- Drives-only is enforced client-side by Harmony hooks in `src/StashNet/Patches/DriveBayOnlyDrivesPatches.cs` (5 methods patched). There's no server-side enforcement yet.

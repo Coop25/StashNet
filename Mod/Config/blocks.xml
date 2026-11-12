@@ -1,0 +1,94 @@
+<configs>
+	<append xpath="/blocks">
+
+		<!-- Scrap Storage Core: the network's brain. No behavior yet (network: M3, password: M4, heat: M7). -->
+		<block name="stashnetScrapCore">
+			<property name="CreativeMode" value="Player" />
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
+			<property name="CustomIcon" value="electricalBox01" />
+			<property name="CustomIconTint" value="FFB060" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="1000" />
+			<property name="CanPickup" value="true" />
+			<property name="DescriptionKey" value="stashnetScrapCoreDesc" />
+			<property class="RepairItems">
+				<property name="resourceScrapIron" value="10" />
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="5,10" />
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0000" />
+		</block>
+
+		<!-- Drive Bay: lockable 4-slot container that only accepts drives (see Patches/DriveBayOnlyDrivesPatches.cs). -->
+		<block name="stashnetDriveBay">
+			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="CompositeTileEntity" />
+			<property class="CompositeFeatures">
+				<property class="TEFeatureStorage">
+					<property name="LootList" value="stashnetDriveBaySlots" />
+				</property>
+				<property class="TEFeatureLockable" />
+				<property class="TEFeatureStashNetDriveBay" />
+			</property>
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Electrical/serverComputerPrefab.prefab" />
+			<property name="DisplayType" value="blockMulti" />
+			<property name="MultiBlockDim" value="1,2,1" />
+			<property name="ModelOffset" value="0,0.5,0" />
+			<property name="CustomIcon" value="decoServerRackWhite" />
+			<property name="CustomIconTint" value="7FB2FF" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="1000" />
+			<property name="DescriptionKey" value="stashnetDriveBayDesc" />
+			<property class="RepairItems">
+				<property name="resourceScrapIron" value="8" />
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="4,8" />
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0001" />
+		</block>
+
+		<!-- Storage Terminal: browse the network. No behavior yet (UI: M3). -->
+		<block name="stashnetTerminal">
+			<property name="CreativeMode" value="Player" />
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Electrical/monitorKeyboardMousePCPrefab.prefab" />
+			<property name="DisplayType" value="blockMulti" />
+			<property name="MultiBlockDim" value="2,1,1" />
+			<property name="ModelOffset" value=".5,0,0" />
+			<property name="GndAlign" value="1" />
+			<property name="CustomIcon" value="decoComputerMonitorKeyboardMousePC" />
+			<property name="CustomIconTint" value="7FFFB0" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="500" />
+			<property name="CanPickup" value="true" />
+			<property name="DescriptionKey" value="stashnetTerminalDesc" />
+			<property class="RepairItems">
+				<property name="resourceElectricParts" value="2" />
+			</property>
+			<drop event="Destroy" name="resourceElectricParts" count="1,3" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0002" />
+		</block>
+
+	</append>
+</configs>

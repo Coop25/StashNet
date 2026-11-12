@@ -1,0 +1,24 @@
+<configs>
+	<append xpath="/items">
+
+		<!-- Basic Drive: early-game storage drive. Contents are stored on the item itself (Milestone 2). -->
+		<item name="stashnetDriveBasic">
+			<property name="Tags" value="stashnetDrive" />
+			<property name="CreativeMode" value="Player" />
+			<property name="HoldType" value="45" />
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+			<property name="Material" value="MelectricParts" />
+			<property name="CustomIcon" value="resourceElectricParts" />
+			<property name="CustomIconTint" value="7FB2FF" />
+			<property name="Weight" value="2" />
+			<property name="Stacknumber" value="1" />
+			<property name="EconomicValue" value="60" />
+			<property name="Group" value="Resources" />
+			<property name="DescriptionKey" value="stashnetDriveBasicDesc" />
+			<property name="SoundPickup" value="parts_grab" />
+			<property name="SoundPlace" value="parts_place" />
+		</item>
+
+	</append>
+</configs>

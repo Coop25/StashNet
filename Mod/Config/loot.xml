@@ -1,0 +1,7 @@
+<configs>
+	<append xpath="/lootcontainers">
+		<!-- 4 drive slots. Player-owned storage: never generates loot. -->
+		<lootcontainer name="stashnetDriveBaySlots" count="0" size="4,1" sound_open="UseActions/open_safe" sound_close="UseActions/close_safe" loot_quality_template="qualBaseTemplate">
+		</lootcontainer>
+	</append>
+</configs>
