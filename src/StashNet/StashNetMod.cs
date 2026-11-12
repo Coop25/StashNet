@@ -6,7 +6,7 @@ namespace StashNet
     /// <summary>Entry point. The game finds this class and calls InitMod once at startup.</summary>
     public class StashNetMod : IModApi
     {
-        public const string Version = "0.7.3";
+        public const string Version = "0.8.0";
 
         public void InitMod(Mod modInstance)
         {

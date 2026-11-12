@@ -1,10 +1,10 @@
 # StashNet: project notes
 
 ## ▶ RESUME HERE (last session ended 2026-11-12)
-- **State:** v0.7.3, all committed and pushed (github.com/Coop25/StashNet, private). Milestones 0–6 are done (M6 = Crafting Terminal, confirmed working in-game).
-- **The mod is NOT installed in the game right now.** The owner asked to remove it at the end of the session, so `Mods\StashNet` was deleted. To test again, rebuild/redeploy (`-p:Deploy=true`), **after the owner says the game is closed**.
+- **State:** v0.8.0 on main (github.com/Coop25/StashNet, private). Milestones 0–7 are done (M7 = Heat, confirmed working in-game 2026-11-12).
+- **v0.8.0 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-12 for the M7 test). Redeploy only after the owner says the game is closed.
 - **The owner's StashNet test world contains StashNet blocks.** Don't load it without the mod installed (those blocks would break). Their real saves never had StashNet.
-- **Next up (roadmap in `docs/PLAN.md`):** M7 Heat (Core heat scales with drives; screamers) → M8 Progression (Standard/High-Density drives 96/384 stacks, upgrade kits, Reinforced/Armored bays, Core tiers + radius) → M9 multiplayer testing + release package. Ask the owner which to do first.
+- **Next (roadmap in `docs/PLAN.md`):** M8 Progression (Standard/High-Density drives 96/384 stacks, upgrade kits, Reinforced/Armored bays, Core tiers + radius) → M9 multiplayer testing + release package. Ask the owner which to do first.
 - **Open items:**
   - ⚠️ Multiplayer has never been tested with a second player (M3b Part B, the M4 lockout, M6 client "click twice"). Must happen in M9.
   - Terminal window layout: no screenshot received yet.
@@ -53,7 +53,12 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 
 - Milestone 5: ✅ done 2026-11-12 (v0.6.1). The owner confirmed drive unload and the tier/durability bars work. The v0.6.0 and v0.6.1 sessions loaded with 6 patches and no StashNet errors, which also covers v0.5.x's lock changes loading. Scope (owner): unload only, with no fill/wipe/format.
 - Milestone 6: ✅ done 2026-11-12 (v0.7.3). The owner confirmed the Crafting Terminal works, including the capped craft count, cancel refunds to storage, and finished crafts to storage. The log shows `Loaded v0.7.3 (19 methods patched)` and no StashNet errors.
-- Current milestone: 7 (Heat), not started. See RESUME HERE at the top.
+- Milestone 7: ✅ done 2026-11-12 (v0.8.0). The owner confirmed it in-game: `sn heat` showed 24 drives → 6 per report, and the area heat rose, faded between reports, and reset (most likely a screamer roll). The log shows `Loaded v0.8.0 (19 methods patched)` and no StashNet errors. Existing Cores loaded with a harmless vanilla warning ("1 feature(s) ... not present in the saved data"). Deferred for M8: overlapping Cores double-count shared bays; each heat report re-reads every drive (re-check with bigger radius/drives). Offered, not done: `sn heat` reading the Core's own area instead of the player's.
+
+## Heat (M7)
+- Vanilla heat (decompiled): per 5×5-chunk area; workstations report `HeatMapStrength` every `AIDirector.GetActivityWorldTimeDelay()` (~167 real s), each report fades over 720 s, so repeats build to ~4.3× one report. At 25 the area rolls 20% for screamers and resets. Forge 6, workbench/campfire 5. The game ticks every loaded tile entity (`Chunk.UpdateTick`), composite features included.
+- Core feature `TEFeatureStashNetHeat` (server only) reports `min(drives × StashNetHeatPerDrive, StashNetHeatCap)` (0.25 / 6.5) at the Core. The Storage Terminal adds `StashNetHeatOnUse` (0.5) per request, throttled per terminal. The Crafting Terminal already has workbench heat. Owner's target "B": 12 drives alone never bring screamers; at the cap the network slowly does. `sn heat` shows the numbers.
+- Adding a feature to an existing composite block is save-safe (composite TE read skips missing/new features by name hash).
 
 ## Crafting Terminal (M6)
 - The block `Extends="workbench"` with `WorkstationWindow=workstation_workbench` (recipes via the inherited `CraftingAreaRecipes`; **never set `WorkstationName`**: data is filed under it but looked up by block name, so the window won't open), and marker property `StashNetCraftingTerminal`. It's a real vanilla workbench.

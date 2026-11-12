@@ -2,18 +2,24 @@
 	<append xpath="/blocks">
 
 		<!-- Scrap Storage Core: the network's brain. Holds the network's code (vanilla lock, M4).
-		     Bays and terminals have no lock of their own; they ask this one. Heat: M7. -->
+		     Bays and terminals have no lock of their own; they ask this one.
+		     Heat (M7, Heat/TEFeatureStashNetHeat.cs): about every 167 s the server reports
+		     min(drives x StashNetHeatPerDrive, StashNetHeatCap) to the game's heat system. -->
 		<block name="stashnetScrapCore">
 			<property name="CreativeMode" value="Player" />
 			<property name="Class" value="CompositeTileEntity" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
+				<property class="TEFeatureStashNetHeat" />
 				<property class="TEFeaturePickup">
 					<property name="TakeDelay" value="2" />
 				</property>
 			</property>
 			<!-- Network reach in blocks (cube distance). Bays and Terminals within this range join. -->
 			<property name="StashNetRadius" value="6" />
+			<!-- Heat per drive in the network, and the most heat one report can be (placeholders, playtest). -->
+			<property name="StashNetHeatPerDrive" value="0.25" />
+			<property name="StashNetHeatCap" value="6.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
@@ -78,6 +84,8 @@
 		<block name="stashnetTerminal">
 			<property name="CreativeMode" value="Player" />
 			<property name="Class" value="StashNet.Blocks.StashNetTerminal, StashNet" />
+			<!-- Heat added while the terminal is in use, at most once per ~167 s (M7, placeholder). -->
+			<property name="StashNetHeatOnUse" value="0.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Electrical/monitorKeyboardMousePCPrefab.prefab" />
