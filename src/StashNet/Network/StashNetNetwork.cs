@@ -8,7 +8,8 @@ using StashNet.Drives;
 namespace StashNet.Network
 {
     /// <summary>
-    /// A snapshot of one storage network: its Core, its lock, and every readable drive in its bays.
+    /// A snapshot of one storage network: its Core, its lock (which guards the bays and terminals,
+    /// not the drives), and every readable drive in its bays.
     /// Opened fresh for every operation, so it is never stale. Only the server writes (SaveDirty).
     /// </summary>
     public sealed class StashNetNetwork
@@ -19,9 +20,8 @@ namespace StashNet.Network
         {
             public TEFeatureStorage Bay;
             public int Index;
-            /// <summary>Stamp to write on save (see DriveStamp), when RestampNeeded.</summary>
-            public string NewStamp;
-            public bool RestampNeeded;
+            /// <summary>The drive still has a lock stamp from v0.5.0; remove it on save.</summary>
+            public bool ClearStamp;
         }
 
         private static int maxCoreRadius = -1;
@@ -37,8 +37,6 @@ namespace StashNet.Network
         public int SkippedBays { get; private set; }
         /// <summary>Drives skipped because their data can't be read (left untouched).</summary>
         public int SkippedDrives { get; private set; }
-        /// <summary>Drives skipped because they're locked to another network (left untouched).</summary>
-        public int LockedDrives { get; private set; }
 
         public static bool IsCore(Block block) => block != null && block.Properties.Contains(PropRadius);
 
@@ -55,7 +53,6 @@ namespace StashNet.Network
             }
 
             var net = new StashNetNetwork { CorePos = corePos, CoreLock = NetworkLock.GetCoreLock(world, corePos) };
-            string stampHash = NetworkLock.StampHash(net.CoreLock);
 
             var drives = new List<NetworkDrive>();
             foreach (Vector3i pos in Cube(corePos, radius))
@@ -78,18 +75,14 @@ namespace StashNet.Network
                     ItemValue drive = storage.ItemGrid[i].itemValue;
                     if (drive == null || drive.IsEmpty() || !DriveRules.IsDrive(drive)) continue;
 
-                    StampDecision stamp = DriveStamp.Decide(DriveItem.GetStamp(drive), corePos.x, corePos.y, corePos.z, stampHash);
-                    if (!stamp.Readable)
-                    {
-                        net.LockedDrives++;
-                        continue;
-                    }
                     if (!DriveItem.TryGetCapacity(drive, out DriveCapacity cap) || !DriveItem.TryLoad(drive, out DriveContents contents, out _))
                     {
                         net.SkippedDrives++;
                         continue;
                     }
-                    var slot = new Slot { Bay = storage, Index = i, NewStamp = stamp.NewStamp, RestampNeeded = stamp.Changed };
+                    // Drives aren't locked to networks (owner's decision, 2026-11-12). Clear any
+                    // lock stamp left by v0.5.0 the next time the server saves.
+                    var slot = new Slot { Bay = storage, Index = i, ClearStamp = DriveItem.HasStamp(drive) };
                     drives.Add(new NetworkDrive(contents, cap, slot));
                 }
             }
@@ -99,20 +92,20 @@ namespace StashNet.Network
             return true;
         }
 
-        /// <summary>SERVER ONLY. Writes changed drives (contents and/or lock stamp) back into their bay slots.</summary>
+        /// <summary>SERVER ONLY. Writes changed drives back into their bay slots.</summary>
         public void SaveDirty()
         {
             foreach (NetworkDrive d in Storage.Drives)
             {
                 var slot = (Slot)d.Tag;
-                if (!d.Dirty && !slot.RestampNeeded) continue;
+                if (!d.Dirty && !slot.ClearStamp) continue;
                 ItemStack current = slot.Bay.ItemGrid[slot.Index];
                 ItemValue updated = current.itemValue.Clone();
                 if (d.Dirty) DriveItem.Save(updated, d.Contents);
-                if (slot.RestampNeeded) DriveItem.SetStamp(updated, slot.NewStamp);
+                if (slot.ClearStamp) DriveItem.ClearStamp(updated);
                 slot.Bay.UpdateSlot(slot.Index, new ItemStack(updated, current.count));
                 slot.Bay.SetModified();
-                slot.RestampNeeded = false;
+                slot.ClearStamp = false;
             }
         }
 

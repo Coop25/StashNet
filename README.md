@@ -7,7 +7,7 @@ Cobble together a crude, unpowered storage network in your first week, then grow
 - **Physical drives** hold your items. The contents travel with the drive.
 - **Terminals** show every drive at once, with search, sort, deposit and withdraw.
 - **Crafting Terminal**: a workbench that crafts straight from network storage.
-- **One password** set on the Core protects the whole network, and the drives too.
+- **One password** set on the Core protects the network's Drive Bays and Terminals.
 - **Armored Drive Bays** you upgrade like normal blocks, topping out at steel-block toughness.
 - **Heat**: a bigger hoard runs hotter and draws screamers.
 

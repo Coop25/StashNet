@@ -46,17 +46,15 @@ namespace StashNet.Drives
             }
         }
 
-        /// <summary>Lock stamp ("x,y,z|hash" of the Core that locked it), see Core/Drives/DriveStamp.cs.</summary>
-        public const string StampKey = "StashNetLock";
+        /// <summary>
+        /// Lock stamp written by v0.5.0 only. Drives are no longer locked to networks (owner's
+        /// decision, 2026-11-12); leftover stamps are ignored and cleared on the next save.
+        /// </summary>
+        public const string LegacyStampKey = "StashNetLock";
 
-        public static string GetStamp(ItemValue drive) =>
-            drive != null && drive.TryGetMetadata(StampKey, out string s) ? s : null;
+        public static bool HasStamp(ItemValue drive) => drive != null && drive.HasMetadata(LegacyStampKey);
 
-        public static void SetStamp(ItemValue drive, string stamp)
-        {
-            if (string.IsNullOrEmpty(stamp)) drive.RemoveMetaData(StampKey);
-            else drive.SetMetadata(StampKey, stamp);
-        }
+        public static void ClearStamp(ItemValue drive) => drive.RemoveMetaData(LegacyStampKey);
 
         public static void Save(ItemValue drive, DriveContents contents)
         {

@@ -96,7 +96,7 @@ Mid/late-game, no god-tier materials.
 - **Owner always has access.**
 - Protected: opening terminals, inserting/removing drives, the Drive Port, picking up network blocks.
 - **Not** protected: being smashed by zombies/explosives/raiders. That's what armor is for.
-- **Drives are stamped with the network's lock.** Loading a stamped drive into a *different* network, or formatting it, asks for the original password. Stolen drives are useless bricks.
+- ~~Drives are stamped with the network's lock.~~ **Dropped (2026-11-12):** the owner prefers drives to stay unlocked, so any network can read any drive. The password protects the network's Drive Bays and Terminals. (Drive protection may come back later through the backup system.)
 
 ### 2.7 Heat
 
@@ -153,8 +153,8 @@ Each milestone ends with something you can load and try in-game. A detailed step
 | **2** | **Drives hold items.** Game-free storage library + tests; saving contents on the drive item. | Items survive save/reload and moving a drive between bays. |
 | | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ M3b ✅ single-player / ⚠️ multiplayer untested (2026-11-12)* | |
 | **3** | **Network + Storage Terminal.** Proximity discovery, combined view, search/sort, deposit/withdraw. | One screen shows every drive's contents; take and put items. |
-| **4** | **Password.** Core lock, propagation, allowed list, drive stamping. | A second player is locked out until they enter the code. |
-| **5** | **Drive Port.** Unload / load / format. | Empty a full drive into the network; stolen drive asks for password. |
+| **4** | **Password.** Core lock guards bays + terminals, allowed list. (Drive locking dropped.) | A second player is locked out until they enter the code. |
+| **5** | **Drive Port.** Unload / load / format. | Empty a full drive into the network; load another network's drive. |
 | **6** | **Crafting Terminal.** Workbench recipes using network stock. | Craft something without carrying the ingredients. |
 | **7** | **Heat.** Formula, cap, terminal-use spikes. | Big network → screamers show up. |
 | **8** | **Progression.** Standard/HD drives, Upgrade Kits, Reinforced/Armored bays, Core tiers 2–3 and radius. | Upgrade a full drive without losing anything; armored bay soaks damage. |

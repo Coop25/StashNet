@@ -111,9 +111,7 @@ namespace StashNet.Network
             if (net.BayCount == 0) resp.Messages.Add(new TerminalMessage("stashnetNoBays", -1));
             else if (net.Storage.Drives.Count == 0) resp.Messages.Add(new TerminalMessage("stashnetNoDrives", -1));
             if (net.SkippedBays > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedBays", net.SkippedBays));
-            if (net.SkippedDrives > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedDrives", net.SkippedDrives));
-            if (net.LockedDrives > 0) resp.Messages.Add(new TerminalMessage("stashnetLockedDrives", net.LockedDrives));
-        }
+            if (net.SkippedDrives > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedDrives", net.SkippedDrives));        }
 
         private static bool IsValid(World world, EntityPlayer player, Vector3i pos)
         {

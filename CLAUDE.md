@@ -44,7 +44,7 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 ## Password design (M4)
 - The network code = the **Core's** vanilla `TEFeatureLockable` (the Core is a CompositeTileEntity with Lockable + Pickup). Bays and terminals have no lock of their own and ask the Core (`NetworkLock`, `CoreLookupCache` with a 1 s Core-position cache for per-frame prompt checks).
 - The server enforces access on every terminal request (`persistentPlayers` PrimaryId). Bay opening is gated client-side by vetoing the storage "Search" command in `TEFeatureStashNetDriveBay.AllowBlockActivationCommand`.
-- Drives get a stamp `StashNetLock = "x,y,z|hash"` (`DriveStamp`, tested). Readable by the home Core or by a network with the same hash; otherwise skipped and untouched. Stamps are written only in `SaveDirty` (server).
+- **Drives are NOT locked to networks** (owner's decision, 2026-11-12, after v0.5.0 briefly stamped them). Any network can read any drive. The lock guards bays and terminals only. Leftover `StashNetLock` metadata from v0.5.0 is cleared on the next server save (`DriveItem.ClearStamp`). Don't reintroduce drive locking unless the owner asks.
 - Bays keep their old `TEFeatureLockable` only so pre-M4 saves load. Feature save order is by name, not XML order, so reordering features in XML is safe.
 
 ## Build note

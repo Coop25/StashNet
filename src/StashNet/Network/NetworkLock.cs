@@ -24,10 +24,6 @@ namespace StashNet.Network
         public static bool IsAllowed(TEFeatureLockable coreLock, PlatformUserIdentifierAbs user) =>
             !IsLocked(coreLock) || (user != null && coreLock.IsUserAllowed(user));
 
-        /// <summary>The hash drives get stamped with; null when the network isn't password-locked.</summary>
-        public static string StampHash(TEFeatureLockable coreLock) =>
-            IsLocked(coreLock) && coreLock.HasPassword() ? coreLock.GetPasswordHash() : null;
-
         /// <summary>Server-side identity of a player (for allowed-list checks).</summary>
         public static PlatformUserIdentifierAbs PlayerId(EntityPlayer player) =>
             player == null ? null : GameManager.Instance.persistentPlayers?.GetPlayerDataFromEntityID(player.entityId)?.PrimaryId;
