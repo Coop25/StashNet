@@ -41,7 +41,8 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 3b: ✅ single-player done 2026-11-12 (v0.4.0 loads with 6 patches, no StashNet errors). ⚠️ **Multiplayer is UNTESTED.** The owner can't test MP right now. Part B of `docs/testing/M3b-checklist.md` (client use, no-dupe race, client full backpack, live refresh, dedicated server load) must pass before any public release (roadmap M9).
 - Milestone 4: ✅ accepted by the owner 2026-11-12 (asked to move on). The v0.5.0 session loaded cleanly (first build against the game's own runtime, lockable Core). ⚠️ v0.5.1 (drive locking removed) had **not been launched in-game** when M5 started, and the M4 checklist results were not reported. Re-check the log for v0.5.1 before claiming it works.
 
-- Current milestone: 5 (drive unload, v0.6.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m5-drive-unload.md`); waiting on `docs/testing/M5-checklist.md`. Scope (owner): unload only, with no fill/wipe/format.
+- Milestone 5: ✅ done 2026-11-12 (v0.6.1). The owner confirmed drive unload and the tier/durability bars work. The v0.6.0 and v0.6.1 sessions loaded with 6 patches and no StashNet errors, which also covers v0.5.x's lock changes loading. Scope (owner): unload only, with no fill/wipe/format.
+- Current milestone: 6 (Crafting Terminal), not started.
 
 ## Drive unload (M5)
 - Shift-click a drive while a terminal is open → the client empties it in place and tags it (`StashNetPending` token) → `DriveUnload` request → the server inserts and returns leftovers in `TerminalResponse.ReturnToDrive` → the client refills the tagged drive (backpack, then toolbelt). If the drive isn't found, the leftovers go to the backpack.
