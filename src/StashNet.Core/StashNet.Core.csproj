@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Game-free logic. No game references allowed here. These source files are also compiled
+       directly into the mod DLL (see src/StashNet/StashNet.csproj), so the game loads one DLL. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>StashNet.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>
