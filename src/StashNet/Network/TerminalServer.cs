@@ -49,6 +49,9 @@ namespace StashNet.Network
                 return resp;
             }
 
+            // Milestone 7: using a Storage Terminal makes a little heat (throttled per terminal).
+            Heat.HeatEmitter.TerminalUsed(world, pos);
+
             switch (req.Op)
             {
                 case TerminalOp.Withdraw:

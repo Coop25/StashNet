@@ -84,6 +84,8 @@
 		<block name="stashnetTerminal">
 			<property name="CreativeMode" value="Player" />
 			<property name="Class" value="StashNet.Blocks.StashNetTerminal, StashNet" />
+			<!-- Heat added while the terminal is in use, at most once per ~167 s (M7, placeholder). -->
+			<property name="StashNetHeatOnUse" value="0.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Electrical/monitorKeyboardMousePCPrefab.prefab" />

@@ -39,6 +39,28 @@ namespace StashNet.Heat
             return NetworkHeat.PerReport(drives, perDrive, cap);
         }
 
+        public const string PropHeatOnUse = "StashNetHeatOnUse";
+        private static readonly System.Collections.Generic.Dictionary<Vector3i, ulong> terminalNext =
+            new System.Collections.Generic.Dictionary<Vector3i, ulong>();
+
+        /// <summary>
+        /// SERVER ONLY. A Storage Terminal request was handled: report a small bump at the terminal,
+        /// at most once per vanilla heat interval per terminal. The Crafting Terminal is skipped
+        /// (it already gives off workbench heat while crafting).
+        /// </summary>
+        public static void TerminalUsed(World world, Vector3i terminalPos)
+        {
+            Block block = world.GetBlock(terminalPos).Block;
+            if (!(block is Blocks.BlockStashNetTerminal)) return;
+            float value = GetFloat(block, PropHeatOnUse);
+            if (value <= 0f) return;
+            if (terminalNext.Count > 256) terminalNext.Clear();
+            terminalNext.TryGetValue(terminalPos, out ulong next);
+            if (!HeatThrottle.ShouldEmit(world.worldTime, ref next, AIDirector.GetActivityWorldTimeDelay())) return;
+            terminalNext[terminalPos] = next;
+            Emit(world, terminalPos, value);
+        }
+
         internal static float GetFloat(Block block, string prop) =>
             block != null && block.Properties.Contains(prop) ? block.Properties.GetFloat(prop) : 0f;
     }
