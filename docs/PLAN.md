@@ -133,7 +133,7 @@ These are the things most likely to force a design change, so we test them befor
 4. Which game version are you on? (Mods often break between major versions.)
 
 **Milestone 0 findings (from reading the game's code, V3.4 b10):**
-1. ✅ on paper: items have built-in metadata storage with no size cap. ⏳ Still needs the in-game save/reload test (`docs/testing/M0-checklist.md`).
+1. ✅ Confirmed in-game (2026-11-12): fake drives of 100 types (~3.4 KB) and 1,000 types survived save/reload, storing in a box, and drop/pickup. **Drive contents live on the drive item; no fallback needed.**
 2. ✅ Storage blocks are built from swappable features (storage, lock, ...). Our own feature classes get picked up by name, so the Drive Bay = lockable storage + a StashNet feature.
 3. ✅ The heat hook exists (`AIDirector.NotifyActivity`). It already switches off during blood moons and when the heat setting is off.
 4. ✅ V3.4.0 (b10).
