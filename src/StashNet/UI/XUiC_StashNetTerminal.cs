@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using StashNet.Core.Network;
+using StashNet.Blocks;
+using StashNet.Core.Protocol;
 using StashNet.Drives;
 using StashNet.Network;
 
@@ -9,19 +10,29 @@ namespace StashNet.UI
 {
     /// <summary>
     /// The Storage Terminal window (Mod/Config/XUi_InGame/windows.xml "stashnetTerminalWindow").
-    /// Shows every item in the network, a page at a time. Click = withdraw a stack,
-    /// right-click = withdraw one, shift-click in the backpack = deposit, button = deposit all.
+    /// Renders the last listing the server sent; every action is a request via TerminalClient.
+    /// Click = withdraw a stack, right-click = one, shift-click in backpack = deposit,
+    /// header button = deposit all. Search filters by name; sort = count (default) or name.
     /// </summary>
     public class XUiC_StashNetTerminal : XUiController
     {
         public const string WindowGroupId = "stashnetTerminal";
+        private const float RefreshInterval = 2f;
 
         private static Vector3i pendingPos;
+        /// <summary>Remembered while the game runs. Default: highest count first.</summary>
+        private static bool sortByName;
 
         private XUiC_StashNetEntry[] entries = new XUiC_StashNetEntry[0];
-        private readonly List<NetworkItem> items = new List<NetworkItem>();
+        private readonly List<ItemAmount> listing = new List<ItemAmount>();
+        private readonly List<ItemAmount> shown = new List<ItemAmount>();
+        private XUiC_TextInput searchInput;
+        private string search = "";
         private Vector3i terminalPos;
         private int page;
+        private float refreshTimer;
+        private int lastActionRequestId = -1;
+        private bool isOpen;
         private string usage = "";
         private string status = "";
         private string hoverName = "";
@@ -43,6 +54,14 @@ namespace StashNet.UI
             Hook("btnPrev", () => ChangePage(-1));
             Hook("btnNext", () => ChangePage(1));
             Hook("btnDepositAll", DepositAll);
+            Hook("btnSort", ToggleSort);
+            searchInput = GetChildById("searchInput") as XUiC_TextInput;
+            if (searchInput != null) searchInput.OnChangeHandler += (_sender, text, _fromCode) =>
+            {
+                search = text ?? "";
+                page = 0;
+                Render();
+            };
         }
 
         public override void OnOpen()
@@ -50,46 +69,72 @@ namespace StashNet.UI
             base.OnOpen();
             terminalPos = pendingPos;
             Current = this;
+            isOpen = true;
             page = 0;
-            status = "";
+            listing.Clear();
+            usage = "";
+            status = Localization.Get("stashnetLoading");
             hoverName = "";
-            Reload();
+            Render();
+            RequestListing();
         }
 
         public override void OnClose()
         {
             base.OnClose();
+            isOpen = false;
             if (Current == this) Current = null;
         }
 
-        public void Withdraw(NetworkItem item, bool single)
+        public override void Update(float _dt)
         {
-            if (item == null) return;
-            int count = single ? 1 : StackSize(item);
-            TerminalOps.Withdraw(xui.playerUI.entityPlayer, terminalPos, item.Name, item.Variant, count, out string message);
-            status = message ?? "";
-            Reload();
+            base.Update(_dt);
+            if (!isOpen) return;
+            refreshTimer += _dt;
+            if (refreshTimer >= RefreshInterval) RequestListing();
         }
 
-        /// <summary>Called by the shift-click patch for a backpack/toolbelt slot.</summary>
+        /// <summary>Called by TerminalClient when the server answers.</summary>
+        public void OnResponse(TerminalResponse response)
+        {
+            if (response.HasListing)
+            {
+                listing.Clear();
+                listing.AddRange(response.Listing);
+                usage = string.Format(Localization.Get("stashnetUsage"), response.DistinctItems, response.UsedStacks, response.MaxStacks, response.Drives);
+            }
+            // The reply to the user's own action always sets the message; background refreshes
+            // only replace it when they have something to say.
+            string messages = FormatMessages(response.Messages);
+            if (response.RequestId == lastActionRequestId || !string.IsNullOrEmpty(messages)) status = messages;
+            Render();
+        }
+
+        public void Withdraw(ItemAmount item, bool single)
+        {
+            int count = single ? 1 : Math.Min(item.Count, StackSize(item.Name));
+            Send(TerminalOp.Withdraw, new ItemAmount(item.Name, item.Variant, count));
+        }
+
+        /// <summary>Shift-click on a backpack/toolbelt slot: remove it from the slot, then send it.</summary>
         public void DepositFromSlot(XUiC_ItemStack slot)
         {
             ItemStack stack = slot.ItemStack;
-            int accepted = TerminalOps.DepositStack(xui.playerUI.entityPlayer, terminalPos, stack, out string message);
-            if (accepted > 0)
+            if (!Depositable(stack))
             {
-                ItemStack rest = stack.Clone();
-                rest.count -= accepted;
-                slot.ItemStack = rest.count > 0 ? rest : ItemStack.Empty.Clone();
-                slot.HandleSlotChangeEvent();
+                status = Localization.Get("stashnetCantStore");
+                RefreshBindings();
+                return;
             }
-            status = message ?? "";
-            Reload();
+            ItemAmount amount = ToAmount(stack);
+            slot.ItemStack = ItemStack.Empty.Clone();
+            slot.HandleSlotChangeEvent();
+            Send(TerminalOp.Deposit, amount);
         }
 
-        public void SetHover(NetworkItem item)
+        public void SetHover(ItemAmount? item)
         {
-            hoverName = item == null ? "" : DisplayName(item);
+            hoverName = item.HasValue ? DisplayName(item.Value.Name) : "";
             RefreshBindings();
         }
 
@@ -101,53 +146,93 @@ namespace StashNet.UI
                 case "stashnet_status": value = status; return true;
                 case "stashnet_hover": value = hoverName; return true;
                 case "stashnet_page": value = $"{page + 1}/{PageCount}"; return true;
+                case "stashnet_sort": value = Localization.Get(sortByName ? "stashnetSortName" : "stashnetSortCount"); return true;
                 default: return base.GetBindingValueInternal(ref value, bindingName);
             }
         }
 
-        private int PageCount => Math.Max(1, (items.Count + entries.Length - 1) / Math.Max(1, entries.Length));
+        private int PageCount => Math.Max(1, (shown.Count + entries.Length - 1) / Math.Max(1, entries.Length));
 
         private void DepositAll()
         {
-            int moved = TerminalOps.DepositBackpack(xui.playerUI.entityPlayer, terminalPos, out string message);
-            status = message ?? string.Format(Localization.Get("stashnetDeposited"), moved);
-            Reload();
+            Bag bag = xui.playerUI.entityPlayer.bag;
+            PackedBoolArray locked = bag.LockedSlots;
+            var request = NewRequest(TerminalOp.Deposit);
+            for (int i = 0; i < bag.SlotCount; i++)
+            {
+                ItemStack stack = bag.ItemGrid[i];
+                if (locked != null && i < locked.Length && locked[i]) continue;
+                if (!Depositable(stack)) continue;
+                request.Items.Add(ToAmount(stack));
+                bag.SetSlot(i, ItemStack.Empty.Clone());
+            }
+            if (request.Items.Count == 0)
+            {
+                status = Localization.Get("stashnetNothingDeposited");
+                RefreshBindings();
+                return;
+            }
+            SendAction(request);
+        }
+
+        private void ToggleSort()
+        {
+            sortByName = !sortByName;
+            page = 0;
+            Render();
         }
 
         private void ChangePage(int delta)
         {
             page = Math.Max(0, Math.Min(PageCount - 1, page + delta));
-            ShowPage();
+            Render();
         }
 
-        private void Reload()
+        private void RequestListing()
         {
-            items.Clear();
-            if (StashNetNetwork.TryOpen(xui.playerUI.entityPlayer.world, terminalPos, out StashNetNetwork net, out string problem))
+            refreshTimer = 0f;
+            TerminalClient.Send(NewRequest(TerminalOp.List));
+        }
+
+        private void Send(TerminalOp op, ItemAmount item)
+        {
+            TerminalRequest request = NewRequest(op);
+            request.Items.Add(item);
+            SendAction(request);
+        }
+
+        private void SendAction(TerminalRequest request)
+        {
+            refreshTimer = 0f;
+            status = "";
+            // TerminalClient assigns the id; in single-player the reply arrives inside Send, so
+            // predict it to recognise the reply either way.
+            lastActionRequestId = TerminalClient.NextRequestId;
+            TerminalClient.Send(request);
+        }
+
+        private TerminalRequest NewRequest(TerminalOp op) =>
+            new TerminalRequest { Op = op, X = terminalPos.x, Y = terminalPos.y, Z = terminalPos.z };
+
+        private void Render()
+        {
+            IEnumerable<ItemAmount> items = listing;
+            if (search.Length > 0)
             {
-                items.AddRange(net.Storage.Aggregate().OrderBy(DisplayName, StringComparer.CurrentCultureIgnoreCase));
-                usage = string.Format(Localization.Get("stashnetUsage"), net.Storage.DistinctItems, net.Storage.UsedStacks, net.Storage.MaxStacks, net.Storage.Drives.Count);
-                if (net.BayCount == 0) problem = Localization.Get("stashnetNoBays");
-                else if (net.Storage.Drives.Count == 0) problem = Localization.Get("stashnetNoDrives");
-                if (net.SkippedBays > 0) problem = Join(problem, string.Format(Localization.Get("stashnetSkippedBays"), net.SkippedBays));
-                if (net.SkippedDrives > 0) problem = Join(problem, string.Format(Localization.Get("stashnetSkippedDrives"), net.SkippedDrives));
+                items = items.Where(i => DisplayName(i.Name).IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0);
             }
-            else
-            {
-                usage = "";
-            }
-            if (!string.IsNullOrEmpty(problem)) status = Join(status, problem);
+            items = sortByName
+                ? items.OrderBy(i => DisplayName(i.Name), StringComparer.CurrentCultureIgnoreCase).ThenByDescending(i => i.Count)
+                : items.OrderByDescending(i => i.Count).ThenBy(i => DisplayName(i.Name), StringComparer.CurrentCultureIgnoreCase);
+            shown.Clear();
+            shown.AddRange(items);
+
             page = Math.Min(page, PageCount - 1);
-            ShowPage();
-        }
-
-        private void ShowPage()
-        {
             int start = page * entries.Length;
             for (int i = 0; i < entries.Length; i++)
             {
                 int idx = start + i;
-                entries[i].SetItem(idx < items.Count ? items[idx] : null);
+                entries[i].SetItem(idx < shown.Count ? shown[idx] : (ItemAmount?)null);
             }
             RefreshBindingsSelfAndChildren();
         }
@@ -158,18 +243,29 @@ namespace StashNet.UI
             if (c != null) c.OnPress += (_sender, _button) => action();
         }
 
-        private static int StackSize(NetworkItem item)
+        private static bool Depositable(ItemStack stack) =>
+            stack != null && !stack.IsEmpty() && !DriveRules.IsDrive(stack.itemValue) && ItemCodec.CanStore(stack.itemValue);
+
+        private static ItemAmount ToAmount(ItemStack stack) =>
+            new ItemAmount(ItemCodec.NameOf(stack.itemValue), ItemCodec.EncodeVariant(stack.itemValue), stack.count);
+
+        private static int StackSize(string name) => ItemCodec.StackSizeOf(name);
+
+        internal static string DisplayName(string itemName)
         {
-            ItemClass ic = ItemClass.GetItemClass(item.Name);
-            return Math.Max(1, ic?.Stacknumber.Value ?? 1);
+            ItemClass ic = ItemClass.GetItemClass(itemName);
+            return ic != null ? ic.GetLocalizedItemName() : itemName;
         }
 
-        internal static string DisplayName(NetworkItem item)
+        private static string FormatMessages(List<TerminalMessage> messages)
         {
-            ItemClass ic = ItemClass.GetItemClass(item.Name);
-            return ic != null ? ic.GetLocalizedItemName() : item.Name;
+            var parts = new List<string>();
+            foreach (TerminalMessage m in messages)
+            {
+                string text = Localization.Get(m.Key);
+                parts.Add(m.Arg >= 0 ? string.Format(text, m.Arg) : text);
+            }
+            return string.Join("  ", parts.Distinct().ToArray());
         }
-
-        private static string Join(string a, string b) => string.IsNullOrEmpty(a) ? b : a + "  " + b;
     }
 }

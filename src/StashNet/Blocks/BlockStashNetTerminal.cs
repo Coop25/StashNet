@@ -42,12 +42,8 @@ namespace StashNet.Blocks
 
         public override bool OnBlockActivated(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
         {
-            if (!SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer)
-            {
-                // Milestone 3a: single-player / host only. Server-side networking comes in 3b.
-                GameManager.ShowTooltip(_player, Localization.Get("stashnetMpUnsupported"), string.Empty, "ui_denied");
-                return true;
-            }
+            // Works for single-player, host, and remote clients: the window talks to the server
+            // through TerminalClient (Milestone 3b).
             XUiC_StashNetTerminal.Open(_player, _blockPos);
             return true;
         }

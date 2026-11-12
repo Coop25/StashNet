@@ -42,14 +42,15 @@ namespace StashNet.Network
 
         public static bool IsCore(Block block) => block != null && block.Properties.Contains(PropRadius);
 
-        public static bool TryOpen(World world, Vector3i terminalPos, out StashNetNetwork network, out string problem)
+        /// <param name="problemKey">On failure, a Localization key describing why (translated on the client).</param>
+        public static bool TryOpen(World world, Vector3i terminalPos, out StashNetNetwork network, out string problemKey)
         {
             network = null;
-            problem = null;
+            problemKey = null;
 
             if (!TryFindCore(world, terminalPos, out Vector3i corePos, out int radius))
             {
-                problem = Localization.Get("stashnetNoCore");
+                problemKey = "stashnetNoCore";
                 return false;
             }
 

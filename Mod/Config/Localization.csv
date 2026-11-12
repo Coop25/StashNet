@@ -22,4 +22,7 @@ stashnetBackpackFull,UI,XUi,,,Backpack full - the rest stayed in storage.
 stashnetNetworkFull,UI,XUi,,,Storage full - some items stayed in your backpack.
 stashnetNothingDeposited,UI,XUi,,,Nothing deposited (storage full or nothing storable).
 stashnetCantStore,UI,XUi,,,That can't be stored on a drive.
-stashnetMpUnsupported,UI,XUi,,,StashNet terminals don't support multiplayer clients yet (coming soon).
+stashnetLoading,UI,XUi,,,Connecting to storage...
+stashnetTooFar,UI,XUi,,,You're too far from the terminal.
+stashnetSortCount,UI,XUi,,,Sort: Most first
+stashnetSortName,UI,XUi,,,Sort: Name

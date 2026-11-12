@@ -38,7 +38,14 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 1: ✅ done 2026-11-12. The owner reports all checklist sections work. The log shows `Loaded v0.1.0 (5 methods patched)` with no StashNet errors.
 - Milestone 2: ✅ done 2026-11-12. All checklist sections pass (capacity limits, weapon with mod/wear/ammo round-trip, full backpack, moves and save/reload, no drive-in-drive). The log shows 0 StashNet errors.
 - Milestone 3a: ✅ done 2026-11-12 (v0.3.2). The owner confirmed deposit/withdraw through the terminal works and asked to move on. Logs for v0.3.0–0.3.2 show no StashNet errors or UI warnings. Not explicitly confirmed: every checklist section, and the window layout (no screenshot received yet).
-- Current milestone: 3b = multiplayer (server-authoritative) support + search/sort polish.
+- Current milestone: 3b (multiplayer + search/sort/refresh, v0.4.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m3b-multiplayer-search.md`); waiting on the in-game checklist `docs/testing/M3b-checklist.md`.
+
+## Multiplayer design (M3b)
+- Every terminal action is a `TerminalRequest` → `TerminalServer.Handle` (server only, the sole writer of drive data) → `TerminalResponse`. Single-player/host call it directly; remote clients use `NetPackageStashNetRequest`/`Response` (auto-registered NetPackage subclasses).
+- Deposit: the client removes from its backpack first, and the server gives back leftovers. Withdraw: the server removes from drives, and the client returns overflow via `Return`, which the server stores or drops at the player's feet (never bounced).
+- The server validates: the block is a terminal and the player is within 8 blocks. Client backpacks are client-authoritative (vanilla 7DTD), so deposits trust the client. This protects against races, not modified clients.
+- Server-side code must never touch XUi/EntityPlayerLocal (dedicated servers have no UI).
+- PowerShell 5.1 commit tip: write commit messages to a file with `[IO.File]::WriteAllText(..., UTF8Encoding($false))` and use `git commit -F`. Here-strings with quotes break, and `Out-File` adds a BOM.
 
 ## Network + terminal design (M3a)
 - `StashNetNetwork.TryOpen` re-scans and reloads on **every** operation (no cached state). Terminal → nearest Core whose `StashNetRadius` reaches it (cube distance) → Drive Bays within that radius of the Core.
