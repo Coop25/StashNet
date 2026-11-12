@@ -13,13 +13,13 @@
 4. Put some items on one drive first (hold it and `stashnet drive deposit`), **or** leave them empty and use the terminal's deposit.
 
 ## 1. Loads cleanly
-- [ ] F1: `[StashNet] Loaded v0.3.0 (6 methods patched)` (one more hook than before: shift-click deposit).
+- [ ] F1: `[StashNet] Loaded v0.3.1 (6 methods patched)` (one more hook than before: shift-click deposit).
 - [ ] No red errors mentioning StashNet, windows.xml, or xui.xml.
 
 ## 2. Opening the terminal
 - [ ] Look at the terminal. The prompt says **"Storage Terminal / Press E to Use"**.
 - [ ] Press **E**. The terminal window opens on the left, with your backpack on the right.
-- [ ] The top line shows usage like `X/45 types  Y/4500 items  (3 drives)`.
+- [ ] The top line shows usage like `X/45 types  Y/72 stacks  (3 drives)`.
 - [ ] Any items already on drives show as icons with counts.
 - [ ] **Hold E** on the terminal: the radial menu has **pick up**, and it works (then place it back).
 - [ ] 📸 Screenshot of the open terminal.
@@ -27,7 +27,8 @@
 ## 3. Deposit
 - [ ] **Shift-click** a stack in your backpack. It moves into the terminal list.
 - [ ] Click the **Deposit all** icon (top-right of the terminal). Everything storable moves in. **Locked** backpack slots stay put, and drives in your backpack stay put.
-- [ ] Deposit more than fits (3 Basic Drives = 45 types / 4,500 items). The leftovers stay in your backpack, with a "Storage full" message.
+- [ ] Deposit more than fits (3 Basic Drives = 45 types / 72 stacks). The leftovers stay in your backpack, with a "Storage full" message.
+- [ ] **Stack counting:** a full 6,000 stack of a resource uses just **1 stack** of space, and each weapon uses 1 stack.
 
 ## 4. Withdraw
 - [ ] **Left-click** an item: one full stack comes into your backpack.

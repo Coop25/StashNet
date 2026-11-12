@@ -6,11 +6,11 @@ stashnetDriveBayDesc,blocks,Block,,,"Holds up to 4 storage drives. Only accepts 
 stashnetTerminal,blocks,Block,,,Storage Terminal
 stashnetTerminalDesc,blocks,Block,,,"Browse, search, deposit and withdraw everything stored on your network's drives."
 stashnetDriveBasic,items,Item,,,Basic Drive
-stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds up to 15 item types (1500 items). Its contents stay on the drive, even when removed. Only readable inside a StashNet network."
+stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds up to 15 item types in 24 stacks, like a small chest. Its contents stay on the drive, even when removed. Only readable inside a StashNet network."
 stashnetUseTerminal,UI,HUD,,,Press {0} to Use
 stashnetTerminalTitle,UI,XUi,,,STORAGE TERMINAL
 stashnetDepositAllTip,UI,XUi,,,Deposit all (backpack)
-stashnetUsage,UI,XUi,,,"{0}/{1} types   {2}/{3} items   ({4} drives)"
+stashnetUsage,UI,XUi,,,"{0}/{1} types   {2}/{3} stacks   ({4} drives)"
 stashnetDeposited,UI,XUi,,,Deposited {0} items.
 stashnetNoCore,UI,XUi,,,No Storage Core in range. Place a Core within 6 blocks of this Terminal.
 stashnetNoBays,UI,XUi,,,No Drive Bays in range of the Core.

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using StashNet.Core.Drives;
@@ -20,8 +21,6 @@ namespace StashNet.Core.Network
 
         /// <summary>True once this drive's contents changed and need saving.</summary>
         public bool Dirty { get; internal set; }
-
-        internal int FreeItems => Capacity.MaxItems - Contents.TotalCount;
     }
 
     /// <summary>An item as the terminal shows it: totals merged across all drives.</summary>
@@ -43,21 +42,23 @@ namespace StashNet.Core.Network
     public sealed class NetworkStorage
     {
         private readonly IReadOnlyList<NetworkDrive> drives;
+        private readonly Func<string, int> stackSizeOf;
 
-        public NetworkStorage(IReadOnlyList<NetworkDrive> drives)
+        public NetworkStorage(IReadOnlyList<NetworkDrive> drives, Func<string, int> stackSizeOf)
         {
             this.drives = drives;
+            this.stackSizeOf = stackSizeOf;
         }
 
         public IReadOnlyList<NetworkDrive> Drives => drives;
         public int MaxTypes => drives.Sum(d => d.Capacity.MaxTypes);
-        public int MaxItems => drives.Sum(d => d.Capacity.MaxItems);
+        public int MaxStacks => drives.Sum(d => d.Capacity.MaxStacks);
         public int UsedTypes => drives.Sum(d => d.Contents.TypeCount);
-        public int UsedItems => drives.Sum(d => d.Contents.TotalCount);
+        public int UsedStacks => drives.Sum(d => d.Contents.UsedStacks(stackSizeOf));
 
         /// <summary>
         /// Stores up to <paramref name="count"/>: drives already holding this exact item first,
-        /// then the drive with the most free room. Returns how many were accepted.
+        /// then the drive with the most free stacks. Returns how many were accepted.
         /// </summary>
         public int Insert(string name, string variant, int count)
         {
@@ -70,7 +71,10 @@ namespace StashNet.Core.Network
             }
 
             // OrderBy is stable, so equal free room keeps bay order.
-            foreach (NetworkDrive d in drives.Except(holding).OrderByDescending(d => d.FreeItems).ToList())
+            var others = drives.Except(holding)
+                .OrderByDescending(d => d.Capacity.MaxStacks - d.Contents.UsedStacks(stackSizeOf))
+                .ToList();
+            foreach (NetworkDrive d in others)
             {
                 if (remaining <= 0) break;
                 remaining -= InsertInto(d, name, variant, remaining);
@@ -119,9 +123,9 @@ namespace StashNet.Core.Network
             return result;
         }
 
-        private static int InsertInto(NetworkDrive d, string name, string variant, int count)
+        private int InsertInto(NetworkDrive d, string name, string variant, int count)
         {
-            int accepted = d.Contents.TryInsert(d.Capacity, name, variant, count);
+            int accepted = d.Contents.TryInsert(d.Capacity, stackSizeOf, name, variant, count);
             if (accepted > 0) d.Dirty = true;
             return accepted;
         }

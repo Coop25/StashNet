@@ -8,15 +8,15 @@ namespace StashNet.Drives
     {
         public const string MetadataKey = "StashNetDrive";
         public const string PropMaxTypes = "StashNetMaxTypes";
-        public const string PropMaxItems = "StashNetMaxItems";
+        public const string PropMaxStacks = "StashNetMaxStacks";
 
         public static bool TryGetCapacity(ItemValue drive, out DriveCapacity capacity)
         {
             capacity = default;
             ItemClass ic = drive?.ItemClass;
             if (ic == null || !DriveRules.IsDrive(drive)) return false;
-            if (!ic.Properties.Contains(PropMaxTypes) || !ic.Properties.Contains(PropMaxItems)) return false;
-            capacity = new DriveCapacity(ic.Properties.GetInt(PropMaxTypes), ic.Properties.GetInt(PropMaxItems));
+            if (!ic.Properties.Contains(PropMaxTypes) || !ic.Properties.Contains(PropMaxStacks)) return false;
+            capacity = new DriveCapacity(ic.Properties.GetInt(PropMaxTypes), ic.Properties.GetInt(PropMaxStacks));
             return true;
         }
 

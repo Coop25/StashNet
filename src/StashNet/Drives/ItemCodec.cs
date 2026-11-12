@@ -42,6 +42,13 @@ namespace StashNet.Drives
 
         public static string NameOf(ItemValue iv) => iv.ItemClass.GetItemName();
 
+        /// <summary>Stack size by item name, for drive capacity. Unknown items count as 1.</summary>
+        public static int StackSizeOf(string name)
+        {
+            ItemClass ic = ItemClass.GetItemClass(name);
+            return ic == null ? 1 : System.Math.Max(1, ic.Stacknumber.Value);
+        }
+
         /// <summary>Null for plain items; otherwise the name-based variant string.</summary>
         public static string EncodeVariant(ItemValue iv)
         {

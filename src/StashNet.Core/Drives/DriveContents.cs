@@ -4,8 +4,9 @@ using System.Collections.Generic;
 namespace StashNet.Core.Drives
 {
     /// <summary>
-    /// What's stored on one drive. Capacity is passed in per call (it comes from the drive item's
-    /// config), so lowering it later never deletes anything - it only blocks further inserts.
+    /// What's stored on one drive. Capacity and stack sizes are passed in per call (they come
+    /// from the game's item config), so changing them later never deletes anything - at most it
+    /// blocks further inserts.
     /// </summary>
     public sealed class DriveContents
     {
@@ -15,17 +16,38 @@ namespace StashNet.Core.Drives
         public int TypeCount => entries.Count;
         public int TotalCount { get; private set; }
 
+        /// <summary>Stacks in use: per entry, ceil(count / stack size).</summary>
+        public int UsedStacks(Func<string, int> stackSizeOf)
+        {
+            int used = 0;
+            foreach (DriveEntry e in entries) used += StacksFor(e.Count, SizeOf(stackSizeOf, e.Name));
+            return used;
+        }
+
         /// <summary>Stores up to <paramref name="count"/> items. Returns how many were accepted (0..count).</summary>
-        public int TryInsert(DriveCapacity capacity, string name, string variant, int count)
+        public int TryInsert(DriveCapacity capacity, Func<string, int> stackSizeOf, string name, string variant, int count)
         {
             if (count <= 0 || string.IsNullOrEmpty(name)) return 0;
-            int room = capacity.MaxItems - TotalCount;
-            if (room <= 0) return 0;
 
+            int size = SizeOf(stackSizeOf, name);
+            long freeStacks = Math.Max(0, capacity.MaxStacks - UsedStacks(stackSizeOf));
             DriveEntry entry = Find(name, variant);
-            if (entry == null && TypeCount >= capacity.MaxTypes) return 0;
 
-            int accepted = Math.Min(count, room);
+            long room;
+            if (entry == null)
+            {
+                if (TypeCount >= capacity.MaxTypes) return 0;
+                room = freeStacks * size;
+            }
+            else
+            {
+                long partialRoom = (long)StacksFor(entry.Count, size) * size - entry.Count;
+                room = partialRoom + freeStacks * size;
+            }
+
+            int accepted = (int)Math.Min(count, room);
+            if (accepted <= 0) return 0;
+
             if (entry == null)
             {
                 entries.Add(new DriveEntry(name, variant, accepted));
@@ -68,6 +90,15 @@ namespace StashNet.Core.Drives
             }
             TotalCount += count;
         }
+
+        /// <summary>Unknown or invalid stack sizes count as 1 (the conservative choice).</summary>
+        internal static int SizeOf(Func<string, int> stackSizeOf, string name)
+        {
+            int size = stackSizeOf?.Invoke(name) ?? 1;
+            return size < 1 ? 1 : size;
+        }
+
+        private static int StacksFor(int count, int size) => (count + size - 1) / size;
 
         private DriveEntry Find(string name, string variant)
         {

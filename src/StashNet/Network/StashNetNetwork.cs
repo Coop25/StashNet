@@ -83,7 +83,7 @@ namespace StashNet.Network
                 }
             }
 
-            network = new StashNetNetwork(corePos, new NetworkStorage(drives), bays, skippedBays, skippedDrives);
+            network = new StashNetNetwork(corePos, new NetworkStorage(drives, ItemCodec.StackSizeOf), bays, skippedBays, skippedDrives);
             return true;
         }
 

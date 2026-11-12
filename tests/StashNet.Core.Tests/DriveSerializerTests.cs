@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using StashNet.Core.Drives;
 using Xunit;
 
@@ -7,17 +7,18 @@ namespace StashNet.Core.Tests
     public class DriveSerializerTests
     {
         private static readonly DriveCapacity Big = new DriveCapacity(100, 100000);
+        private static readonly System.Func<string, int> One = _ => 1;
 
         [Fact]
         public void RoundTrip_PreservesEntriesAndOrder()
         {
             var d = new DriveContents();
-            d.TryInsert(Big, "resourceWood", null, 250);
-            d.TryInsert(Big, "gunPistol", "gunPistol,modGunScope|AAECAw==", 1);
-            d.TryInsert(Big, "weird", "tab\there\nnewline\\backslash ünïcödé", 3);
-            d.TryInsert(Big, "resourceIron", null, 7);
-            d.TryInsert(Big, "dashVariant", "-", 2);
-            d.TryInsert(Big, "emptyVariant", "", 4);
+            d.TryInsert(Big, One, "resourceWood", null, 250);
+            d.TryInsert(Big, One, "gunPistol", "gunPistol,modGunScope|AAECAw==", 1);
+            d.TryInsert(Big, One, "weird", "tab\there\nnewline\\backslash ünïcödé", 3);
+            d.TryInsert(Big, One, "resourceIron", null, 7);
+            d.TryInsert(Big, One, "dashVariant", "-", 2);
+            d.TryInsert(Big, One, "emptyVariant", "", 4);
 
             var back = DriveSerializer.Deserialize(DriveSerializer.Serialize(d));
 
