@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Implement task by task (superpowers:executing-plans). Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Storage Terminals work for players connected to a server (not just single-player/host), with no item duplication or loss. The terminal screen gets a search box, a sort toggle, and live refresh.
+**Goal:** Storage Terminals work for players connected to a server (not just single-player/host), with no item duplication or loss. The terminal screen gets a search box, a sort toggle (default: highest count first), and live refresh.
 
 **Architecture:** One request/response protocol for every terminal action. The **server** owns all drive changes: it receives a request, runs it through the existing `StashNetNetwork`/`NetworkStorage` code, and replies. In single-player and on the host, the same handler is called directly (no packet). On a remote client, it travels in a `NetPackage`. The client's backpack is only ever changed **on the client**, by the client, from what the server's reply says.
 
@@ -60,7 +60,8 @@
 ### Task 4: Terminal UI on the new protocol + search/sort + live refresh
 **Files:** Modify `src/StashNet/UI/XUiC_StashNetTerminal.cs`, `src/StashNet/Blocks/BlockStashNetTerminal.cs` (remove the client block), `Mod/Config/XUi_InGame/windows.xml`, `Localization.csv`.
 - The window renders the last listing it received. Actions: Withdraw (stack/one), Deposit (shift-click: remove from slot, then send), Deposit all (remove all eligible unlocked stacks, then send one Deposit).
-- Search: a text box filters by localized name (case-insensitive, contains). Sort button cycles **Name ↑ / Count ↓**.
+- Search: a text box filters by localized name (case-insensitive, contains).
+- Sort: **default = Count ↓ (highest first)**, ties broken by name ↑ so the order is stable (owner's request, 2026-11-12). The button toggles to **Name ↑** and back. The choice is remembered while the game runs.
 - Refresh: a `List` request every 2 s while open.
 
 ### Task 5: Version 0.4.0, checklist (single-player regression + local dedicated server + client), docs, commit
