@@ -151,14 +151,14 @@ Each milestone ends with something you can load and try in-game. A detailed step
 | **0** | **Setup + proof of concept.** Dev tools, empty mod that loads, answers to the 4 unknowns. | Game loads with mod; log shows "StashNet loaded". |
 | **1** | **Blocks & items exist.** Core, Drive Bay, Basic Drive, Storage Terminal — vanilla looks, tinted icons, recipes. Bay only accepts drives. | Craft and place everything; put drives in a bay. |
 | **2** | **Drives hold items.** Game-free storage library + tests; saving contents on the drive item. | Items survive save/reload and moving a drive between bays. |
-| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ (2026-11-12)* | |
+| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ M3b ✅ single-player / ⚠️ multiplayer untested (2026-11-12)* | |
 | **3** | **Network + Storage Terminal.** Proximity discovery, combined view, search/sort, deposit/withdraw. | One screen shows every drive's contents; take and put items. |
 | **4** | **Password.** Core lock, propagation, allowed list, drive stamping. | A second player is locked out until they enter the code. |
 | **5** | **Drive Port.** Unload / load / format. | Empty a full drive into the network; stolen drive asks for password. |
 | **6** | **Crafting Terminal.** Workbench recipes using network stock. | Craft something without carrying the ingredients. |
 | **7** | **Heat.** Formula, cap, terminal-use spikes. | Big network → screamers show up. |
 | **8** | **Progression.** Standard/HD drives, Upgrade Kits, Reinforced/Armored bays, Core tiers 2–3 and radius. | Upgrade a full drive without losing anything; armored bay soaks damage. |
-| **9** | **Multiplayer hardening + release package.** Dedicated server test, dupe tests, zip for sharing. | Two players use one network on a server at once with no dupes. |
+| **9** | **Multiplayer hardening + release package.** Dedicated server test, dupe tests, zip for sharing. **Must include M3b checklist Part B** (never tested). | Two players use one network on a server at once with no dupes. |
 
 **v1 = milestones 0–9.**
 
