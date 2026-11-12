@@ -1,6 +1,6 @@
 Key,File,Type,UsedInMainMenu,NoTranslate,english
 stashnetScrapCore,blocks,Block,,,Scrap Storage Core
-stashnetScrapCoreDesc,blocks,Block,,,"The heart of a StashNet storage network. Drive Bays and Terminals nearby connect to it. Crude, but it works."
+stashnetScrapCoreDesc,blocks,Block,,,"The heart of a StashNet storage network. Drive Bays and Terminals within 6 blocks connect to it. Lock it with a code to protect the whole network, drives included."
 stashnetDriveBay,blocks,Block,,,Drive Bay
 stashnetDriveBayDesc,blocks,Block,,,"Holds up to 4 storage drives. Only accepts drives. Can be locked with a code."
 stashnetTerminal,blocks,Block,,,Storage Terminal
@@ -26,3 +26,8 @@ stashnetLoading,UI,XUi,,,Connecting to storage...
 stashnetTooFar,UI,XUi,,,You're too far from the terminal.
 stashnetSortCount,UI,XUi,,,Sort: Most first
 stashnetSortName,UI,XUi,,,Sort: Name
+blockcommand_netcode,UI,Radial blockcommand,,,Network code
+stashnetNetworkLocked,UI,XUi,,,This storage network is locked. Enter the code set on its Core.
+stashnetLockedDrives,UI,XUi,,,{0} drive(s) are locked to another network.
+stashnetBayLocked,UI,HUD,,,"{1}\nNetwork locked - press {0} to enter the code"
+stashnetTerminalLocked,UI,HUD,,,Network locked - press {0} to enter the code

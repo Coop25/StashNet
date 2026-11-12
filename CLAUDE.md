@@ -39,7 +39,16 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 2: ✅ done 2026-11-12. All checklist sections pass (capacity limits, weapon with mod/wear/ammo round-trip, full backpack, moves and save/reload, no drive-in-drive). The log shows 0 StashNet errors.
 - Milestone 3a: ✅ done 2026-11-12 (v0.3.2). The owner confirmed deposit/withdraw through the terminal works and asked to move on. Logs for v0.3.0–0.3.2 show no StashNet errors or UI warnings. Not explicitly confirmed: every checklist section, and the window layout (no screenshot received yet).
 - Milestone 3b: ✅ single-player done 2026-11-12 (v0.4.0 loads with 6 patches, no StashNet errors). ⚠️ **Multiplayer is UNTESTED.** The owner can't test MP right now. Part B of `docs/testing/M3b-checklist.md` (client use, no-dupe race, client full backpack, live refresh, dedicated server load) must pass before any public release (roadmap M9).
-- Current milestone: 4 (password), not started.
+- Current milestone: 4 (password, v0.5.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m4-password.md`); waiting on the in-game checklist `docs/testing/M4-checklist.md`.
+
+## Password design (M4)
+- The network code = the **Core's** vanilla `TEFeatureLockable` (the Core is a CompositeTileEntity with Lockable + Pickup). Bays and terminals have no lock of their own and ask the Core (`NetworkLock`, `CoreLookupCache` with a 1 s Core-position cache for per-frame prompt checks).
+- The server enforces access on every terminal request (`persistentPlayers` PrimaryId). Bay opening is gated client-side by vetoing the storage "Search" command in `TEFeatureStashNetDriveBay.AllowBlockActivationCommand`.
+- Drives get a stamp `StashNetLock = "x,y,z|hash"` (`DriveStamp`, tested). Readable by the home Core or by a network with the same hash; otherwise skipped and untouched. Stamps are written only in `SaveDirty` (server).
+- Bays keep their old `TEFeatureLockable` only so pre-M4 saves load. Feature save order is by name, not XML order, so reordering features in XML is safe.
+
+## Build note
+The mod compiles against the **game's own** mscorlib/System libraries (`GameFrameworkLib` + the `UseOnlyGameFrameworkLibraries` target in the csproj), not .NET Framework reference assemblies. The game API uses `ReadOnlySpan`, which only exists in Unity's mscorlib.
 
 ## Multiplayer design (M3b)
 - Every terminal action is a `TerminalRequest` → `TerminalServer.Handle` (server only, the sole writer of drive data) → `TerminalResponse`. Single-player/host call it directly; remote clients use `NetPackageStashNetRequest`/`Response` (auto-registered NetPackage subclasses).

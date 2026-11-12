@@ -20,13 +20,10 @@
     <NoStandardLib>true</NoStandardLib>
   </PropertyGroup>
 
+  <!-- The game's own framework libraries, added straight to the compiler in the target below
+       (assembly resolution would otherwise swap them for the SDK's copies of the same names). -->
   <ItemGroup>
-    <Reference Include="mscorlib"><HintPath>$(GameManaged)\mscorlib.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="System.Xml"><HintPath>$(GameManaged)\System.Xml.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="System.Xml.Linq"><HintPath>$(GameManaged)\System.Xml.Linq.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="System"><HintPath>$(GameManaged)\System.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="System.Core"><HintPath>$(GameManaged)\System.Core.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="netstandard"><HintPath>$(GameManaged)\netstandard.dll</HintPath><Private>false</Private></Reference>
+    <GameFrameworkLib Include="$(GameManaged)\mscorlib.dll;$(GameManaged)\System.dll;$(GameManaged)\System.Core.dll;$(GameManaged)\System.Xml.dll;$(GameManaged)\System.Xml.Linq.dll;$(GameManaged)\netstandard.dll" />
   </ItemGroup>
 
   <!-- Game-free logic is compiled straight into the mod so the game only loads one DLL. -->
@@ -41,6 +38,15 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameManaged)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="0Harmony"><HintPath>$(GameDir)\Mods\0_TFP_Harmony\0Harmony.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
+
+  <!-- The SDK still injects standard .NET Framework reference assemblies for net48. Drop them so
+       only the game's own runtime libraries (referenced above) are compiled against. -->
+  <Target Name="UseOnlyGameFrameworkLibraries" AfterTargets="ResolveAssemblyReferences" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <ReferencePath Remove="@(ReferencePath)" Condition="$([System.String]::Copy('%(ReferencePath.FullPath)').ToLowerInvariant().Contains('referenceassemblies'))" />
+      <ReferencePath Include="@(GameFrameworkLib)" />
+    </ItemGroup>
+  </Target>
 
   <!-- After build: stage the mod folder, then copy it into the game's Mods folder. -->
   <Target Name="StageMod" AfterTargets="Build">

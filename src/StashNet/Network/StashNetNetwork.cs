@@ -8,8 +8,8 @@ using StashNet.Drives;
 namespace StashNet.Network
 {
     /// <summary>
-    /// A snapshot of one storage network: its Core, and every readable drive in its bays.
-    /// Opened fresh for every operation, so it is never stale.
+    /// A snapshot of one storage network: its Core, its lock, and every readable drive in its bays.
+    /// Opened fresh for every operation, so it is never stale. Only the server writes (SaveDirty).
     /// </summary>
     public sealed class StashNetNetwork
     {
@@ -19,26 +19,26 @@ namespace StashNet.Network
         {
             public TEFeatureStorage Bay;
             public int Index;
+            /// <summary>Stamp to write on save (see DriveStamp), when RestampNeeded.</summary>
+            public string NewStamp;
+            public bool RestampNeeded;
         }
 
         private static int maxCoreRadius = -1;
 
-        private StashNetNetwork(Vector3i corePos, NetworkStorage storage, int bayCount, int skippedBays, int skippedDrives)
-        {
-            CorePos = corePos;
-            Storage = storage;
-            BayCount = bayCount;
-            SkippedBays = skippedBays;
-            SkippedDrives = skippedDrives;
-        }
+        private StashNetNetwork() { }
 
-        public Vector3i CorePos { get; }
-        public NetworkStorage Storage { get; }
-        public int BayCount { get; }
+        public Vector3i CorePos { get; private set; }
+        /// <summary>The Core's vanilla lock; null for Cores placed before Milestone 4 (= unlocked).</summary>
+        public TEFeatureLockable CoreLock { get; private set; }
+        public NetworkStorage Storage { get; private set; }
+        public int BayCount { get; private set; }
         /// <summary>Bays skipped because someone has them open.</summary>
-        public int SkippedBays { get; }
+        public int SkippedBays { get; private set; }
         /// <summary>Drives skipped because their data can't be read (left untouched).</summary>
-        public int SkippedDrives { get; }
+        public int SkippedDrives { get; private set; }
+        /// <summary>Drives skipped because they're locked to another network (left untouched).</summary>
+        public int LockedDrives { get; private set; }
 
         public static bool IsCore(Block block) => block != null && block.Properties.Contains(PropRadius);
 
@@ -54,8 +54,10 @@ namespace StashNet.Network
                 return false;
             }
 
+            var net = new StashNetNetwork { CorePos = corePos, CoreLock = NetworkLock.GetCoreLock(world, corePos) };
+            string stampHash = NetworkLock.StampHash(net.CoreLock);
+
             var drives = new List<NetworkDrive>();
-            int bays = 0, skippedBays = 0, skippedDrives = 0;
             foreach (Vector3i pos in Cube(corePos, radius))
             {
                 BlockValue bv = world.GetBlock(pos);
@@ -65,46 +67,57 @@ namespace StashNet.Network
                 TEFeatureStorage storage = te.GetFeature<TEFeatureStorage>();
                 if (storage == null) continue;
 
-                bays++;
+                net.BayCount++;
                 if (storage.IsUserAccessing())
                 {
-                    skippedBays++;
+                    net.SkippedBays++;
                     continue;
                 }
                 for (int i = 0; i < storage.ItemGrid.Length; i++)
                 {
                     ItemValue drive = storage.ItemGrid[i].itemValue;
                     if (drive == null || drive.IsEmpty() || !DriveRules.IsDrive(drive)) continue;
-                    if (!DriveItem.TryGetCapacity(drive, out DriveCapacity cap) || !DriveItem.TryLoad(drive, out DriveContents contents, out _))
+
+                    StampDecision stamp = DriveStamp.Decide(DriveItem.GetStamp(drive), corePos.x, corePos.y, corePos.z, stampHash);
+                    if (!stamp.Readable)
                     {
-                        skippedDrives++;
+                        net.LockedDrives++;
                         continue;
                     }
-                    drives.Add(new NetworkDrive(contents, cap, new Slot { Bay = storage, Index = i }));
+                    if (!DriveItem.TryGetCapacity(drive, out DriveCapacity cap) || !DriveItem.TryLoad(drive, out DriveContents contents, out _))
+                    {
+                        net.SkippedDrives++;
+                        continue;
+                    }
+                    var slot = new Slot { Bay = storage, Index = i, NewStamp = stamp.NewStamp, RestampNeeded = stamp.Changed };
+                    drives.Add(new NetworkDrive(contents, cap, slot));
                 }
             }
 
-            network = new StashNetNetwork(corePos, new NetworkStorage(drives, ItemCodec.StackSizeOf), bays, skippedBays, skippedDrives);
+            net.Storage = new NetworkStorage(drives, ItemCodec.StackSizeOf);
+            network = net;
             return true;
         }
 
-        /// <summary>Writes every changed drive back into its bay slot.</summary>
+        /// <summary>SERVER ONLY. Writes changed drives (contents and/or lock stamp) back into their bay slots.</summary>
         public void SaveDirty()
         {
             foreach (NetworkDrive d in Storage.Drives)
             {
-                if (!d.Dirty) continue;
                 var slot = (Slot)d.Tag;
+                if (!d.Dirty && !slot.RestampNeeded) continue;
                 ItemStack current = slot.Bay.ItemGrid[slot.Index];
                 ItemValue updated = current.itemValue.Clone();
-                DriveItem.Save(updated, d.Contents);
+                if (d.Dirty) DriveItem.Save(updated, d.Contents);
+                if (slot.RestampNeeded) DriveItem.SetStamp(updated, slot.NewStamp);
                 slot.Bay.UpdateSlot(slot.Index, new ItemStack(updated, current.count));
                 slot.Bay.SetModified();
+                slot.RestampNeeded = false;
             }
         }
 
-        /// <summary>Nearest Core (cube distance) whose own radius reaches the terminal.</summary>
-        private static bool TryFindCore(World world, Vector3i from, out Vector3i corePos, out int coreRadius)
+        /// <summary>Nearest Core (cube distance) whose own radius reaches <paramref name="from"/>.</summary>
+        public static bool TryFindCore(World world, Vector3i from, out Vector3i corePos, out int coreRadius)
         {
             corePos = default;
             coreRadius = 0;

@@ -1,9 +1,17 @@
 <configs>
 	<append xpath="/blocks">
 
-		<!-- Scrap Storage Core: the network's brain. No behavior yet (network: M3, password: M4, heat: M7). -->
+		<!-- Scrap Storage Core: the network's brain. Holds the network's code (vanilla lock, M4).
+		     Bays and terminals have no lock of their own; they ask this one. Heat: M7. -->
 		<block name="stashnetScrapCore">
 			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="CompositeTileEntity" />
+			<property class="CompositeFeatures">
+				<property class="TEFeatureLockable" />
+				<property class="TEFeaturePickup">
+					<property name="TakeDelay" value="2" />
+				</property>
+			</property>
 			<!-- Network reach in blocks (cube distance). Bays and Terminals within this range join. -->
 			<property name="StashNetRadius" value="6" />
 			<property name="Material" value="Mmetal" />
@@ -16,7 +24,6 @@
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
 			<property name="Path" value="solid" />
 			<property name="MaxDamage" value="1000" />
-			<property name="CanPickup" value="true" />
 			<property name="DescriptionKey" value="stashnetScrapCoreDesc" />
 			<property class="RepairItems">
 				<property name="resourceScrapIron" value="10" />
@@ -29,16 +36,19 @@
 			<property name="SortOrder2" value="0000" />
 		</block>
 
-		<!-- Drive Bay: lockable 4-slot container that only accepts drives (see Patches/DriveBayOnlyDrivesPatches.cs). -->
+		<!-- Drive Bay: 4-slot container that only accepts drives (Patches/DriveBayOnlyDrivesPatches.cs).
+		     Access follows the network Core's lock (Blocks/TEFeatureStashNetDriveBay.cs, listed FIRST so
+		     its "network locked" prompt wins). The bay's own TEFeatureLockable is kept only so bays
+		     placed before M4 keep loading; its lock/keypad commands are disabled. -->
 		<block name="stashnetDriveBay">
 			<property name="CreativeMode" value="Player" />
 			<property name="Class" value="CompositeTileEntity" />
 			<property class="CompositeFeatures">
+				<property class="TEFeatureStashNetDriveBay" />
 				<property class="TEFeatureStorage">
 					<property name="LootList" value="stashnetDriveBaySlots" />
 				</property>
 				<property class="TEFeatureLockable" />
-				<property class="TEFeatureStashNetDriveBay" />
 			</property>
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />

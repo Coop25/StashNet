@@ -41,6 +41,15 @@ namespace StashNet.Network
                 return resp;
             }
 
+            // The network's code lives on the Core (Milestone 4). Not allowed = no listing, no changes.
+            if (!NetworkLock.IsAllowed(net.CoreLock, NetworkLock.PlayerId(player)))
+            {
+                if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
+                if (req.Op == TerminalOp.Return) DropAll(player, req.Items);
+                resp.Messages.Add(new TerminalMessage("stashnetNetworkLocked", -1));
+                return resp;
+            }
+
             switch (req.Op)
             {
                 case TerminalOp.Withdraw:
@@ -103,6 +112,7 @@ namespace StashNet.Network
             else if (net.Storage.Drives.Count == 0) resp.Messages.Add(new TerminalMessage("stashnetNoDrives", -1));
             if (net.SkippedBays > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedBays", net.SkippedBays));
             if (net.SkippedDrives > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedDrives", net.SkippedDrives));
+            if (net.LockedDrives > 0) resp.Messages.Add(new TerminalMessage("stashnetLockedDrives", net.LockedDrives));
         }
 
         private static bool IsValid(World world, EntityPlayer player, Vector3i pos)
