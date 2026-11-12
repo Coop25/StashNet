@@ -67,8 +67,11 @@ namespace StashNet.Core.Drives
 
         public int CountOf(string name, string variant) => Find(name, variant)?.Count ?? 0;
 
-        /// <summary>Adds an entry while loading, ignoring capacity (stored data is never dropped).</summary>
-        internal void AddLoaded(string name, string variant, int count)
+        /// <summary>
+        /// Adds an entry ignoring capacity. Used when loading, and when putting items back onto the
+        /// drive they came from (stored data is never dropped).
+        /// </summary>
+        public void AddLoaded(string name, string variant, int count)
         {
             DriveEntry entry = Find(name, variant);
             if (entry == null)

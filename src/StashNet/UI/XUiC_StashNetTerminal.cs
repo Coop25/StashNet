@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using StashNet.Blocks;
+using StashNet.Core.Drives;
 using StashNet.Core.Protocol;
 using StashNet.Drives;
 using StashNet.Network;
@@ -120,6 +121,11 @@ namespace StashNet.UI
         public void DepositFromSlot(XUiC_ItemStack slot)
         {
             ItemStack stack = slot.ItemStack;
+            if (stack != null && !stack.IsEmpty() && DriveRules.IsDrive(stack.itemValue))
+            {
+                UnloadDrive(slot);
+                return;
+            }
             if (!Depositable(stack))
             {
                 status = Localization.Get("stashnetCantStore");
@@ -130,6 +136,42 @@ namespace StashNet.UI
             slot.ItemStack = ItemStack.Empty.Clone();
             slot.HandleSlotChangeEvent();
             Send(TerminalOp.Deposit, amount);
+        }
+
+        /// <summary>
+        /// Shift-click on a drive: empty it in place (tagged with a one-time token), send its contents
+        /// to the network, and the server's leftovers come back onto this same drive (TerminalClient).
+        /// </summary>
+        private void UnloadDrive(XUiC_ItemStack slot)
+        {
+            ItemStack stack = slot.ItemStack;
+            if (!DriveItem.TryLoad(stack.itemValue, out DriveContents contents, out string error))
+            {
+                status = error;
+                RefreshBindings();
+                return;
+            }
+            if (contents.TypeCount == 0)
+            {
+                status = Localization.Get("stashnetDriveEmpty");
+                RefreshBindings();
+                return;
+            }
+
+            TerminalRequest request = NewRequest(TerminalOp.DriveUnload);
+            foreach (DriveEntry e in contents.Entries) request.Items.Add(new ItemAmount(e.Name, e.Variant, e.Count));
+
+            string token = Guid.NewGuid().ToString("N");
+            ItemValue emptied = stack.itemValue.Clone();
+            DriveItem.Save(emptied, new DriveContents());
+            emptied.SetMetadata(DriveItem.PendingKey, token);
+            slot.ItemStack = new ItemStack(emptied, stack.count);
+            slot.HandleSlotChangeEvent();
+
+            refreshTimer = 0f;
+            status = "";
+            lastActionRequestId = TerminalClient.NextRequestId;
+            TerminalClient.SendDriveUnload(request, token);
         }
 
         public void SetHover(ItemAmount? item)

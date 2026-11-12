@@ -33,6 +33,7 @@ namespace StashNet.Core.Tests
         [InlineData(TerminalOp.Withdraw)]
         [InlineData(TerminalOp.Deposit)]
         [InlineData(TerminalOp.Return)]
+        [InlineData(TerminalOp.DriveUnload)]
         public void Request_RoundTrips(TerminalOp op)
         {
             var r = new TerminalRequest { Op = op, X = -12, Y = 64, Z = 3000, RequestId = 42 };
@@ -69,6 +70,8 @@ namespace StashNet.Core.Tests
             r.Listing.Add(new ItemAmount("resourceWood", null, 9000));
             r.Listing.Add(new ItemAmount("gunPistol", "v", 1));
             r.Give.Add(new ItemAmount("resourceWood", null, 500));
+            r.ReturnToDrive.Add(new ItemAmount("resourceIron", null, 40));
+            r.ReturnToDrive.Add(new ItemAmount("gunRifle", "mods", 1));
             r.Messages.Add(new TerminalMessage("stashnetSkippedBays", 2));
             r.Messages.Add(new TerminalMessage("stashnetNetworkFull", -1));
 
@@ -79,6 +82,7 @@ namespace StashNet.Core.Tests
             Assert.Equal((2, 5, 72, 3), (back.DistinctItems, back.UsedStacks, back.MaxStacks, back.Drives));
             Assert.Equal(r.Listing, back.Listing);
             Assert.Equal(r.Give, back.Give);
+            Assert.Equal(r.ReturnToDrive, back.ReturnToDrive);
             Assert.Equal(r.Messages, back.Messages);
         }
 
@@ -89,7 +93,16 @@ namespace StashNet.Core.Tests
             Assert.False(back.HasListing);
             Assert.Empty(back.Listing);
             Assert.Empty(back.Give);
+            Assert.Empty(back.ReturnToDrive);
             Assert.Empty(back.Messages);
+        }
+
+        [Fact]
+        public void OpAfterLast_Throws()
+        {
+            var bytes = Serialize(new TerminalRequest { Op = TerminalOp.List });
+            bytes[0] = (byte)TerminalOp.DriveUnload + 1;
+            Assert.Throws<FormatException>(() => Read(bytes));
         }
 
         [Fact]

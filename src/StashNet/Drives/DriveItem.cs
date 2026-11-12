@@ -52,6 +52,9 @@ namespace StashNet.Drives
         /// </summary>
         public const string LegacyStampKey = "StashNetLock";
 
+        /// <summary>One-time token on a drive emptied for an unload, so its leftovers can find it again.</summary>
+        public const string PendingKey = "StashNetPending";
+
         public static bool HasStamp(ItemValue drive) => drive != null && drive.HasMetadata(LegacyStampKey);
 
         public static void ClearStamp(ItemValue drive) => drive.RemoveMetaData(LegacyStampKey);

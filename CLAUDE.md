@@ -39,7 +39,12 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 2: ✅ done 2026-11-12. All checklist sections pass (capacity limits, weapon with mod/wear/ammo round-trip, full backpack, moves and save/reload, no drive-in-drive). The log shows 0 StashNet errors.
 - Milestone 3a: ✅ done 2026-11-12 (v0.3.2). The owner confirmed deposit/withdraw through the terminal works and asked to move on. Logs for v0.3.0–0.3.2 show no StashNet errors or UI warnings. Not explicitly confirmed: every checklist section, and the window layout (no screenshot received yet).
 - Milestone 3b: ✅ single-player done 2026-11-12 (v0.4.0 loads with 6 patches, no StashNet errors). ⚠️ **Multiplayer is UNTESTED.** The owner can't test MP right now. Part B of `docs/testing/M3b-checklist.md` (client use, no-dupe race, client full backpack, live refresh, dedicated server load) must pass before any public release (roadmap M9).
-- Current milestone: 4 (password, v0.5.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m4-password.md`); waiting on the in-game checklist `docs/testing/M4-checklist.md`.
+- Milestone 4: ✅ accepted by the owner 2026-11-12 (asked to move on). The v0.5.0 session loaded cleanly (first build against the game's own runtime, lockable Core). ⚠️ v0.5.1 (drive locking removed) had **not been launched in-game** when M5 started, and the M4 checklist results were not reported. Re-check the log for v0.5.1 before claiming it works.
+
+- Current milestone: 5 (drive unload, v0.6.0). Code done (plan: `docs/superpowers/plans/2026-11-12-m5-drive-unload.md`); waiting on `docs/testing/M5-checklist.md`. Scope (owner): unload only, with no fill/wipe/format.
+
+## Drive unload (M5)
+- Shift-click a drive while a terminal is open → the client empties it in place and tags it (`StashNetPending` token) → `DriveUnload` request → the server inserts and returns leftovers in `TerminalResponse.ReturnToDrive` → the client refills the tagged drive (backpack, then toolbelt). If the drive isn't found, the leftovers go to the backpack.
 
 ## Password design (M4)
 - The network code = the **Core's** vanilla `TEFeatureLockable` (the Core is a CompositeTileEntity with Lockable + Pickup). Bays and terminals have no lock of their own and ask the Core (`NetworkLock`, `CoreLookupCache` with a 1 s Core-position cache for per-frame prompt checks).

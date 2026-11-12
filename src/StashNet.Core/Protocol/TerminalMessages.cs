@@ -15,6 +15,8 @@ namespace StashNet.Core.Protocol
         Deposit = 3,
         /// <summary>Overflow I couldn't fit; store it, or drop it at my feet. Never sent back again.</summary>
         Return = 4,
+        /// <summary>I emptied a drive in my backpack; store its contents, send leftovers back in ReturnToDrive.</summary>
+        DriveUnload = 5,
     }
 
     /// <summary>An item (by name + variant, see ItemCodec) and an amount.</summary>
@@ -72,6 +74,8 @@ namespace StashNet.Core.Protocol
         public List<TerminalMessage> Messages = new List<TerminalMessage>();
         /// <summary>Items the client must put into its backpack (withdrawals, deposit leftovers).</summary>
         public List<ItemAmount> Give = new List<ItemAmount>();
+        /// <summary>DriveUnload leftovers: the client puts these back onto the drive it emptied.</summary>
+        public List<ItemAmount> ReturnToDrive = new List<ItemAmount>();
     }
 
     /// <summary>Binary encoding for terminal messages. Reading validates everything and throws FormatException on bad data.</summary>
@@ -93,7 +97,7 @@ namespace StashNet.Core.Protocol
         public static TerminalRequest ReadRequest(BinaryReader rd)
         {
             byte op = rd.ReadByte();
-            if (op < (byte)TerminalOp.List || op > (byte)TerminalOp.Return) throw new FormatException($"Unknown terminal op {op}.");
+            if (op < (byte)TerminalOp.List || op > (byte)TerminalOp.DriveUnload) throw new FormatException($"Unknown terminal op {op}.");
             return new TerminalRequest
             {
                 Op = (TerminalOp)op,
@@ -124,6 +128,7 @@ namespace StashNet.Core.Protocol
                 w.Write(m.Arg);
             }
             WriteItems(w, r.Give);
+            WriteItems(w, r.ReturnToDrive);
         }
 
         public static TerminalResponse ReadResponse(BinaryReader rd)
@@ -140,6 +145,7 @@ namespace StashNet.Core.Protocol
             int messages = ReadLength(rd);
             for (int i = 0; i < messages; i++) r.Messages.Add(new TerminalMessage(ReadString(rd), rd.ReadInt32()));
             r.Give = ReadItems(rd);
+            r.ReturnToDrive = ReadItems(rd);
             return r;
         }
 

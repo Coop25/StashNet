@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using StashNet.Blocks;
 using StashNet.Core.Network;
 using StashNet.Core.Protocol;
@@ -27,16 +28,14 @@ namespace StashNet.Network
             if (!IsValid(world, player, pos))
             {
                 // Never strand items the client already handed over.
-                if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
-                if (req.Op == TerminalOp.Return) DropAll(player, req.Items);
+                Refund(player, req, resp);
                 resp.Messages.Add(new TerminalMessage("stashnetTooFar", -1));
                 return resp;
             }
 
             if (!StashNetNetwork.TryOpen(world, pos, out StashNetNetwork net, out string problemKey))
             {
-                if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
-                if (req.Op == TerminalOp.Return) DropAll(player, req.Items);
+                Refund(player, req, resp);
                 resp.Messages.Add(new TerminalMessage(problemKey, -1));
                 return resp;
             }
@@ -44,8 +43,7 @@ namespace StashNet.Network
             // The network's code lives on the Core (Milestone 4). Not allowed = no listing, no changes.
             if (!NetworkLock.IsAllowed(net.CoreLock, NetworkLock.PlayerId(player)))
             {
-                if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
-                if (req.Op == TerminalOp.Return) DropAll(player, req.Items);
+                Refund(player, req, resp);
                 resp.Messages.Add(new TerminalMessage("stashnetNetworkLocked", -1));
                 return resp;
             }
@@ -56,7 +54,14 @@ namespace StashNet.Network
                     Withdraw(net, req, resp);
                     break;
                 case TerminalOp.Deposit:
-                    Deposit(net, req, resp);
+                    Deposit(net, req, resp.Give, resp);
+                    break;
+                case TerminalOp.DriveUnload:
+                    Deposit(net, req, resp.ReturnToDrive, resp);
+                    int unloaded = 0;
+                    foreach (ItemAmount a in req.Items) unloaded += a.Count;
+                    foreach (ItemAmount a in resp.ReturnToDrive) unloaded -= a.Count;
+                    resp.Messages.Add(new TerminalMessage("stashnetDriveUnloaded", unloaded));
                     break;
                 case TerminalOp.Return:
                     Return(net, player, req);
@@ -76,7 +81,8 @@ namespace StashNet.Network
             if (removed > 0) resp.Give.Add(new ItemAmount(want.Name, want.Variant, removed));
         }
 
-        private static void Deposit(StashNetNetwork net, TerminalRequest req, TerminalResponse resp)
+        /// <summary>Store what fits; anything else goes to <paramref name="leftovers"/> (backpack, or the drive for DriveUnload).</summary>
+        private static void Deposit(StashNetNetwork net, TerminalRequest req, List<ItemAmount> leftovers, TerminalResponse resp)
         {
             bool full = false, refused = false;
             foreach (ItemAmount a in req.Items)
@@ -84,10 +90,18 @@ namespace StashNet.Network
                 int accepted = Storable(a) ? net.Storage.Insert(a.Name, a.Variant, a.Count) : 0;
                 if (!Storable(a)) refused = true;
                 else if (accepted < a.Count) full = true;
-                if (accepted < a.Count) resp.Give.Add(new ItemAmount(a.Name, a.Variant, a.Count - accepted));
+                if (accepted < a.Count) leftovers.Add(new ItemAmount(a.Name, a.Variant, a.Count - accepted));
             }
             if (refused) resp.Messages.Add(new TerminalMessage("stashnetCantStore", -1));
             if (full) resp.Messages.Add(new TerminalMessage("stashnetNetworkFull", -1));
+        }
+
+        /// <summary>Request refused before anything was stored: hand back whatever the client gave up.</summary>
+        private static void Refund(EntityPlayer player, TerminalRequest req, TerminalResponse resp)
+        {
+            if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
+            if (req.Op == TerminalOp.DriveUnload) resp.ReturnToDrive.AddRange(req.Items);
+            if (req.Op == TerminalOp.Return) DropAll(player, req.Items);
         }
 
         /// <summary>Overflow from a client: store what fits, drop the rest. Never sent back.</summary>
