@@ -151,7 +151,7 @@ Each milestone ends with something you can load and try in-game. A detailed step
 | **0** | **Setup + proof of concept.** Dev tools, empty mod that loads, answers to the 4 unknowns. | Game loads with mod; log shows "StashNet loaded". |
 | **1** | **Blocks & items exist.** Core, Drive Bay, Basic Drive, Storage Terminal — vanilla looks, tinted icons, recipes. Bay only accepts drives. | Craft and place everything; put drives in a bay. |
 | **2** | **Drives hold items.** Game-free storage library + tests; saving contents on the drive item. | Items survive save/reload and moving a drive between bays. |
-| | *Status: M0 ✅ M1 ✅ M2 ✅ (2026-11-12)* | |
+| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ (2026-11-12)* | |
 | **3** | **Network + Storage Terminal.** Proximity discovery, combined view, search/sort, deposit/withdraw. | One screen shows every drive's contents; take and put items. |
 | **4** | **Password.** Core lock, propagation, allowed list, drive stamping. | A second player is locked out until they enter the code. |
 | **5** | **Drive Port.** Unload / load / format. | Empty a full drive into the network; stolen drive asks for password. |

@@ -37,7 +37,8 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 0: ✅ done 2026-11-12. All in-game checks passed, including 1,000-type item metadata through save/reload, container, and drop/pickup.
 - Milestone 1: ✅ done 2026-11-12. The owner reports all checklist sections work. The log shows `Loaded v0.1.0 (5 methods patched)` with no StashNet errors.
 - Milestone 2: ✅ done 2026-11-12. All checklist sections pass (capacity limits, weapon with mod/wear/ammo round-trip, full backpack, moves and save/reload, no drive-in-drive). The log shows 0 StashNet errors.
-- Current milestone: 3a (network + basic Terminal screen). Code done (plan: `docs/superpowers/plans/2026-11-12-m3a-network-terminal.md`); waiting on the in-game checklist `docs/testing/M3a-checklist.md`. 3b = search/sort polish + multiplayer (server-authoritative) support.
+- Milestone 3a: ✅ done 2026-11-12 (v0.3.2). The owner confirmed deposit/withdraw through the terminal works and asked to move on. Logs for v0.3.0–0.3.2 show no StashNet errors or UI warnings. Not explicitly confirmed: every checklist section, and the window layout (no screenshot received yet).
+- Current milestone: 3b = multiplayer (server-authoritative) support + search/sort polish.
 
 ## Network + terminal design (M3a)
 - `StashNetNetwork.TryOpen` re-scans and reloads on **every** operation (no cached state). Terminal → nearest Core whose `StashNetRadius` reaches it (cube distance) → Drive Bays within that radius of the Core.
