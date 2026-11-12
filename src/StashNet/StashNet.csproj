@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The mod DLL that the game loads. Game DLLs are referenced from the local install and never copied. -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>StashNet</AssemblyName>
+    <RootNamespace>StashNet</RootNamespace>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Staged mod folder: ModInfo.xml + Config + StashNet.dll -->
+    <ModStageDir>$(MSBuildThisFileDirectory)..\..\dist\StashNet\</ModStageDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameManaged)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="LogLibrary"><HintPath>$(GameManaged)\LogLibrary.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameManaged)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameManaged)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(GameDir)\Mods\0_TFP_Harmony\0Harmony.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- After build: stage the mod folder, then copy it into the game's Mods folder. -->
+  <Target Name="StageMod" AfterTargets="Build">
+    <ItemGroup>
+      <ModContent Include="$(MSBuildThisFileDirectory)..\..\Mod\**\*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(ModStageDir)" />
+    <Copy SourceFiles="@(ModContent)" DestinationFiles="@(ModContent->'$(ModStageDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModStageDir)" />
+    <Message Importance="high" Text="StashNet staged at $(ModStageDir)" />
+  </Target>
+
+  <Target Name="DeployMod" AfterTargets="StageMod" Condition="'$(Deploy)' == 'true'">
+    <ItemGroup>
+      <StagedFiles Include="$(ModStageDir)**\*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(GameDir)\Mods\StashNet" />
+    <Copy SourceFiles="@(StagedFiles)" DestinationFiles="@(StagedFiles->'$(GameDir)\Mods\StashNet\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Importance="high" Text="StashNet deployed to $(GameDir)\Mods\StashNet" />
+  </Target>
+
+</Project>

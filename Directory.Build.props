@@ -1,0 +1,12 @@
+<Project>
+  <!-- Machine-specific settings (game path) live in local.props, which is not committed.
+       Copy local.props.example to local.props and edit it. -->
+  <Import Project="$(MSBuildThisFileDirectory)local.props" Condition="Exists('$(MSBuildThisFileDirectory)local.props')" />
+
+  <PropertyGroup>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die</GameDir>
+    <GameManaged>$(GameDir)\7DaysToDie_Data\Managed</GameManaged>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+</Project>

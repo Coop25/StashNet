@@ -1,0 +1,6 @@
+<Project>
+  <!-- Copy this file to local.props and set the path to your 7 Days to Die install. -->
+  <PropertyGroup>
+    <GameDir>G:\SteamLibrary\steamapps\common\7 Days To Die</GameDir>
+  </PropertyGroup>
+</Project>

@@ -4,6 +4,9 @@ obj/
 dist/
 *.zip
 
+# Machine-specific build settings
+local.props
+
 # IDE
 .vs/
 .vscode/
