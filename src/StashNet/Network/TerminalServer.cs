@@ -50,7 +50,15 @@ namespace StashNet.Network
             }
 
             // Milestone 7: using a Storage Terminal makes a little heat (throttled per terminal).
-            Heat.HeatEmitter.TerminalUsed(world, pos);
+            // Guarded: a heat failure must never abort a request whose items the client already handed over.
+            try
+            {
+                Heat.HeatEmitter.TerminalUsed(world, pos);
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"[StashNet] heat: terminal bump failed: {e.Message}");
+            }
 
             switch (req.Op)
             {

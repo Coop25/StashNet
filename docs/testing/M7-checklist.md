@@ -23,7 +23,7 @@ Stand next to your Core for each step.
 - [ ] (Optional, takes a while) Light a **forge** next to it and leave it running. The area number climbs past 25 within ~12 minutes, then drops back to 0 (that's the screamer roll). Screamers may or may not show up (1 in 5 per roll).
 
 ## 3. Terminals
-- [ ] Use the **Storage Terminal** for a bit (open, take/put items). The area number goes up by about 0.5 (at most once every ~3 minutes).
+- [ ] Take **all drives out of the bays** first (so the Core makes 0 heat), wait ~3 minutes, and note the area number. Then use the **Storage Terminal** for a bit (open, take/put items). The area number goes up by about 0.5 (at most once every ~3 minutes). Put the drives back afterwards.
 - [ ] Open the **Crafting Terminal** but don't craft: no extra bump from it. While it's **crafting**, it gives off normal workbench heat (vanilla behavior).
 
 ## 4. Edge cases
