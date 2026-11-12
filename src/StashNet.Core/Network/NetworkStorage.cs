@@ -51,10 +51,11 @@ namespace StashNet.Core.Network
         }
 
         public IReadOnlyList<NetworkDrive> Drives => drives;
-        public int MaxTypes => drives.Sum(d => d.Capacity.MaxTypes);
         public int MaxStacks => drives.Sum(d => d.Capacity.MaxStacks);
-        public int UsedTypes => drives.Sum(d => d.Contents.TypeCount);
         public int UsedStacks => drives.Sum(d => d.Contents.UsedStacks(stackSizeOf));
+
+        /// <summary>Different items in the network, each counted once however many drives hold it.</summary>
+        public int DistinctItems => Aggregate().Count;
 
         /// <summary>
         /// Stores up to <paramref name="count"/>: drives already holding this exact item first,

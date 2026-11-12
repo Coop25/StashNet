@@ -6,7 +6,7 @@ namespace StashNet.Core.Tests
 {
     public class DriveSerializerTests
     {
-        private static readonly DriveCapacity Big = new DriveCapacity(100, 100000);
+        private static readonly DriveCapacity Big = new DriveCapacity(100000);
         private static readonly System.Func<string, int> One = _ => 1;
 
         [Fact]

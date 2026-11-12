@@ -6,8 +6,8 @@ namespace StashNet.Core.Tests
 {
     public class DriveContentsTests
     {
-        // Basic Drive: 15 types / 24 stacks.
-        private static readonly DriveCapacity Basic = new DriveCapacity(15, 24);
+        // Basic Drive: 24 stacks.
+        private static readonly DriveCapacity Basic = new DriveCapacity(24);
 
         // Test stack sizes: stone 6000, wood 500, nails 500, guns 1; anything else 100.
         internal static readonly Func<string, int> Sizes = name =>
@@ -56,7 +56,7 @@ namespace StashNet.Core.Tests
         [Fact]
         public void Insert_FillsPartialStackEvenWhenStacksFull()
         {
-            var cap = new DriveCapacity(15, 1);
+            var cap = new DriveCapacity(1);
             var d = new DriveContents();
             d.TryInsert(cap, Sizes, "wood", null, 300);
             Assert.Equal(200, d.TryInsert(cap, Sizes, "wood", null, 1000));
@@ -64,27 +64,13 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
-        public void Insert_NewType_WhenTypesFull_ReturnsZero()
+        public void NoTypeLimit_ManyTypesFitWhileStacksRemain()
         {
-            var cap = new DriveCapacity(2, 24);
             var d = new DriveContents();
-            d.TryInsert(cap, Sizes, "a", null, 1);
-            d.TryInsert(cap, Sizes, "b", null, 1);
-            Assert.Equal(0, d.TryInsert(cap, Sizes, "c", null, 5));
-            Assert.Equal(2, d.TypeCount);
+            for (int i = 0; i < 24; i++) Assert.Equal(1, d.TryInsert(Basic, Sizes, "item" + i, null, 1));
+            Assert.Equal(24, d.TypeCount);
+            Assert.Equal(0, d.TryInsert(Basic, Sizes, "item24", null, 1));
         }
-
-        [Fact]
-        public void Insert_ExistingType_WhenTypesFull_StillAccepted()
-        {
-            var cap = new DriveCapacity(2, 24);
-            var d = new DriveContents();
-            d.TryInsert(cap, Sizes, "a", null, 1);
-            d.TryInsert(cap, Sizes, "b", null, 1);
-            Assert.Equal(10, d.TryInsert(cap, Sizes, "a", null, 10));
-            Assert.Equal(11, d.CountOf("a", null));
-        }
-
         [Fact]
         public void Insert_SameNameDifferentVariant_IsSeparateType()
         {
@@ -103,7 +89,7 @@ namespace StashNet.Core.Tests
         {
             var d = new DriveContents();
             Func<string, int> weird = _ => 0;
-            Assert.Equal(2, d.TryInsert(new DriveCapacity(15, 2), weird, "x", null, 5));
+            Assert.Equal(2, d.TryInsert(new DriveCapacity(2), weird, "x", null, 5));
             Assert.Equal(2, d.UsedStacks(weird));
         }
 
@@ -160,7 +146,7 @@ namespace StashNet.Core.Tests
             var d = new DriveContents();
             d.TryInsert(Basic, Sizes, "wood", null, 5000);
             d.TryInsert(Basic, Sizes, "nails", null, 2000);
-            var smaller = new DriveCapacity(1, 2);
+            var smaller = new DriveCapacity(2);
             Assert.Equal(0, d.TryInsert(smaller, Sizes, "nails", null, 1));
             Assert.Equal(0, d.TryInsert(smaller, Sizes, "c", null, 1));
             Assert.Equal(2, d.TypeCount);

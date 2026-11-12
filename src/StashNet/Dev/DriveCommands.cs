@@ -31,7 +31,7 @@ namespace StashNet.Dev
 
         private static void Show(Action<string> output, ItemValue drive, DriveCapacity cap, DriveContents contents)
         {
-            output($"{drive.ItemClass.GetLocalizedItemName()}: {contents.TypeCount}/{cap.MaxTypes} types, {contents.UsedStacks(ItemCodec.StackSizeOf)}/{cap.MaxStacks} stacks ({contents.TotalCount} items)");
+            output($"{drive.ItemClass.GetLocalizedItemName()}: {contents.TypeCount} different items, {contents.UsedStacks(ItemCodec.StackSizeOf)}/{cap.MaxStacks} stacks ({contents.TotalCount} items)");
             foreach (DriveEntry e in contents.Entries)
             {
                 ItemClass ic = ItemClass.GetItemClass(e.Name);
@@ -88,7 +88,7 @@ namespace StashNet.Dev
                 bag.SetSlot(mv.Key, stack.count > 0 ? stack : ItemStack.Empty.Clone());
                 total += mv.Value;
             }
-            output($"Deposited {total} items. Drive now {contents.TypeCount}/{cap.MaxTypes} types, {contents.UsedStacks(ItemCodec.StackSizeOf)}/{cap.MaxStacks} stacks ({contents.TotalCount} items).");
+            output($"Deposited {total} items. Drive now {contents.TypeCount} different items, {contents.UsedStacks(ItemCodec.StackSizeOf)}/{cap.MaxStacks} stacks ({contents.TotalCount} items).");
             if (skippedUnstorable > 0) output($"{skippedUnstorable} stack(s) can't be stored on drives yet (e.g. painted blocks) and stayed in your backpack.");
         }
 
@@ -116,7 +116,7 @@ namespace StashNet.Dev
             }
 
             if (total > 0) SaveHeldDrive(player, drive, contents);
-            output($"Withdrew {total} items. Drive now {contents.TypeCount}/{cap.MaxTypes} types, {contents.UsedStacks(ItemCodec.StackSizeOf)}/{cap.MaxStacks} stacks ({contents.TotalCount} items).");
+            output($"Withdrew {total} items. Drive now {contents.TypeCount} different items, {contents.UsedStacks(ItemCodec.StackSizeOf)}/{cap.MaxStacks} stacks ({contents.TotalCount} items).");
             if (backpackFull) output("Your backpack is full - the rest stayed on the drive.");
             if (missing.Count > 0) output("Kept on the drive (item no longer exists in this game): " + string.Join(", ", missing.ToArray()));
         }
@@ -141,7 +141,7 @@ namespace StashNet.Dev
             }
             if (!DriveItem.TryGetCapacity(drive, out cap))
             {
-                output("This drive has no capacity configured (StashNetMaxTypes/StashNetMaxStacks missing in items.xml).");
+                output("This drive has no capacity configured (StashNetMaxStacks missing in items.xml).");
                 return false;
             }
             if (!DriveItem.TryLoad(drive, out contents, out string error))

@@ -126,7 +126,7 @@ namespace StashNet.UI
             if (StashNetNetwork.TryOpen(xui.playerUI.entityPlayer.world, terminalPos, out StashNetNetwork net, out string problem))
             {
                 items.AddRange(net.Storage.Aggregate().OrderBy(DisplayName, StringComparer.CurrentCultureIgnoreCase));
-                usage = string.Format(Localization.Get("stashnetUsage"), net.Storage.UsedTypes, net.Storage.MaxTypes, net.Storage.UsedStacks, net.Storage.MaxStacks, net.Storage.Drives.Count);
+                usage = string.Format(Localization.Get("stashnetUsage"), net.Storage.DistinctItems, net.Storage.UsedStacks, net.Storage.MaxStacks, net.Storage.Drives.Count);
                 if (net.BayCount == 0) problem = Localization.Get("stashnetNoBays");
                 else if (net.Storage.Drives.Count == 0) problem = Localization.Get("stashnetNoDrives");
                 if (net.SkippedBays > 0) problem = Join(problem, string.Format(Localization.Get("stashnetSkippedBays"), net.SkippedBays));

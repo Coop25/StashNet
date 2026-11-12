@@ -10,9 +10,9 @@ namespace StashNet.Core.Tests
     {
         private static readonly System.Func<string, int> Sizes = DriveContentsTests.Sizes;
 
-        private static NetworkDrive Drive(int maxTypes = 15, int maxStacks = 24, params (string name, int count)[] items)
+        private static NetworkDrive Drive(int maxStacks = 24, params (string name, int count)[] items)
         {
-            var cap = new DriveCapacity(maxTypes, maxStacks);
+            var cap = new DriveCapacity(maxStacks);
             var contents = new DriveContents();
             foreach (var (name, count) in items) contents.TryInsert(cap, Sizes, name, null, count);
             return new NetworkDrive(contents, cap, null);
@@ -92,7 +92,7 @@ namespace StashNet.Core.Tests
         [Fact]
         public void Aggregate_SumsAcrossDrives_KeepsVariantsSeparate()
         {
-            var cap = new DriveCapacity(15, 24);
+            var cap = new DriveCapacity(24);
             var a = Drive(items: ("wood", 10));
             a.Contents.TryInsert(cap, Sizes, "gun", "v1", 1);
             var b = Drive(items: ("wood", 5));
@@ -119,13 +119,22 @@ namespace StashNet.Core.Tests
         [Fact]
         public void Totals_AreSums()
         {
-            var a = Drive(15, 24, ("wood", 10));
-            var b = Drive(40, 96, ("stone", 6001), ("nails", 5));
+            var a = Drive(24, ("wood", 10));
+            var b = Drive(96, ("stone", 6001), ("nails", 5));
             var net = Net(a, b);
-            Assert.Equal(55, net.MaxTypes);
             Assert.Equal(120, net.MaxStacks);
-            Assert.Equal(3, net.UsedTypes);
             Assert.Equal(4, net.UsedStacks);
+            Assert.Equal(3, net.DistinctItems);
+        }
+
+        [Fact]
+        public void DistinctItems_CountsItemSplitAcrossDrivesOnce()
+        {
+            var a = Drive(maxStacks: 1, items: ("wood", 500));
+            var b = Drive(maxStacks: 1, items: ("wood", 100));
+            var net = Net(a, b);
+            Assert.Equal(1, net.DistinctItems);
+            Assert.Equal(2, net.UsedStacks);
         }
     }
 }

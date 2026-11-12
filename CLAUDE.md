@@ -50,7 +50,7 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Drive contents = `DriveContents` serialized as `SND1` text in item metadata key `StashNetDrive`.
 - Items are stored by NAME. Non-plain items use our own name-based "variant" encoding (`src/StashNet/Drives/ItemCodec.cs`). **Never store the game's binary ItemValue format.** It uses numeric IDs that shift when mods change, and its reader branches on the item class mid-read.
 - Never lose items: move into the destination first, then remove from the source only what arrived. Unreadable drive data is refused and never overwritten.
-- **Capacity = types + stacks** (owner's decision, 2026-11-12). Each entry uses ceil(count / stack size) stacks. Item props: `StashNetMaxTypes` / `StashNetMaxStacks`. Tiers: Basic 15/24, Standard 40/96, High-Density 100/384. Stack sizes come from the game's ItemClass at runtime (`ItemCodec.StackSizeOf`) and are never stored.
+- **Capacity = stacks only, no type limit** (owner's decisions, 2026-11-12). Each entry uses ceil(count / stack size) stacks. Item prop: `StashNetMaxStacks`. Tiers: Basic 24, Standard 96, High-Density 384. The terminal shows "N different items", each item counted once across drives (`NetworkStorage.DistinctItems`). Stack sizes come from the game's ItemClass at runtime (`ItemCodec.StackSizeOf`) and are never stored.
 - Testing world: the owner reuses one throwaway world for all StashNet testing (started in M0).
 - Game logs: `%APPDATA%\7DaysToDie\logs\output_log_client__*.txt` (newest = latest session; one file per game launch). Read-only, OK to check. When the owner reports test results, verify the log shows the expected commands and no StashNet errors.
 

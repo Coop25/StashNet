@@ -53,13 +53,13 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 ### 2.3 Drives
 
 - Each drive stores its own contents. Pull it out → the items leave with it.
-- Capacity is **item types + stacks**. Each item type uses `ceil(count ÷ its stack size)` stacks, like slots in a chest: 6,000 stone = 1 stack, 3 rifles = 3 stacks. *(Changed 2026-11-12 from raw item counts, which made high-stack resources like 6,000-stack stone overflow a drive.)* All numbers are tunable in items.xml:
+- Capacity is **stacks only**. Each item type uses `ceil(count ÷ its stack size)` stacks, like slots in a chest: 6,000 stone = 1 stack, 3 rifles = 3 stacks. There is no separate type limit. *(Changed 2026-11-12, twice: raw item counts made 6,000-stack resources overflow a drive, and a per-drive type limit double-counted items spread across drives.)* All numbers are tunable in items.xml:
 
-| Drive | Item types | Stacks | Tier |
-|---|---|---|---|
-| Basic | 15 | 24 | Early (scrap, duct tape, wood) |
-| Standard | 40 | 96 | Mid (forged iron, electrical parts) |
-| High-Density | 100 | 384 | Late (forged steel, circuitry) |
+| Drive | Stacks | Tier |
+|---|---|---|
+| Basic | 24 | Early (scrap, duct tape, wood) |
+| Standard | 96 | Mid (forged iron, electrical parts) |
+| High-Density | 384 | Late (forged steel, circuitry) |
 
   For scale: a vanilla wooden crate holds 48 stacks, so a Drive Bay of 4 Basic Drives (96 stacks) is about two crates.
 

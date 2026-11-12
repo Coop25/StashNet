@@ -33,17 +33,8 @@ namespace StashNet.Core.Drives
             long freeStacks = Math.Max(0, capacity.MaxStacks - UsedStacks(stackSizeOf));
             DriveEntry entry = Find(name, variant);
 
-            long room;
-            if (entry == null)
-            {
-                if (TypeCount >= capacity.MaxTypes) return 0;
-                room = freeStacks * size;
-            }
-            else
-            {
-                long partialRoom = (long)StacksFor(entry.Count, size) * size - entry.Count;
-                room = partialRoom + freeStacks * size;
-            }
+            long partialRoom = entry == null ? 0 : (long)StacksFor(entry.Count, size) * size - entry.Count;
+            long room = partialRoom + freeStacks * size;
 
             int accepted = (int)Math.Min(count, room);
             if (accepted <= 0) return 0;

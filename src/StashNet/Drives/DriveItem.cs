@@ -7,7 +7,6 @@ namespace StashNet.Drives
     public static class DriveItem
     {
         public const string MetadataKey = "StashNetDrive";
-        public const string PropMaxTypes = "StashNetMaxTypes";
         public const string PropMaxStacks = "StashNetMaxStacks";
 
         public static bool TryGetCapacity(ItemValue drive, out DriveCapacity capacity)
@@ -15,8 +14,8 @@ namespace StashNet.Drives
             capacity = default;
             ItemClass ic = drive?.ItemClass;
             if (ic == null || !DriveRules.IsDrive(drive)) return false;
-            if (!ic.Properties.Contains(PropMaxTypes) || !ic.Properties.Contains(PropMaxStacks)) return false;
-            capacity = new DriveCapacity(ic.Properties.GetInt(PropMaxTypes), ic.Properties.GetInt(PropMaxStacks));
+            if (!ic.Properties.Contains(PropMaxStacks)) return false;
+            capacity = new DriveCapacity(ic.Properties.GetInt(PropMaxStacks));
             return true;
         }
 
