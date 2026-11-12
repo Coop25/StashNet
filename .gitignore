@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+dist/
+*.zip
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Game DLLs are copyrighted: never commit them. Reference them from the local game install.
+lib/
+*.dll
+
+# Logs / OS
+*.log
+Thumbs.db
+.DS_Store
