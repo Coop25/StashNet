@@ -20,7 +20,7 @@ namespace StashNet.Dev
 
         public override string[] getCommands() => new[] { "stashnet", "sn" };
 
-        public override string getDescription() => "StashNet developer tools (info, drive, metatest, metacheck, metaclear).";
+        public override string getDescription() => "StashNet developer tools (info, heat, drive, metatest, metacheck, metaclear).";
 
         public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
         {
@@ -45,11 +45,14 @@ namespace StashNet.Dev
                 case "metaclear":
                     MetaClear();
                     return;
+                case "heat":
+                    Heat.HeatCommand.Run(Out);
+                    return;
                 case "drive":
                     DriveCommands.Run(_params, Out);
                     return;
                 default:
-                    Out("Unknown subcommand. Try: info, drive [show|deposit|withdraw|wipe], metatest [n], metacheck, metaclear");
+                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], metatest [n], metacheck, metaclear");
                     return;
             }
         }
