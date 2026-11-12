@@ -54,4 +54,4 @@ Put something recognizable on a drive first (e.g. 123 wood + a weapon).
 
 ## Report back
 PASS/FAIL per section. For anything off, a screenshot of the F1 output, or the newest log from
-`G:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\output_log_client__*.txt`.
+`%APPDATA%\7DaysToDie\logs\` (the newest `output_log_client__*.txt`).
