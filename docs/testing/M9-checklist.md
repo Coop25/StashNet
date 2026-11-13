@@ -63,6 +63,7 @@ Place a Crafting Terminal near the Core and put some ingredients in storage (not
 - [ ] With a code set, hammer a Storage Core onto the Scrap Core: the code stays, and the reach grows (a terminal 10 blocks away connects).
 - [ ] Craft a Standard drive at a workbench and put it in a bay: the stack total grows by 96.
 - [ ] **New looks:** a Drive Bay looks like a tall file cabinet, Reinforced like a server rack, Armored like a dark gun safe. A Scrap Core looks like an electrical box, a Storage Core like a transformer, an Advanced Core like a control panel. Each sits flat on the floor (not floating or sunk in), you can't walk through it, and upgrading swaps the look in place. Their icons match.
+- [ ] **Drive icons:** Basic, Standard and High-Density drives show the new worn hard-drive icons (blue / green / purple tape with 24 / 96 / 384) in your backpack, in a Drive Bay, and in the creative menu. None shows a blank or pink square.
 
 ### A7. Core spacing (new in v0.9.1, never tested yet)
 - [ ] Try to place another Core **30 blocks** from yours: refused, with the "can't build" sound and "Another Storage Core is only 30 blocks away...".

@@ -21,7 +21,7 @@ A 7 Days to Die mod adding a drive-based storage network (Core, Drive Bays, driv
 - Never commit game DLLs (Assembly-CSharp.dll, 0Harmony.dll, Unity DLLs). Reference them from the local game install.
 - Game-free logic (drive storage, network merge, passwords, heat math) lives in a separate library with automated tests. Game glue stays thin.
 - All balance numbers live in one config XML.
-- v1 uses vanilla models and tinted vanilla icons only. No custom art.
+- v1 uses vanilla models and tinted vanilla icons, with one exception: the three **drive icons are custom PNGs** (owner asked, 2026-11-13). They're worn 7 Days-style 3D boxes in `Mod/UIAtlases/ItemIconAtlas/<item name>.png`, drawn by `tools/icons/draw-drive-icons.ps1` (deterministic, so re-running reproduces them byte for byte). Drives have no `CustomIcon`, so the game uses the PNG named after the item. No other custom art.
 
 ## Git
 - **The default branch is `master`, never `main`** (owner, 2026-11-13; renamed from `main` that day). Each milestone gets its own branch off `master` and merges back into `master` after the owner's in-game test.

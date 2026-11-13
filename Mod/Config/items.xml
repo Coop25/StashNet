@@ -7,7 +7,9 @@
 		     StashNetHeatWeight = how much the drive counts toward its network's heat (M8: bigger
 		     drives run hotter). Weight = what scrapping an EMPTY drive gives back (electrical parts).
 		     Tiers (M8): Basic 24 / weight 1, Standard 96 / 2, High-Density 384 / 4.
-		     To move up a tier: craft the bigger drive, shift-click the old one in a terminal, scrap it. -->
+		     To move up a tier: craft the bigger drive, shift-click the old one in a terminal, scrap it.
+		     Icons: no CustomIcon, so the game uses Mod/UIAtlases/ItemIconAtlas/<item name>.png (drawn by
+		     tools/icons/draw-drive-icons.ps1). -->
 		<item name="stashnetDriveBasic">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="24" />
@@ -17,8 +19,6 @@
 			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
 			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
 			<property name="Material" value="MelectricParts" />
-			<property name="CustomIcon" value="resourceElectricParts" />
-			<property name="CustomIconTint" value="7FB2FF" />
 			<property name="Weight" value="2" />
 			<property name="Stacknumber" value="1" />
 			<property name="EconomicValue" value="60" />
@@ -38,8 +38,6 @@
 			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
 			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
 			<property name="Material" value="MelectricParts" />
-			<property name="CustomIcon" value="resourceElectricParts" />
-			<property name="CustomIconTint" value="7FFF7F" />
 			<property name="Weight" value="4" />
 			<property name="Stacknumber" value="1" />
 			<property name="EconomicValue" value="240" />
@@ -59,8 +57,6 @@
 			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
 			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
 			<property name="Material" value="MelectricParts" />
-			<property name="CustomIcon" value="resourceElectricParts" />
-			<property name="CustomIconTint" value="D07FFF" />
 			<property name="Weight" value="8" />
 			<property name="Stacknumber" value="1" />
 			<property name="EconomicValue" value="600" />
