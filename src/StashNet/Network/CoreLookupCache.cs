@@ -5,7 +5,8 @@ namespace StashNet.Network
 {
     /// <summary>
     /// Activation prompts/commands are re-evaluated every frame while a player looks at a block,
-    /// and finding the Core scans ~2,000 blocks. Cache "which Core serves this position" for 1 s.
+    /// and finding the Core walks the tile entities of the nearby chunks (up to the biggest Core
+    /// reach). Cache "which Core serves this position" for 1 s.
     /// The lock itself is read fresh each time (cheap), so code changes show immediately.
     /// </summary>
     public static class CoreLookupCache
