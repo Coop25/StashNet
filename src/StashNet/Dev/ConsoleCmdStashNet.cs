@@ -20,7 +20,7 @@ namespace StashNet.Dev
 
         public override string[] getCommands() => new[] { "stashnet", "sn" };
 
-        public override string getDescription() => "StashNet developer tools (info, heat, drive, metatest, metacheck, metaclear).";
+        public override string getDescription() => "StashNet developer tools (info, heat, drive, skin reload, metatest, metacheck, metaclear).";
 
         public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
         {
@@ -51,8 +51,17 @@ namespace StashNet.Dev
                 case "drive":
                     DriveCommands.Run(_params, Out);
                     return;
+                case "skin":
+                    if (_params.Count < 2 || _params[1].ToLowerInvariant() != "reload")
+                    {
+                        Out("Usage: stashnet skin reload   (re-reads Mods/StashNet/Skins and rebuilds every skin in view)");
+                        return;
+                    }
+                    Skins.SkinAssets.Reload();
+                    Out($"Skins reloaded: {Skins.SkinApplier.ReapplyAll()} blocks rebuilt.");
+                    return;
                 default:
-                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], metatest [n], metacheck, metaclear");
+                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], skin reload, metatest [n], metacheck, metaclear");
                     return;
             }
         }

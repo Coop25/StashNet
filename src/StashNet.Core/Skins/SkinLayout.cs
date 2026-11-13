@@ -31,12 +31,21 @@ namespace StashNet.Core.Skins
 
         private readonly Dictionary<string, BlockSkin> blocks = new Dictionary<string, BlockSkin>();
 
+        /// <summary>Optional shader names that override the automatic pick (for tuning in-game); null when not set.</summary>
+        public string Shader { get; private set; }
+
+        public string GlowShader { get; private set; }
+
         public bool TryGet(string blockName, out BlockSkin skin) => blocks.TryGetValue(blockName ?? "", out skin);
 
         public static SkinLayout Parse(string xml, SkinAtlas atlas, List<string> warnings)
         {
             XElement root = SkinXml.Load(xml, "skins");
-            var layout = new SkinLayout();
+            var layout = new SkinLayout
+            {
+                Shader = NullIfEmpty((string)root.Attribute("shader")),
+                GlowShader = NullIfEmpty((string)root.Attribute("glowShader")),
+            };
             foreach (XElement b in root.Elements("block"))
             {
                 string name = (string)b.Attribute("name");
@@ -64,6 +73,8 @@ namespace StashNet.Core.Skins
             }
             return layout;
         }
+
+        private static string NullIfEmpty(string s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
         private static SkinPiece ReadPiece(string block, XElement p, SkinAtlas atlas, List<string> warnings)
         {

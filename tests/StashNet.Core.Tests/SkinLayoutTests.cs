@@ -73,6 +73,33 @@ namespace StashNet.Core.Tests
             Assert.Throws<SkinFormatException>(() => SkinLayout.Parse("<skins><block", Atlas, new List<string>()));
 
         [Fact]
+        public void ShippedLayouts_ParseWithoutWarnings()
+        {
+            string dir = System.IO.Path.Combine(System.AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Mod", "Skins");
+            SkinAtlas atlas = SkinAtlas.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(dir, "atlas.xml")));
+            var warnings = new List<string>();
+            SkinLayout layout = SkinLayout.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(dir, "layouts.xml")), atlas, warnings);
+            Assert.Empty(warnings);
+            Assert.True(layout.TryGet("stashnetDriveBay", out _));
+        }
+
+        [Fact]
+        public void Parse_ReadsShaderOverrides()
+        {
+            SkinLayout layout = SkinLayout.Parse("<skins shader=\"Legacy Shaders/Diffuse\" glowShader=\"Unlit/Texture\" />", Atlas, new List<string>());
+            Assert.Equal("Legacy Shaders/Diffuse", layout.Shader);
+            Assert.Equal("Unlit/Texture", layout.GlowShader);
+        }
+
+        [Fact]
+        public void Parse_NoShaderOverrides_AreNull()
+        {
+            SkinLayout layout = SkinLayout.Parse("<skins />", Atlas, new List<string>());
+            Assert.Null(layout.Shader);
+            Assert.Null(layout.GlowShader);
+        }
+
+        [Fact]
         public void Parse_DuplicateBlock_LastWinsWithWarning()
         {
             var warnings = new List<string>();
