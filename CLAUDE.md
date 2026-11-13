@@ -1,19 +1,19 @@
 # StashNet: project notes
 
-## ▶ RESUME HERE (last session ended 2026-11-13, handed off to a fresh chat)
+## ▶ RESUME HERE (updated 2026-11-13)
 - **Where things are:**
   - `master` = M8 Progression + the Core spacing rule (merged and pushed 2026-11-13; GitHub is in sync). Milestones 0–8 are done. M8 design: `docs/superpowers/specs/2026-11-13-m8-progression-design.md`. M8 was accepted by the owner ("everything seems to work"). The v0.9.0 log was clean, but that session was only about 2.5 min with no `sn heat`, so not every M8 checklist step was confirmed.
-  - **Current work: M9 on branch `m9-release`** (4 commits ahead of `master`, **not pushed, not merged**). It contains:
+  - **Current work: M9 on branch `m9-release`** (ahead of `master`, **not pushed, not merged**). It contains:
     1. The release zip build option (`-p:Package=true` → `dist/StashNet-v<version>.zip`).
     2. A player-facing `README.md`.
     3. `docs/testing/M9-checklist.md`: Part A is solo, joining a dedicated server on the owner's PC; Part B needs a friend.
     4. **New tier looks.** Each bay and Core tier uses its own vanilla model.
     5. **Custom 3D drive icons.**
-  - **v0.9.1 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-13 from `m9-release`: spacing + looks + icons). The owner launched it, the log shows `Loaded v0.9.1 (20 methods patched)` with no errors, and the owner said "that looks good". Not yet confirmed: M8 checklist step 9 (spacing) and every M9 checklist line.
+  - **v0.9.1 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-13 from `m9-release`: spacing + looks + icons). The owner launched it, and the log shows `Loaded v0.9.1 (20 methods patched)` with no StashNet errors.
+  - ✅ **v0.9.1 single-player checks passed (owner, 2026-11-13: "All three work"):** new tier looks, custom drive icons, and Core spacing (M8 checklist step 9). The client log for that session (`output_log_client__2026-11-13__13-54-15.txt`) has no StashNet errors. Spacing refusals are client-side and not logged, so the log can't confirm them on its own. Not yet run: any M9 checklist line as a joined player.
 - **Next steps:**
-  1. Ask the owner how their v0.9.1 checks went (new looks, drive icons, Core spacing) and check the newest client log.
-  2. The owner runs `docs/testing/M9-checklist.md` Part A. The dedicated server isn't installed yet; setup steps are at the top of the checklist. Server log: newest `output_log` in the server's `7DaysToDieServer_Data`.
-  3. Fix what breaks, bump to **1.0.0**, merge `m9-release` into **`master`** (never `main`), and push only when the owner says to.
+  1. The owner runs `docs/testing/M9-checklist.md` Part A. The dedicated server **isn't installed yet** (checked 2026-11-13: no `7 Days to Die Dedicated Server` folder under `G:\SteamLibrary\steamapps\common`). Setup steps are at the top of the checklist. Server log: newest `output_log` in the server's `7DaysToDieServer_Data`.
+  2. Fix what breaks, bump to **1.0.0**, merge `m9-release` into **`master`** (never `main`), and push only when the owner says to.
 - **Assumptions to confirm:** the owner never said who the release is for. M9 assumes friends on a server the owner runs, downloading the zip from GitHub, so protection stays at vanilla's level (placement and drives-only are checked on the player's own game). Revisit if they want a public release.
 - **Known gaps:**
   - `sn heat` (and the other `sn` subcommands) use the local player, so they don't work for a joined player on a dedicated server.
