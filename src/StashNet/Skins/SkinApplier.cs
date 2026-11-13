@@ -38,7 +38,11 @@ namespace StashNet.Skins
                 r.sharedMaterials = painted ? SkinPainter.Paint(owner.BlockName, paint, owner.Originals[i]) : owner.Originals[i];
             }
             if (painted && paint.Mute)
+            {
+                // The CRT's hum comes from the game's AudioPlayer script, which stops its sound when disabled.
+                foreach (AudioPlayer p in owner.GetComponentsInChildren<AudioPlayer>(true)) p.enabled = false;
                 foreach (AudioSource a in owner.GetComponentsInChildren<AudioSource>(true)) a.mute = true;
+            }
         }
 
         /// <summary>Redo every live block of one type (its repaint just finished).</summary>

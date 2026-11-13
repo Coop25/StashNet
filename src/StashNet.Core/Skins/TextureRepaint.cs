@@ -66,6 +66,15 @@ namespace StashNet.Core.Skins
             }
         }
 
+        /// <summary>
+        /// Sets every pixel's alpha. Used on the _RMOM texture, whose alpha is the game's tint mask: masked parts
+        /// show only the block's flat tint color and ignore the painted texture.
+        /// </summary>
+        public static void SetAlpha(byte[] px, int w, int h, byte alpha)
+        {
+            for (int i = 3; i < w * h * 4; i += 4) px[i] = alpha;
+        }
+
         /// <summary>Patchy dirt: large dark patches plus fine variation. Only ever darkens.</summary>
         public static void Grime(byte[] px, int w, int h, int seed, float amount)
         {

@@ -20,6 +20,12 @@ namespace StashNet.Core.Skins
         public float Damage = 1f;
         public int Seed = 1;
 
+        /// <summary>
+        /// The value written into the tint mask (the _RMOM texture's alpha), 0..255, or -1 to leave it alone.
+        /// 0 (default) turns the mask off, so the painted texture shows everywhere.
+        /// </summary>
+        public int Mask;
+
         /// <summary>False for armor: bullet hits become dents, never holes.</summary>
         public bool Holes = true;
 
@@ -97,6 +103,17 @@ namespace StashNet.Core.Skins
             if (SkinXml.TryNumber(t, "strength", out float strength)) tex.Strength = strength;
             if (SkinXml.TryNumber(t, "damage", out float damage)) tex.Damage = damage;
             if (SkinXml.TryNumber(t, "seed", out float seed)) tex.Seed = (int)seed;
+            string mask = (string)t.Attribute("mask");
+            if (string.Equals(mask, "keep", System.StringComparison.OrdinalIgnoreCase)) tex.Mask = -1;
+            else if (mask != null)
+            {
+                if (!int.TryParse(mask, NumberStyles.Integer, CultureInfo.InvariantCulture, out int m) || m < 0 || m > 255)
+                {
+                    warnings.Add($"{block}: texture '{name}' has mask '{mask}' (use 0-255 or keep); skipped");
+                    return null;
+                }
+                tex.Mask = m;
+            }
             tex.Holes = !string.Equals((string)t.Attribute("holes"), "false", System.StringComparison.OrdinalIgnoreCase);
 
             var stamps = new List<TextureStamp>();

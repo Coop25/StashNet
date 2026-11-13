@@ -8,9 +8,11 @@ namespace StashNet.Skins
     /// </summary>
     internal static class TextureReadback
     {
-        public static byte[] ToRgba(Texture tex, int slice = -1)
+        /// <param name="linear">True for data textures (masks, roughness): read the raw values, no color conversion.</param>
+        public static byte[] ToRgba(Texture tex, int slice = -1, bool linear = false)
         {
-            RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32,
+                linear ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
             RenderTexture prev = RenderTexture.active;
             var copy = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
             try

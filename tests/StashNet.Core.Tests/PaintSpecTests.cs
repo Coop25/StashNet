@@ -58,6 +58,34 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Parse_Mask_DefaultClearsKeepKeepsNumberSets()
+        {
+            PaintSpec spec = Parse(
+                "<block name=\"b\">" +
+                "<texture name=\"a\" tint=\"000000\" />" +
+                "<texture name=\"k\" tint=\"000000\" mask=\"keep\" />" +
+                "<texture name=\"n\" tint=\"000000\" mask=\"255\" />" +
+                "</block>", new List<string>());
+            spec.TryGet("b", out BlockPaint block);
+            block.TryGetTexture("a", out TexturePaint a);
+            block.TryGetTexture("k", out TexturePaint k);
+            block.TryGetTexture("n", out TexturePaint n);
+            Assert.Equal(0, a.Mask);
+            Assert.Equal(-1, k.Mask);
+            Assert.Equal(255, n.Mask);
+        }
+
+        [Fact]
+        public void Parse_BadMask_TextureSkippedWithWarning()
+        {
+            var warnings = new List<string>();
+            PaintSpec spec = Parse("<block name=\"b\"><texture name=\"t\" tint=\"000000\" mask=\"300\" /></block>", warnings);
+            Assert.Single(warnings);
+            spec.TryGet("b", out BlockPaint block);
+            Assert.False(block.TryGetTexture("t", out _));
+        }
+
+        [Fact]
         public void Parse_MuteTrue_SilencesTheBlock()
         {
             PaintSpec spec = Parse("<block name=\"tv\" mute=\"true\" /><block name=\"bay\" />", new List<string>());

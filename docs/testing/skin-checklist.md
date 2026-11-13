@@ -5,6 +5,16 @@ The look is "military salvage, wrecked but working". Design: `docs/superpowers/s
 ## Part 1 (v0.10.1): done 2026-11-13
 The texture dump worked for all 8 blocks.
 
+## Part 4 (v0.10.4): turn off the game's tint mask, silence the TV
+
+**What Part 3 found** (`sn skin inspect`): the game paints each model part with its own flat color (orange on the cabinet, grey on the safe), and that color wins over the paint wherever the model's tint mask is on. **v0.10.4** repaints a copy of the mask with the mask switched off, so the painted texture shows on every part. It also switches off the TV's sound player.
+
+### Steps
+- [ ] Load the test world near the StashNet blocks. After a second or two: is each block army green and beat up **all over**, including the file cabinet fronts and the server rack's white frame? Is the TV silent, with the green screen?
+  - If a block turns into **one flat color everywhere**, the mask works the other way round. Tell me; it's a one-line change in `paint.xml` plus `sn skin reload`, no new version needed.
+- [ ] `sn skin grid`: the grid should now cover whole blocks, cabinet fronts included. Note the labels on each block's **front**, and say if they're mirrored. Then `sn skin grid` again to turn it off.
+- [ ] Screenshot, close the game, tell me.
+
 ## Part 3 (v0.10.3): fixes after Part 2
 
 **Part 2 found:**

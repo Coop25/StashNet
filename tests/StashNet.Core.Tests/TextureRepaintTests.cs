@@ -54,6 +54,17 @@ namespace StashNet.Core.Tests
             Assert.True(At(px, 2, 0, 0).g < At(px, 2, 1, 0).g);
         }
 
+        // ---- Mask ----
+
+        [Fact]
+        public void SetAlpha_ChangesOnlyAlpha()
+        {
+            byte[] px = Solid(2, 2, 10, 20, 30, 255);
+            TextureRepaint.SetAlpha(px, 2, 2, 0);
+            for (int i = 0; i < px.Length; i += 4)
+                Assert.Equal(new byte[] { 10, 20, 30, 0 }, new[] { px[i], px[i + 1], px[i + 2], px[i + 3] });
+        }
+
         // ---- Grime ----
 
         [Fact]

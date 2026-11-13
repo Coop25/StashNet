@@ -26,8 +26,7 @@ namespace StashNet.Skins
             public TextureWrapMode Wrap;
             public FilterMode Filter;
             public int Aniso;
-            public bool Grid;
-            public TexturePaint Paint;
+            public bool Grid, Linear;
             public volatile bool Done;
             public Exception Error;
             public long Ms;
@@ -77,7 +76,7 @@ namespace StashNet.Skins
                     Log.Warning($"[StashNet] Skin repaint failed for {j.Block}/{j.TexName}: {j.Error.Message}");
                     continue;
                 }
-                var t = new Texture2D(j.W, j.H, TextureFormat.RGBA32, true) { name = $"StashNet_{j.TexName}", wrapMode = j.Wrap, filterMode = j.Filter, anisoLevel = j.Aniso };
+                var t = new Texture2D(j.W, j.H, TextureFormat.RGBA32, true, j.Linear) { name = $"StashNet_{j.TexName}", wrapMode = j.Wrap, filterMode = j.Filter, anisoLevel = j.Aniso };
                 t.SetPixelData(j.Pixels, 0);
                 t.Apply(true, true);
                 textures[j.Key] = t;
@@ -105,46 +104,86 @@ namespace StashNet.Skins
             string texKey = $"{block}|{tex.name}|{GridMode}";
             string matKey = $"{texKey}|{original.name}";
             if (materials.TryGetValue(matKey, out Material ready)) return ready;
+
+            // The tint mask lives in _RMOM's alpha: masked parts show only the block's flat tint color (which
+            // the game sets per renderer, overriding the material), never the painted texture. v0.10.3's
+            // inspect showed it: the cabinet front stayed orange. A copy of _RMOM with the mask off fixes that.
+            Texture rmom = tp.Mask >= 0 && original.HasProperty("_RMOM") ? original.GetTexture("_RMOM") : null;
+            string maskKey = rmom != null ? $"{block}|{rmom.name}|mask{tp.Mask}" : null;
+
+            bool waiting = false;
             if (!textures.TryGetValue(texKey, out Texture2D painted))
             {
-                if (!jobs.ContainsKey(texKey) && !failed.Contains(texKey)) Start(block, texKey, tex, tp);
-                return null;
+                waiting = true;
+                if (!jobs.ContainsKey(texKey) && !failed.Contains(texKey)) StartPaint(block, texKey, tex, tp);
             }
+            Texture2D mask = null;
+            if (maskKey != null && !textures.TryGetValue(maskKey, out mask))
+            {
+                waiting = true;
+                if (!jobs.ContainsKey(maskKey) && !failed.Contains(maskKey)) StartMask(block, maskKey, rmom, (byte)tp.Mask);
+            }
+            if (waiting) return null;
 
             var copy = new Material(original) { name = $"StashNet_{original.name}" };
             copy.SetTexture("_MainTex", painted);
-            // The game's tint-mask shader recolors masked parts with _Color (white made them grey in v0.10.2).
-            // Use the tint's hue at full brightness: green where masked, and no darkening if the shader
-            // multiplies the whole texture.
-            if (copy.HasProperty("_Color")) copy.SetColor("_Color", GridMode ? Color.white : Brightest(tp.R, tp.G, tp.B));
+            if (mask != null) copy.SetTexture("_RMOM", mask);
+            if (copy.HasProperty("_Color")) copy.SetColor("_Color", Color.white);
             materials[matKey] = copy;
             made.Add(copy);
             return copy;
         }
 
-        private static Color Brightest(byte r, byte g, byte b)
-        {
-            float max = Mathf.Max(1, Mathf.Max(r, Mathf.Max(g, b)));
-            return new Color(r / max, g / max, b / max, 1f);
-        }
-
-        private static void Start(string block, string key, Texture tex, TexturePaint tp)
+        private static Job NewJob(string block, string key, Texture tex, bool linear)
         {
             var job = new Job
             {
                 Block = block, Key = key, TexName = tex.name, W = tex.width, H = tex.height,
-                Wrap = tex.wrapMode, Filter = tex.filterMode, Aniso = tex.anisoLevel, Grid = GridMode, Paint = tp,
+                Wrap = tex.wrapMode, Filter = tex.filterMode, Aniso = tex.anisoLevel, Grid = GridMode, Linear = linear,
             };
             try
             {
-                job.Pixels = TextureReadback.ToRgba(tex);
+                job.Pixels = TextureReadback.ToRgba(tex, -1, linear);
+                return job;
             }
             catch (Exception e)
             {
                 failed.Add(key);
                 Log.Warning($"[StashNet] Skin repaint failed for {block}/{tex.name}: {e.Message}");
-                return;
+                return null;
             }
+        }
+
+        private static void Run(Job job, Action work)
+        {
+            jobs[job.Key] = job;
+            int gen = generation;
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                var timer = Stopwatch.StartNew();
+                try
+                {
+                    work();
+                }
+                catch (Exception e)
+                {
+                    job.Error = e;
+                }
+                job.Ms = timer.ElapsedMilliseconds;
+                if (gen == generation) job.Done = true;
+            });
+        }
+
+        private static void StartMask(string block, string key, Texture rmom, byte value)
+        {
+            Job job = NewJob(block, key, rmom, true);
+            if (job != null) Run(job, () => TextureRepaint.SetAlpha(job.Pixels, job.W, job.H, value));
+        }
+
+        private static void StartPaint(string block, string key, Texture tex, TexturePaint tp)
+        {
+            Job job = NewJob(block, key, tex, false);
+            if (job == null) return;
             // Sprites are looked up here, on the main thread; the job only reads their pixels.
             Func<string, SpriteImage> sprite = SkinAssets.Sprite;
             var glyphs = new Dictionary<char, SpriteImage>();
@@ -156,31 +195,17 @@ namespace StashNet.Skins
                 foreach (TextureStamp s in tp.Stamps) stamps.Add((sprite(s.Sprite), s));
             }
 
-            jobs[key] = job;
-            int gen = generation;
-            ThreadPool.QueueUserWorkItem(_ =>
+            Run(job, () =>
             {
-                var timer = Stopwatch.StartNew();
-                try
+                if (job.Grid)
                 {
-                    if (job.Grid)
-                    {
-                        TextureRepaint.Grid(job.Pixels, job.W, job.H, c => glyphs.TryGetValue(c, out SpriteImage g) ? g : null);
-                    }
-                    else
-                    {
-                        TextureRepaint.Recolor(job.Pixels, job.W, job.H, tp.R, tp.G, tp.B, tp.Strength);
-                        TextureRepaint.Grime(job.Pixels, job.W, job.H, tp.Seed, tp.Damage);
-                        foreach ((SpriteImage img, TextureStamp s) in stamps)
-                            if (img != null) TextureRepaint.Stamp(job.Pixels, job.W, job.H, img, s.U, s.V, s.W, s.H, s.Rot);
-                    }
+                    TextureRepaint.Grid(job.Pixels, job.W, job.H, c => glyphs.TryGetValue(c, out SpriteImage g) ? g : null);
+                    return;
                 }
-                catch (Exception e)
-                {
-                    job.Error = e;
-                }
-                job.Ms = timer.ElapsedMilliseconds;
-                if (gen == generation) job.Done = true;
+                TextureRepaint.Recolor(job.Pixels, job.W, job.H, tp.R, tp.G, tp.B, tp.Strength);
+                TextureRepaint.Grime(job.Pixels, job.W, job.H, tp.Seed, tp.Damage);
+                foreach ((SpriteImage img, TextureStamp s) in stamps)
+                    TextureRepaint.Stamp(job.Pixels, job.W, job.H, img, s.U, s.V, s.W, s.H, s.Rot);
             });
         }
 
