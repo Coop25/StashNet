@@ -50,6 +50,7 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 - **Early game: proximity, no power, no wires.** Bays and terminals within the Core's radius join automatically.
   - Scrap Storage Core radius: **6 blocks**. Storage Core: **12**. Advanced Storage Core: **24**.
 - **One Core per network.** A bay or terminal in range of two Cores joins the nearest one (ties are broken by position, so every lookup agrees). A bay is never in two networks (enforced since M8).
+- **Cores keep their distance (2026-11-13, owner):** a Core can't be placed within 2 × the largest Core reach (48 blocks) of any other Core, whatever its tier or owner. Fully upgraded networks then never overlap. Cores already placed closer keep working.
 - **Later: powered Network Relays** (wired with the vanilla wire tool) extend reach beyond the radius.
 - **Terminals do not need power in v1.** Powered tiers come later as an upgrade, never a requirement.
 

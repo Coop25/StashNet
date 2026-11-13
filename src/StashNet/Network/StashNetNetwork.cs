@@ -156,6 +156,18 @@ namespace StashNet.Network
             return i >= 0 && cores[i].X == corePos.x && cores[i].Y == corePos.y && cores[i].Z == corePos.z;
         }
 
+        /// <summary>
+        /// Owner's spacing rule: true if a Core placed at <paramref name="pos"/> would be within
+        /// 2 x the largest Core reach of an existing Core (StashNet.Core CoreSpacing). Loaded chunks only.
+        /// </summary>
+        public static bool CoreTooClose(World world, Vector3i pos, out int distance, out int minGap)
+        {
+            int maxReach = MaxCoreRadius();
+            minGap = CoreSpacing.MinGap(maxReach);
+            List<CoreSite> cores = CoresNear(world, pos, minGap);
+            return CoreSpacing.TooClose(cores, pos.x, pos.y, pos.z, maxReach, out distance);
+        }
+
         private static int MaxCoreRadius()
         {
             if (maxCoreRadius >= 0) return maxCoreRadius;

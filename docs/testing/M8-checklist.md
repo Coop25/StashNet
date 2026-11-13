@@ -14,7 +14,7 @@ Handy commands (F1 console):
 **How upgrading works:** hold a hammer, have the **next tier's block** in your backpack or toolbelt, and keep hitting the block, the same as upgrading wood to cobblestone. After a few hits it turns into the next tier and the block from your inventory is used up.
 
 ## 0. Loads cleanly
-- [ ] F1: `[StashNet] Loaded v0.9.0 (20 methods patched)`, and no red errors mentioning StashNet, blocks.xml, items.xml or recipes.xml.
+- [ ] F1: `[StashNet] Loaded v0.9.1 (20 methods patched)`, and no red errors mentioning StashNet, blocks.xml, items.xml or recipes.xml.
 - [ ] Your existing network (Scrap Core, bays, Basic drives) still works: the terminal shows your items and asks for the code if it's locked.
 
 ## 1. Upgrades keep everything (most important, do this first)
@@ -59,7 +59,15 @@ Handy commands (F1 console):
 - [ ] Stand at a Core and run `sn heat`. The line shows a **heat weight**: each Basic drive adds 1, each Standard 2, each High-Density 4.
 - [ ] Example: 12 Basic drives on a Scrap Core gives `heat weight 12 -> 3 heat per report` (same as M7). Swap one Basic for a High-Density: the weight goes to 15.
 
-## 9. Save and reload
+## 9. Cores must be far apart (v0.9.1)
+Cores can't be placed within **48 blocks** of another Core (twice the Advanced Core's reach), so networks never overlap.
+- [ ] Hold a Core (any tier) and try to place it **30 blocks** from an existing Core: refused with the "can't build" sound and "Another Storage Core is only 30 blocks away. Cores must be more than 48 blocks apart...".
+- [ ] Same thing straight **above** or below an existing Core (e.g. 20 blocks up): refused.
+- [ ] Place it **50 blocks** away: allowed.
+- [ ] The two Cores you placed close together in step 5 (before this rule) still work.
+- [ ] Upgrading a Core in place still works (it isn't a new placement).
+
+## 10. Save and reload
 - [ ] Save, quit to the menu, reload. Upgraded bays and Cores are still their new tier, with the same drives and code. `sn heat` shows the same numbers.
 
 When done, send me the results (and I'll check the log).

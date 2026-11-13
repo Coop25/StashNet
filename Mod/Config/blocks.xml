@@ -13,7 +13,9 @@
 		     Each tier is written out in full (no Extends) so no tier inherits another's UpgradeBlock. -->
 		<block name="stashnetScrapCore">
 			<property name="CreativeMode" value="Player" />
-			<property name="Class" value="CompositeTileEntity" />
+			<!-- A composite block (Blocks/BlockStashNetCore.cs) that also refuses placement within
+			     2 x the largest Core reach of another Core (owner's spacing rule, 2026-11-13). -->
+			<property name="Class" value="StashNet.Blocks.StashNetCore, StashNet" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
@@ -58,7 +60,7 @@
 		<!-- Storage Core (M8, tier 2): reach 12, runs cooler. -->
 		<block name="stashnetStorageCore">
 			<property name="CreativeMode" value="Player" />
-			<property name="Class" value="CompositeTileEntity" />
+			<property name="Class" value="StashNet.Blocks.StashNetCore, StashNet" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
@@ -101,7 +103,7 @@
 		<!-- Advanced Storage Core (M8, tier 3): reach 24, runs coolest. Top tier: no upgrade. -->
 		<block name="stashnetAdvancedCore">
 			<property name="CreativeMode" value="Player" />
-			<property name="Class" value="CompositeTileEntity" />
+			<property name="Class" value="StashNet.Blocks.StashNetCore, StashNet" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
