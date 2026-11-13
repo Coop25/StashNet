@@ -58,6 +58,17 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Parse_HolesFalse_ForArmored()
+        {
+            PaintSpec spec = Parse("<block name=\"b\"><texture name=\"t\" tint=\"000000\" holes=\"false\" /><texture name=\"u\" tint=\"000000\" /></block>", new List<string>());
+            spec.TryGet("b", out BlockPaint block);
+            block.TryGetTexture("t", out TexturePaint t);
+            block.TryGetTexture("u", out TexturePaint u);
+            Assert.False(t.Holes);
+            Assert.True(u.Holes);
+        }
+
+        [Fact]
         public void Parse_BadTint_TextureSkippedWithWarning()
         {
             var warnings = new List<string>();

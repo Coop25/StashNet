@@ -4,6 +4,7 @@
        tint      army-green base paint (hex RRGGBB); strength 0..1 = how much of the vanilla color is replaced
        damage    how much scattered wear: grime, rust, scorch, bullet holes, claw gouges, bare metal (1 = normal)
        seed      changes where the damage lands
+       holes     "false" = bullet hits are dents, never holes (armor)
        <stamp sprite u v w h rot>  one atlas sprite painted in: u,v = its center in the texture (0..1, from the
                  bottom-left), w,h = its size as a fraction of the texture, rot = degrees counter-clockwise.
      screen="sprite" replaces the picture on a screen part (the CRT TV).
@@ -19,7 +20,7 @@
     <texture name="serverComputer" tint="4A503F" strength="0.8" damage="1.2" seed="12" />
   </block>
   <block name="stashnetDriveBayArmored">
-    <texture name="safeGunLarge" tint="3A3F31" strength="0.85" damage="1.0" seed="13" />
+    <texture name="safeGunLarge" tint="3A3F31" strength="0.85" damage="1.0" seed="13" holes="false" />
   </block>
 
   <!-- Cores: electrical box (blue), transformer (green), control panel (purple). -->

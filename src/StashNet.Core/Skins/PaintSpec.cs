@@ -19,6 +19,10 @@ namespace StashNet.Core.Skins
         public float Strength = 0.85f;
         public float Damage = 1f;
         public int Seed = 1;
+
+        /// <summary>False for armor: bullet hits become dents, never holes.</summary>
+        public bool Holes = true;
+
         public IReadOnlyList<TextureStamp> Stamps;
     }
 
@@ -85,6 +89,7 @@ namespace StashNet.Core.Skins
             if (SkinXml.TryNumber(t, "strength", out float strength)) tex.Strength = strength;
             if (SkinXml.TryNumber(t, "damage", out float damage)) tex.Damage = damage;
             if (SkinXml.TryNumber(t, "seed", out float seed)) tex.Seed = (int)seed;
+            tex.Holes = !string.Equals((string)t.Attribute("holes"), "false", System.StringComparison.OrdinalIgnoreCase);
 
             var stamps = new List<TextureStamp>();
             foreach (XElement s in t.Elements("stamp"))
