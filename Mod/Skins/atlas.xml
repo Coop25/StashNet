@@ -31,4 +31,20 @@
   <sprite name="bulletHole1" x="628" y="604" w="48" h="48" />
   <sprite name="bulletHole2" x="684" y="604" w="48" h="48" />
   <sprite name="bulletDent" x="740" y="604" w="48" h="48" />
+  <sprite name="glyphA" x="796" y="604" w="28" h="36" />
+  <sprite name="glyphB" x="832" y="604" w="28" h="36" />
+  <sprite name="glyphC" x="868" y="604" w="28" h="36" />
+  <sprite name="glyphD" x="904" y="604" w="28" h="36" />
+  <sprite name="glyphE" x="940" y="604" w="28" h="36" />
+  <sprite name="glyphF" x="976" y="604" w="28" h="36" />
+  <sprite name="glyphG" x="4" y="692" w="28" h="36" />
+  <sprite name="glyphH" x="40" y="692" w="28" h="36" />
+  <sprite name="glyph1" x="76" y="692" w="28" h="36" />
+  <sprite name="glyph2" x="112" y="692" w="28" h="36" />
+  <sprite name="glyph3" x="148" y="692" w="28" h="36" />
+  <sprite name="glyph4" x="184" y="692" w="28" h="36" />
+  <sprite name="glyph5" x="220" y="692" w="28" h="36" />
+  <sprite name="glyph6" x="256" y="692" w="28" h="36" />
+  <sprite name="glyph7" x="292" y="692" w="28" h="36" />
+  <sprite name="glyph8" x="328" y="692" w="28" h="36" />
 </atlas>

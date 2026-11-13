@@ -236,6 +236,9 @@ function Draw-Label($g, [float]$w, [float]$h, [string]$text, [int]$seed) {
   for ($i=0; $i -lt 50; $i++) { Wipe $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) 2 2 }
   Grime $g $w $h 60 ($seed+12) 120 }
 
+function Draw-Glyph($g, [float]$w, [float]$h, [string]$ch) {
+  Text $g $ch 'Arial' ($h*0.95) ([System.Drawing.FontStyle]::Bold) (C 255 255 255 255) 0 0 $w $h }
+
 # ---------- Sprite list: name, width, height, drawer. Fixed order = fixed packing. ----------
 $sprites = @(
   @('crtScreen', 256, 192, { param($g,$w,$h) Draw-Crt $g $w $h 1 }),
@@ -269,7 +272,23 @@ $sprites = @(
   @('ductTape', 96, 28, { param($g,$w,$h) Draw-DuctTape $g $w $h 29 }),
   @('bulletHole1', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 30 $true }),
   @('bulletHole2', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 31 $true }),
-  @('bulletDent', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 32 $false })
+  @('bulletDent', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 32 $false }),
+  @('glyphA', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'A' }),
+  @('glyphB', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'B' }),
+  @('glyphC', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'C' }),
+  @('glyphD', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'D' }),
+  @('glyphE', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'E' }),
+  @('glyphF', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'F' }),
+  @('glyphG', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'G' }),
+  @('glyphH', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'H' }),
+  @('glyph1', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '1' }),
+  @('glyph2', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '2' }),
+  @('glyph3', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '3' }),
+  @('glyph4', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '4' }),
+  @('glyph5', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '5' }),
+  @('glyph6', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '6' }),
+  @('glyph7', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '7' }),
+  @('glyph8', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h '8' })
 )
 
 # ---------- Shelf packing + drawing ----------
