@@ -11,6 +11,28 @@ After v0.10.0 (decals on the Drive Bay) was built, the owner said they expected 
 - **Storage Terminal is now the CRT TV** (`tvCRTPlayerOnPrefab`, 1×1×1) as of v0.10.1. Its green text screen comes in step 2, once the dump shows how the TV's screen is textured.
 - Limit the owner accepted: surface bumps (normal maps) stay vanilla, so painted dents look flat.
 
+## Revision 2 (2026-11-13): how the repaint works (owner approved: "Yes, build it")
+
+What the dump showed:
+- Every model uses `Game/Entity Tint Mask` (`_MainTex`, `_Normal`, `_Emissive`, `_RMOM`, `_Color`).
+- Meshes aren't CPU-readable, so there are no UV maps.
+- The decal shaders don't exist in the build, so v0.10.0's decals never rendered.
+- The CRT screen is its own renderer (`GameScreenFlicker`, `_Albedo` = the "Emergency Broadcast System" card), and the game already flickers it.
+
+Decisions:
+- **Repaint at runtime, from the game's own textures.** On a block type's first appearance, the mod reads the vanilla `_MainTex` back from the GPU and repaints a copy:
+  - recolor to army green, keeping detail
+  - grime
+  - a seeded scatter of damage stamps from our atlas (bullet holes, claw gouges, scorch, rust, bare metal)
+  - explicit stamps: stencil, tier stripe, readout
+
+  Clones of the materials (with `_Color` white) carry the copy, on StashNet blocks only. **No game art goes in the repo or the zip.** Normal, RMOM and emissive maps stay vanilla.
+- **Settings:** `Mod/Skins/paint.xml` holds, per block and per vanilla texture name: tint, strength, damage amount, seed and stamps. Stamps use texture-space u,v with origin bottom-left. The block's `screen` sprite replaces a `GameScreenFlicker` `_Albedo`. Tuning works through `sn skin reload`.
+- **Finding the front:** `sn skin grid` toggles a debug paint, an 8×8 lettered grid (columns A–H left to right, rows 1–8 top to bottom of the texture). The owner reads off which cells show on each block's front, and stencil/stripe/readout get placed from that.
+- **`TintColor` comes off** the bay XML: the paint carries the color now, and a property-block tint would re-tint it.
+- **The floating-decal system is removed:** `FacePlacement`, `SkinLayout`, `layouts.xml` and the mesh building.
+- **Not glowing for now:** the bays' small green readout is painted, not lit. The CRT screen glows through its own shader.
+
 ## Why
 
 The owner wants StashNet's blocks to look like their own thing, not like furniture players recognize from the game. In the owner's words, the cleaner mockups looked "too clean and not cobbled together". The look should fit 7 Days to Die: survivor gear salvaged from a military bunker that has been through hordes and still runs.

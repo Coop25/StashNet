@@ -413,3 +413,41 @@ Steps:
     - no StashNet exceptions
   - Tune with `sn skin reload` as needed.
 - [ ] **Step 4: Record the owner's verdict in `CLAUDE.md` and commit.** Message: "v0.10.1: salvage look on all blocks (owner-checked)". The next step is M9 Part A (dedicated server), which also covers Review Focus 2 on a server.
+
+---
+
+## Revision R (2026-11-13): texture repaint replaces decals (spec "Revision 1" and "Revision 2")
+
+Phase 2 above (Tasks 7–11) is superseded. These tasks replace it. Same rules: TDD in `StashNet.Core`, deterministic art, deploy only on the owner's yes.
+
+- **R1 `PaintSpec` (Core, tested):** parses `Mod/Skins/paint.xml`.
+  - Format:
+    ```xml
+    <paint>
+      <block name="..." screen="crtScreen?">
+        <texture name="FileCabinet_d" tint="4A503F" strength="0.85" damage="1" seed="11">
+          <stamp sprite="..." u="" v="" w="" h="" rot="" />
+        </texture>
+      </block>
+    </paint>
+    ```
+    `u` and `v` are the stamp center (0..1, origin bottom-left); `w` and `h` are fractions of the texture.
+  - Bad stamp or block: skipped with a warning. Whole-file problems: `SkinFormatException`.
+  - API: `PaintSpec.Parse(xml, atlas, warnings)`, `TryGet(blockName, out BlockPaint)`, `BlockPaint.Screen`, `BlockPaint.TryGetTexture(name, out TexturePaint)`.
+- **R2 `TextureRepaint` (Core, tested), on RGBA byte arrays (row 0 = bottom):**
+  - `Recolor(px, w, h, r, g, b, strength)`
+  - `Grime(px, w, h, seed, amount)`
+  - `Stamp(px, w, h, SpriteImage, u, v, wFrac, hFrac, rotDeg)` (alpha-over)
+  - `ScatterDamage(seed, amount) -> List<TextureStamp>` (deterministic, inside 0..1)
+  - `Grid(px, w, h, Func<char, SpriteImage> glyphs)`
+  - `GridCell(u, v) -> "C4"`, `CellCenter("C4") -> (u, v)`
+  - `SpriteImage(atlasPx, aw, ah, UvRect)` with bilinear `Sample`.
+- **R3 Atlas glyphs:** add sprites `glyphA`..`glyphH` and `glyph1`..`glyph8` to `draw-skin-atlas.ps1`, and extend `ShippedAtlas_ParsesAndHasAllSprites`.
+- **R4 Game glue:**
+  - `TextureReadback.ToRgba(Texture) -> byte[]`, shared with `SkinDump`.
+  - `SkinPainter` keeps a per-(block, material) cache of repainted clones and a screen material. It runs on the first appearance and keeps the originals on `SkinOwner` for reload.
+  - `SkinApplier.Apply` swaps `sharedMaterials`.
+  - `sn skin grid` toggles the grid paint and re-applies.
+  - `TintColor` is removed from the bays.
+- **R5 Remove the decal path:** `FacePlacement`, `SkinLayout` and their tests, `layouts.xml`, and the mesh code in `SkinApplier`. Bump to v0.10.2, build, test, update the checklist (grid step) and `CLAUDE.md`, then ask to deploy.
+- **R6 (after the owner's grid report):** stencil, stripe and readout stamps per block in `paint.xml`, then the icons.
