@@ -37,12 +37,42 @@ namespace StashNet.Skins
                 if (r == null) continue;
                 r.sharedMaterials = painted ? SkinPainter.Paint(owner.BlockName, paint, owner.Originals[i]) : owner.Originals[i];
             }
+            SetScreens(owner, painted && !SkinPainter.GridMode ? paint.Screen : null);
             if (painted && paint.Mute)
             {
-                // The CRT's hum comes from the game's AudioPlayer script, which stops its sound when disabled.
-                foreach (AudioPlayer p in owner.GetComponentsInChildren<AudioPlayer>(true)) p.enabled = false;
+                // The CRT's hum comes from the game's AudioPlayer script: stop what's playing, then switch it off
+                // so it can't start again (SkinOwner switches it back on if the model is reused).
+                foreach (AudioPlayer p in owner.GetComponentsInChildren<AudioPlayer>(true))
+                {
+                    p.StopAudio();
+                    if (p.enabled) owner.Silenced.Add(p);
+                    p.enabled = false;
+                }
                 foreach (AudioSource a in owner.GetComponentsInChildren<AudioSource>(true)) a.mute = true;
             }
+        }
+
+        /// <summary>
+        /// Puts our picture into the TV's own per-renderer screen material (or puts the original back when
+        /// sprite is null). The original picture is remembered on the owner for Restore.
+        /// </summary>
+        private static void SetScreens(SkinOwner owner, string sprite)
+        {
+            Texture2D picture = sprite != null ? SkinPainter.ScreenTexture(sprite) : null;
+            foreach (Material[] mats in owner.Originals)
+                foreach (Material m in mats)
+                {
+                    if (!SkinPainter.IsScreen(m) || !SkinPainter.IsPerRenderer(m)) continue;
+                    if (picture == null)
+                    {
+                        owner.RestoreScreen(m);
+                        continue;
+                    }
+                    owner.RememberScreen(m);
+                    m.SetTexture("_Albedo", picture);
+                    m.SetTextureScale("_Albedo", Vector2.one);
+                    m.SetTextureOffset("_Albedo", Vector2.zero);
+                }
         }
 
         /// <summary>Redo every live block of one type (its repaint just finished).</summary>

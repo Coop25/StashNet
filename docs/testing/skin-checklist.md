@@ -5,6 +5,31 @@ The look is "military salvage, wrecked but working". Design: `docs/superpowers/s
 ## Part 1 (v0.10.1): done 2026-11-13
 The texture dump worked for all 8 blocks.
 
+## Part 5 (v0.10.5): pink fix, TV screen and sound, lighter paint, stencils
+
+**What Part 4 found:**
+- The paint shows on whole blocks now, confirmed by the grid. But it was too dark and uniform.
+- A picked-up and re-placed TV turned **pink**. The game reuses removed models and deletes runtime-made materials, and that deleted the shared repaint.
+- The TV screen was still black and still made sound.
+
+**v0.10.5 changes:**
+- **Removing a model** (pick up, upgrade, unload) puts its vanilla materials back. The look only returns if that spot still holds the StashNet block. A deleted copy gets rebuilt instead of showing pink.
+- **The TV:** the green screen goes into the TV's own screen material, and its sound player is stopped outright.
+- **Lighter paint**, so more of the original detail shows.
+- **Stencils, tier stripes and readouts**, placed from your grid report. The Storage Core still gets damage only.
+
+### Steps
+- [ ] Look at all StashNet blocks after a second or two. Do you see:
+  - lighter army green with detail showing
+  - "STASHNET" stencils
+  - tier stripes (blue/green/purple)
+  - green readouts on the rack, safe and control panel
+- [ ] The TV: green StashNet screen, no sound.
+- [ ] **Pick up the TV and place it again**: still fine, not pink. Do the same with a Drive Bay. Upgrade a bay: the new tier gets its look.
+- [ ] Place a **vanilla** TV, file cabinet or gun safe (creative menu): it looks normal (not green).
+- [ ] Tell me what to move or resize, for example "the safe's stencil is too high". I can change it live with `sn skin reload` once you OK copying the settings file.
+- [ ] Screenshot, close the game.
+
 ## Part 4 (v0.10.4): turn off the game's tint mask, silence the TV
 
 **What Part 3 found** (`sn skin inspect`): the game paints each model part with its own flat color (orange on the cabinet, grey on the safe), and that color wins over the paint wherever the model's tint mask is on. **v0.10.4** repaints a copy of the mask with the mask switched off, so the painted texture shows on every part. It also switches off the TV's sound player.

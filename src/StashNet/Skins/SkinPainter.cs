@@ -52,7 +52,9 @@ namespace StashNet.Skins
                 result[i] = m;
                 if (m == null || m.shader == null) continue;
 
-                if (m.shader.name == ScreenShader && paint.Screen != null && m.HasProperty("_Albedo") && !GridMode)
+                // A per-TV screen material ("(Instance)") is left in place and gets its picture swapped by
+                // SkinApplier (the game drives that exact material; a copy of it rendered black in v0.10.3/4).
+                if (IsScreen(m) && paint.Screen != null && !GridMode && !IsPerRenderer(m))
                     result[i] = ScreenCopy(block, m, paint.Screen) ?? m;
                 else if (m.HasProperty("_MainTex") && m.GetTexture("_MainTex") is Texture tex && paint.TryGetTexture(tex.name, out TexturePaint tp))
                     result[i] = PaintedCopy(block, m, tex, tp) ?? m;
@@ -103,7 +105,7 @@ namespace StashNet.Skins
         {
             string texKey = $"{block}|{tex.name}|{GridMode}";
             string matKey = $"{texKey}|{original.name}";
-            if (materials.TryGetValue(matKey, out Material ready)) return ready;
+            if (Alive(materials, matKey, out Material ready)) return ready;
 
             // The tint mask lives in _RMOM's alpha: masked parts show only the block's flat tint color (which
             // the game sets per renderer, overriding the material), never the painted texture. v0.10.3's
@@ -112,13 +114,13 @@ namespace StashNet.Skins
             string maskKey = rmom != null ? $"{block}|{rmom.name}|mask{tp.Mask}" : null;
 
             bool waiting = false;
-            if (!textures.TryGetValue(texKey, out Texture2D painted))
+            if (!Alive(textures, texKey, out Texture2D painted))
             {
                 waiting = true;
                 if (!jobs.ContainsKey(texKey) && !failed.Contains(texKey)) StartPaint(block, texKey, tex, tp);
             }
             Texture2D mask = null;
-            if (maskKey != null && !textures.TryGetValue(maskKey, out mask))
+            if (maskKey != null && !Alive(textures, maskKey, out mask))
             {
                 waiting = true;
                 if (!jobs.ContainsKey(maskKey) && !failed.Contains(maskKey)) StartMask(block, maskKey, rmom, (byte)tp.Mask);
@@ -132,6 +134,18 @@ namespace StashNet.Skins
             materials[matKey] = copy;
             made.Add(copy);
             return copy;
+        }
+
+        /// <summary>
+        /// A cached copy, if it still exists. The game deletes runtime-made materials when its model pool drops a
+        /// model; a deleted copy shows pink (v0.10.4), so it's forgotten here and made again.
+        /// </summary>
+        private static bool Alive<T>(Dictionary<string, T> cache, string key, out T value) where T : Object
+        {
+            if (cache.TryGetValue(key, out value) && value != null) return true;
+            cache.Remove(key);
+            value = null;
+            return false;
         }
 
         private static Job NewJob(string block, string key, Texture tex, bool linear)
@@ -209,10 +223,29 @@ namespace StashNet.Skins
             });
         }
 
+        internal static bool IsScreen(Material m) => m != null && m.shader != null && m.shader.name == ScreenShader && m.HasProperty("_Albedo");
+
+        /// <summary>The game's own per-renderer copy (safe to change: no other block uses it).</summary>
+        internal static bool IsPerRenderer(Material m) => m.name.EndsWith("(Instance)");
+
+        /// <summary>The screen picture as its own texture, made once.</summary>
+        internal static Texture2D ScreenTexture(string sprite)
+        {
+            string key = $"screenTex|{sprite}";
+            if (Alive(textures, key, out Texture2D tex)) return tex;
+            byte[] px = SkinAssets.Crop(sprite, out int w, out int h);
+            if (px == null || w == 0 || h == 0) return null;
+            tex = TextureReadback.FromRgba(px, w, h, $"StashNet_{sprite}");
+            tex.wrapMode = TextureWrapMode.Clamp;
+            textures[key] = tex;
+            made.Add(tex);
+            return tex;
+        }
+
         private static Material ScreenCopy(string block, Material original, string sprite)
         {
             string key = $"{block}|screen|{original.name}";
-            if (materials.TryGetValue(key, out Material ready)) return ready;
+            if (Alive(materials, key, out Material ready)) return ready;
             byte[] px = SkinAssets.Crop(sprite, out int w, out int h);
             if (px == null || w == 0 || h == 0) return null;
             Texture2D screen = TextureReadback.FromRgba(px, w, h, $"StashNet_{sprite}");

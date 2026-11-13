@@ -29,9 +29,28 @@ namespace StashNet.Skins
             followUps.Add((owner, Time.time + FollowUpDelay));
         }
 
+        private static readonly List<SkinOwner> rechecks = new List<SkinOwner>();
+
+        /// <summary>A model was switched on again: next frame, repaint it only if its spot still holds our block.</summary>
+        internal static void Recheck(SkinOwner owner)
+        {
+            Ensure();
+            rechecks.Add(owner);
+        }
+
         private void Update()
         {
             SkinPainter.Pump();
+            if (rechecks.Count > 0)
+            {
+                foreach (SkinOwner o in rechecks)
+                    if (o != null && o.isActiveAndEnabled && o.StillOurs())
+                    {
+                        o.Track();
+                        SkinApplier.Reapply(o);
+                    }
+                rechecks.Clear();
+            }
             if (followUps.Count == 0) return;
             float now = Time.time;
             for (int i = followUps.Count - 1; i >= 0; i--)
@@ -39,7 +58,7 @@ namespace StashNet.Skins
                 (SkinOwner owner, float at) = followUps[i];
                 if (now < at) continue;
                 followUps.RemoveAt(i);
-                if (owner != null && owner.Bed != null) SkinApplier.Reapply(owner);
+                if (owner != null && owner.isActiveAndEnabled && owner.StillOurs()) SkinApplier.Reapply(owner);
             }
         }
     }

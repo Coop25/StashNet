@@ -11,38 +11,72 @@
      screen="sprite" replaces the picture on a screen part (the CRT TV). mute="true" silences the model's own sounds.
      Tune in-game: edit Mods/StashNet/Skins/paint.xml, then F1 "sn skin reload". "sn skin grid" shows a lettered
      grid instead, to find where each face is (columns A-H left to right, rows 1-8 from the top of the texture).
+     Grid cell to u,v: column A..H = u 0.0625..0.9375 (center), row 1..8 = v 0.9375..0.0625 (center).
+     Fronts found with the grid (owner, 2026-11-13): file cabinet drawers around the C3/D4 corner (all four
+     drawers share it); gun safe C5-D8 rotated 180; server rack A4-D5 rotated 90; control panel A7-C8;
+     electrical box front strip E2-G2 (its top is mirrored); TV bezel E3-G3; workbench drawer D2.
      Style rule (owner): when in doubt, dirtier and more worn. -->
 <paint>
   <!-- Drive Bays: file cabinet (blue), server rack (green), gun safe (purple, darker green, dented not holed). -->
   <block name="stashnetDriveBay">
-    <texture name="FileCabinet_d" tint="4A503F" strength="0.85" damage="1.2" seed="11" />
+    <texture name="FileCabinet_d" tint="4A503F" strength="0.6" damage="1.2" seed="11">
+      <!-- On each drawer front (all four share this spot): a stencil and a blue tier stripe. -->
+      <stamp sprite="stencilStashnet" u="0.375" v="0.655" w="0.085" h="0.016" />
+      <stamp sprite="stripeBlue" u="0.375" v="0.588" w="0.11" h="0.01" />
+    </texture>
   </block>
   <block name="stashnetDriveBayReinforced">
-    <texture name="serverComputer" tint="4A503F" strength="0.8" damage="1.2" seed="12" />
+    <texture name="serverComputer" tint="4A503F" strength="0.6" damage="1.2" seed="12">
+      <!-- Door front A4-D5, turned 90 degrees: u runs down the door, v runs left to right. -->
+      <stamp sprite="stencilStashnet" u="0.07" v="0.5" w="0.2" h="0.036" rot="90" />
+      <stamp sprite="readoutDrv8" u="0.17" v="0.5" w="0.11" h="0.038" rot="90" />
+      <stamp sprite="stripeGreen" u="0.44" v="0.5" w="0.22" h="0.016" rot="90" />
+    </texture>
   </block>
   <block name="stashnetDriveBayArmored">
-    <texture name="safeGunLarge" tint="3A3F31" strength="0.85" damage="1.0" seed="13" holes="false" />
+    <texture name="safeGunLarge" tint="3A3F31" strength="0.65" damage="1.0" seed="13" holes="false">
+      <!-- Door front C5-D8, upside down on the texture (row 8 is the top of the door). -->
+      <stamp sprite="stencilStashnet" u="0.375" v="0.07" w="0.2" h="0.032" rot="180" />
+      <stamp sprite="readoutDrv12" u="0.375" v="0.15" w="0.1" h="0.035" rot="180" />
+      <stamp sprite="stripePurple" u="0.375" v="0.43" w="0.24" h="0.018" rot="180" />
+    </texture>
   </block>
 
   <!-- Cores: electrical box (blue), transformer (green), control panel (purple). -->
   <block name="stashnetScrapCore">
-    <texture name="utilityElectricalBox_02" tint="4A503F" strength="0.8" damage="1.2" seed="21" />
+    <texture name="utilityElectricalBox_02" tint="4A503F" strength="0.6" damage="1.2" seed="21">
+      <!-- Front strip E2-G2. -->
+      <stamp sprite="stencilStashnet" u="0.69" v="0.82" w="0.3" h="0.045" />
+      <stamp sprite="stripeBlue" u="0.69" v="0.765" w="0.36" h="0.014" />
+    </texture>
   </block>
   <block name="stashnetStorageCore">
-    <texture name="UtilityTransformer_d" tint="4A503F" strength="0.8" damage="1.0" seed="22" />
+    <!-- Front not found yet (wasn't in the grid screenshots): damage only for now. -->
+    <texture name="UtilityTransformer_d" tint="4A503F" strength="0.6" damage="1.0" seed="22" />
   </block>
   <block name="stashnetAdvancedCore">
-    <texture name="controlPanelControls" tint="4A503F" strength="0.75" damage="1.0" seed="23" />
+    <texture name="controlPanelControls" tint="4A503F" strength="0.55" damage="1.0" seed="23">
+      <!-- Front A7-C8. -->
+      <stamp sprite="stencilStashnet" u="0.19" v="0.215" w="0.22" h="0.034" />
+      <stamp sprite="readoutCore" u="0.3" v="0.12" w="0.09" h="0.032" />
+      <stamp sprite="stripePurple" u="0.19" v="0.035" w="0.36" h="0.016" />
+    </texture>
   </block>
 
-  <!-- Storage Terminal: the CRT TV, with the green StashNet screen. -->
+  <!-- Storage Terminal: the CRT TV, with the green StashNet screen, silenced. -->
   <block name="stashnetTerminal" screen="crtScreen" mute="true">
-    <texture name="tvCRT" tint="4A503F" strength="0.7" damage="1.0" seed="31" />
+    <texture name="tvCRT" tint="4A503F" strength="0.5" damage="1.0" seed="31">
+      <!-- Bezel above the screen, E3-G3. -->
+      <stamp sprite="stencilStashnet" u="0.69" v="0.69" w="0.2" h="0.03" />
+    </texture>
   </block>
 
   <!-- Crafting Terminal: the workbench (lighter touch on the wood) and its toolbox. -->
   <block name="stashnetCraftingTerminal">
-    <texture name="woodWorkBench" tint="4A503F" strength="0.55" damage="1.0" seed="41" />
-    <texture name="metalToolBox_d" tint="4A503F" strength="0.85" damage="1.0" seed="42" />
+    <texture name="woodWorkBench" tint="4A503F" strength="0.4" damage="1.0" seed="41">
+      <!-- Front drawer D2. -->
+      <stamp sprite="stencilStashnet" u="0.4375" v="0.815" w="0.1" h="0.018" />
+    </texture>
+    <texture name="metalToolBox_d" tint="4A503F" strength="0.7" damage="1.0" seed="42" />
   </block>
 </paint>
