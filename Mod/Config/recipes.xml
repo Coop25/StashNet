@@ -32,5 +32,45 @@
 			<ingredient name="resourceScrapPolymers" count="2" />
 			<ingredient name="resourceDuctTape" count="1" />
 		</recipe>
+
+		<!-- M8 Progression: mid/late-game tiers, crafted at a workbench. The bay and Core tiers are also
+		     the hammer-upgrade item for the tier below (the old block is used up). Placeholders. -->
+		<recipe name="stashnetDriveStandard" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="resourceForgedIron" count="5" />
+			<ingredient name="resourceElectricParts" count="8" />
+			<ingredient name="resourceMechanicalParts" count="2" />
+		</recipe>
+
+		<recipe name="stashnetDriveHighDensity" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="resourceForgedSteel" count="5" />
+			<ingredient name="resourceElectricParts" count="15" />
+			<ingredient name="resourceMechanicalParts" count="4" />
+		</recipe>
+
+		<recipe name="stashnetDriveBayReinforced" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="resourceForgedIron" count="30" />
+			<ingredient name="resourceMechanicalParts" count="8" />
+			<ingredient name="resourceElectricParts" count="4" />
+		</recipe>
+
+		<recipe name="stashnetDriveBayArmored" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="resourceForgedSteel" count="25" />
+			<ingredient name="resourceMechanicalParts" count="10" />
+			<ingredient name="resourceElectricParts" count="8" />
+		</recipe>
+
+		<recipe name="stashnetStorageCore" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="resourceForgedIron" count="40" />
+			<ingredient name="resourceElectricParts" count="15" />
+			<ingredient name="resourceMechanicalParts" count="10" />
+			<ingredient name="resourceRadiator" count="1" />
+		</recipe>
+
+		<recipe name="stashnetAdvancedCore" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="resourceForgedSteel" count="30" />
+			<ingredient name="resourceElectricParts" count="25" />
+			<ingredient name="resourceMechanicalParts" count="10" />
+			<ingredient name="resourceRadiator" count="2" />
+		</recipe>
 	</append>
 </configs>

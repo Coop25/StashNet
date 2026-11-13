@@ -1,13 +1,17 @@
 <configs>
 	<append xpath="/items">
 
-		<!-- Basic Drive: early-game storage drive. Contents are stored on the item itself (Milestone 2). -->
+		<!-- Drives. Contents are stored on the item itself (Milestone 2). Balance numbers live here:
+		     StashNetMaxStacks = capacity in stacks (each item type uses ceil(count / its stack size)
+		     stacks, like chest slots; no separate type limit).
+		     StashNetHeatWeight = how much the drive counts toward its network's heat (M8: bigger
+		     drives run hotter). Weight = what scrapping an EMPTY drive gives back (electrical parts).
+		     Tiers (M8): Basic 24 / weight 1, Standard 96 / 2, High-Density 384 / 4.
+		     To move up a tier: craft the bigger drive, shift-click the old one in a terminal, scrap it. -->
 		<item name="stashnetDriveBasic">
 			<property name="Tags" value="stashnetDrive" />
-			<!-- Capacity (balance numbers live here), in stacks. Each item type uses
-			     ceil(count / its stack size) stacks, like chest slots. No separate type limit.
-			     Tiers: Basic 24, Standard 96, High-Density 384. -->
 			<property name="StashNetMaxStacks" value="24" />
+			<property name="StashNetHeatWeight" value="1" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
 			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
@@ -24,5 +28,51 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
+		<!-- Standard Drive (M8): mid-game, crafted at a workbench. -->
+		<item name="stashnetDriveStandard">
+			<property name="Tags" value="stashnetDrive" />
+			<property name="StashNetMaxStacks" value="96" />
+			<property name="StashNetHeatWeight" value="2" />
+			<property name="CreativeMode" value="Player" />
+			<property name="HoldType" value="45" />
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+			<property name="Material" value="MelectricParts" />
+			<property name="CustomIcon" value="resourceElectricParts" />
+			<property name="CustomIconTint" value="7FFF7F" />
+			<property name="Weight" value="4" />
+			<property name="Stacknumber" value="1" />
+			<property name="EconomicValue" value="240" />
+			<property name="Group" value="Resources" />
+			<property name="DescriptionKey" value="stashnetDriveStandardDesc" />
+			<property name="SoundPickup" value="parts_grab" />
+			<property name="SoundPlace" value="parts_place" />
+		</item>
+
+		<!-- High-Density Drive (M8): late-game, crafted at a workbench. -->
+		<item name="stashnetDriveHighDensity">
+			<property name="Tags" value="stashnetDrive" />
+			<property name="StashNetMaxStacks" value="384" />
+			<property name="StashNetHeatWeight" value="4" />
+			<property name="CreativeMode" value="Player" />
+			<property name="HoldType" value="45" />
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+			<property name="Material" value="MelectricParts" />
+			<property name="CustomIcon" value="resourceElectricParts" />
+			<property name="CustomIconTint" value="D07FFF" />
+			<property name="Weight" value="8" />
+			<property name="Stacknumber" value="1" />
+			<property name="EconomicValue" value="600" />
+			<property name="Group" value="Resources" />
+			<property name="DescriptionKey" value="stashnetDriveHighDensityDesc" />
+			<property name="SoundPickup" value="parts_grab" />
+			<property name="SoundPlace" value="parts_place" />
+		</item>
+
 	</append>
+
+	<!-- M8: bays and Cores are upgraded in place with a hammer, using the next tier's block as the
+	     upgrade item. Repair tools only accept items on their allowlist, so add ours to every tool. -->
+	<append xpath="//property[@name='Allowed_upgrade_items']/@value">,stashnetDriveBayReinforced,stashnetDriveBayArmored,stashnetStorageCore,stashnetAdvancedCore</append>
 </configs>

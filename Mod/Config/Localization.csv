@@ -1,20 +1,20 @@
 Key,File,Type,UsedInMainMenu,NoTranslate,english
 stashnetScrapCore,blocks,Block,,,Scrap Storage Core
-stashnetScrapCoreDesc,blocks,Block,,,"The heart of a StashNet storage network. Drive Bays and Terminals within 6 blocks connect to it. Lock it with a code to protect the network's Drive Bays and Terminals."
+stashnetScrapCoreDesc,blocks,Block,,,"The heart of a StashNet storage network. Drive Bays and Terminals within 6 blocks connect to it. Lock it with a code to protect the network's Drive Bays and Terminals. Hit it with a hammer while carrying a Storage Core to upgrade it; the code stays."
 stashnetDriveBay,blocks,Block,,,Drive Bay
-stashnetDriveBayDesc,blocks,Block,,,"Holds up to 4 storage drives. Only accepts drives. Protected by its network Core's code."
+stashnetDriveBayDesc,blocks,Block,,,"Holds up to 4 storage drives. Only accepts drives. Protected by its network Core's code. Hit it with a hammer while carrying a Reinforced Drive Bay to upgrade it; the drives stay inside."
 stashnetTerminal,blocks,Block,,,Storage Terminal
 stashnetTerminalDesc,blocks,Block,,,"Browse, search, deposit and withdraw everything stored on your network's drives."
 stashnetCraftingTerminal,blocks,Block,,,Crafting Terminal
-stashnetCraftingTerminalDesc,blocks,Block,,,"A workbench wired into your storage network. Same recipes and skills as a workbench, but it can use ingredients stored on the network's drives (within 6 blocks of a Storage Core)."
+stashnetCraftingTerminalDesc,blocks,Block,,,"A workbench wired into your storage network. Same recipes and skills as a workbench, but it can use ingredients stored on the network's drives (place it within reach of a Storage Core)."
 stashnetFetchingIngredients,UI,XUi,,,Fetching ingredients from storage... click Craft again.
 stashnetDriveBasic,items,Item,,,Basic Drive
-stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds 24 stacks, like a small chest. Its contents stay on the drive, even when removed. Only readable inside a StashNet network."
+stashnetDriveBasicDesc,items,Item,,,"A crude storage drive. Holds 24 stacks, like a small chest. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network."
 stashnetUseTerminal,UI,HUD,,,Press {0} to Use
 stashnetTerminalTitle,UI,XUi,,,STORAGE TERMINAL
 stashnetUsage,UI,XUi,,,"{0} different items   {1}/{2} stacks   ({3} drives)"
 stashnetDeposited,UI,XUi,,,Deposited {0} items.
-stashnetNoCore,UI,XUi,,,No Storage Core in range. Place a Core within 6 blocks of this Terminal.
+stashnetNoCore,UI,XUi,,,No Storage Core in range. Place a Core near this Terminal (a Scrap Core reaches 6 blocks).
 stashnetNoBays,UI,XUi,,,No Drive Bays in range of the Core.
 stashnetNoDrives,UI,XUi,,,No drives in the Drive Bays.
 stashnetSkippedBays,UI,XUi,,,{0} bay(s) skipped (someone has them open).
@@ -37,3 +37,15 @@ stashnetNetworkLocked,UI,XUi,,,This storage network is locked. Enter the code se
 stashnetBayLocked,UI,HUD,,,"{1}\nNetwork locked - press {0} to enter the code"
 stashnetTerminalLocked,UI,HUD,,,Network locked - press {0} to enter the code
 stashnetUnloadBeforeScrap,UI,XUi,,,Unload this drive first: shift-click it in a Storage Terminal.
+stashnetDriveStandard,items,Item,,,Standard Drive
+stashnetDriveStandardDesc,items,Item,,,"A sturdier storage drive. Holds 96 stacks, about two crates. Runs hotter than a Basic Drive. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network."
+stashnetDriveHighDensity,items,Item,,,High-Density Drive
+stashnetDriveHighDensityDesc,items,Item,,,"A dense late-game storage drive. Holds 384 stacks, about eight crates. Runs the hottest. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network."
+stashnetDriveBayReinforced,blocks,Block,,,Reinforced Drive Bay
+stashnetDriveBayReinforcedDesc,blocks,Block,,,"Holds up to 8 storage drives and takes about as much punishment as concrete. Only accepts drives. Protected by its network Core's code. Hit it with a hammer while carrying an Armored Drive Bay to upgrade it; the drives stay inside."
+stashnetDriveBayArmored,blocks,Block,,,Armored Drive Bay
+stashnetDriveBayArmoredDesc,blocks,Block,,,"Holds up to 12 storage drives and is about as tough as steel. Only accepts drives. Protected by its network Core's code. If it is destroyed, its drives drop in a loot bag."
+stashnetStorageCore,blocks,Block,,,Storage Core
+stashnetStorageCoreDesc,blocks,Block,,,"A better network Core. Drive Bays and Terminals within 12 blocks connect to it, and its drives give off less heat. Lock it with a code to protect the network. Hit it with a hammer while carrying an Advanced Storage Core to upgrade it; the code stays."
+stashnetAdvancedCore,blocks,Block,,,Advanced Storage Core
+stashnetAdvancedCoreDesc,blocks,Block,,,"The best network Core. Drive Bays and Terminals within 24 blocks connect to it, and its drives give off the least heat. Lock it with a code to protect the network."
