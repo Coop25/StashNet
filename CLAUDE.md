@@ -1,7 +1,7 @@
 # StashNet: project notes
 
 ## ▶ RESUME HERE (last session: 2026-11-13)
-- **State:** **v0.9.1 on main** (github.com/Coop25/StashNet, private; local merge, not pushed). Milestones 0–8 are done. M8 Progression (design `docs/superpowers/specs/2026-11-13-m8-progression-design.md`, plan `docs/superpowers/plans/2026-11-13-m8-progression.md`) was **accepted by the owner 2026-11-13** ("everything seems to work"). The v0.9.0 log was clean (`Loaded v0.9.0 (20 methods patched)`, no StashNet errors), but the in-world session was only about 2.5 min with no `sn heat`, so not every checklist step was confirmed. The **Core spacing rule (v0.9.1)** is merged but **never deployed or tested**. The owner chose to test it with M9 (M8 checklist step 9).
+- **State:** **v0.9.1 on `master`** (github.com/Coop25/StashNet, private; pushed 2026-11-13). Milestones 0–8 are done. M8 Progression (design `docs/superpowers/specs/2026-11-13-m8-progression-design.md`, plan `docs/superpowers/plans/2026-11-13-m8-progression.md`) was **accepted by the owner 2026-11-13** ("everything seems to work"). The v0.9.0 log was clean (`Loaded v0.9.0 (20 methods patched)`, no StashNet errors), but the in-world session was only about 2.5 min with no `sn heat`, so not every checklist step was confirmed. The **Core spacing rule (v0.9.1)** is merged but **never deployed or tested**. The owner chose to test it with M9 (M8 checklist step 9).
 - **v0.9.0 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-13). Redeploy only after the owner says the game is closed.
 - **The owner's StashNet test world contains StashNet blocks.** Don't load it without the mod installed (those blocks would break). Their real saves never had StashNet.
 - **Next: M9** (multiplayer testing + hardening + release package). It's being designed. Open question to the owner: who the release is for and how they'd get it. That decides the anti-cheat bar and the package. Parked balance idea: a running cost (fuel or electricity), decide after the owner has played M8.
@@ -21,6 +21,9 @@ A 7 Days to Die mod adding a drive-based storage network (Core, Drive Bays, driv
 - Game-free logic (drive storage, network merge, passwords, heat math) lives in a separate library with automated tests. Game glue stays thin.
 - All balance numbers live in one config XML.
 - v1 uses vanilla models and tinted vanilla icons only. No custom art.
+
+## Git
+- **The default branch is `master`, never `main`** (owner, 2026-11-13; renamed from `main` that day). Each milestone gets its own branch off `master` and merges back into `master` after the owner's in-game test.
 
 ## Never touch the game install without asking
 Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods folder. Do it **only after the owner says yes for that deploy**, and only while the game is closed. The owner plays this game, and their real saves run other mods. Read-only inspection of the game folder is fine.
