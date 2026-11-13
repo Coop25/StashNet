@@ -297,7 +297,7 @@ function Draw-Warning($g, [float]$w, [float]$h, [int]$seed) {
   $g.FillRectangle((Brush (C 255 220 180 30)), 0, 0, $w, $h)
   $g.FillRectangle((Brush (C 255 20 20 20)), 3, [float]($h*0.36), $w-6, [float]($h*0.6))
   for ($x = -$h; $x -lt $w; $x += 12) { Poly $g (Brush (C 255 20 20 20)) @(@($x,($h*0.32)),@(($x+6),($h*0.32)),@(($x+6+$h*0.3),0),@(($x+$h*0.3),0)) }
-  Text $g 'DATA STORAGE' 'Arial' ($h*0.26) ([System.Drawing.FontStyle]::Bold) (C 255 220 180 30) 3 ([float]($h*0.38)) ($w-6) ([float]($h*0.3))
+  Text $g 'DATA STORAGE' 'Arial' ($h*0.24) ([System.Drawing.FontStyle]::Bold) (C 255 220 180 30) 3 ([float]($h*0.38)) ($w-6) ([float]($h*0.3))
   Text $g 'HANDLE WITH CARE' 'Arial' ($h*0.16) ([System.Drawing.FontStyle]::Bold) (C 255 220 180 30) 3 ([float]($h*0.66)) ($w-6) ([float]($h*0.26))
   for ($i=0; $i -lt 3; $i++) { Wipe $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) ([float](6+$rnd.Next(10))) ([float](5+$rnd.Next(8))) }
   Grime $g $w $h 70 ($seed+5) 160 }
@@ -340,7 +340,7 @@ $sprites = @(
   @('ledPanel', 160, 80, { param($g,$w,$h) Draw-LedPanel $g $w $h 52 }),
   @('ventGrille', 160, 80, { param($g,$w,$h) Draw-Vent $g $w $h 53 }),
   @('portPanel', 160, 72, { param($g,$w,$h) Draw-Ports $g $w $h 54 }),
-  @('warningLabel', 128, 64, { param($g,$w,$h) Draw-Warning $g $w $h 55 }),
+  @('warningLabel', 176, 64, { param($g,$w,$h) Draw-Warning $g $w $h 55 }),
   @('glyphA', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'A' }),
   @('glyphB', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'B' }),
   @('glyphC', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'C' }),

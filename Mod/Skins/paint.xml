@@ -55,7 +55,7 @@
       <stamp sprite="paintPatch" u="0.4" v="0.476" w="0.185" h="0.02" rot="180" />
       <stamp sprite="stencilStashnet" u="0.375" v="0.07" w="0.2" h="0.032" rot="180" />
       <stamp sprite="ledPanel" u="0.41" v="0.25" w="0.1" h="0.05" rot="180" />
-      <stamp sprite="warningLabel" u="0.32" v="0.25" w="0.07" h="0.035" rot="180" />
+      <stamp sprite="warningLabel" u="0.315" v="0.25" w="0.085" h="0.031" rot="180" />
       <stamp sprite="ventGrille" u="0.375" v="0.335" w="0.16" h="0.065" rot="180" />
       <stamp sprite="portPanel" u="0.375" v="0.395" w="0.13" h="0.045" rot="180" />
       <stamp sprite="stripePurple" u="0.375" v="0.43" w="0.24" h="0.018" rot="180" />

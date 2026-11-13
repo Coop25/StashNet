@@ -35,21 +35,21 @@
   <sprite name="ledPanel" x="4" y="708" w="160" h="80" />
   <sprite name="ventGrille" x="172" y="708" w="160" h="80" />
   <sprite name="portPanel" x="340" y="708" w="160" h="72" />
-  <sprite name="warningLabel" x="508" y="708" w="128" h="64" />
-  <sprite name="glyphA" x="644" y="708" w="28" h="36" />
-  <sprite name="glyphB" x="680" y="708" w="28" h="36" />
-  <sprite name="glyphC" x="716" y="708" w="28" h="36" />
-  <sprite name="glyphD" x="752" y="708" w="28" h="36" />
-  <sprite name="glyphE" x="788" y="708" w="28" h="36" />
-  <sprite name="glyphF" x="824" y="708" w="28" h="36" />
-  <sprite name="glyphG" x="860" y="708" w="28" h="36" />
-  <sprite name="glyphH" x="896" y="708" w="28" h="36" />
-  <sprite name="glyph1" x="932" y="708" w="28" h="36" />
-  <sprite name="glyph2" x="968" y="708" w="28" h="36" />
-  <sprite name="glyph3" x="4" y="796" w="28" h="36" />
-  <sprite name="glyph4" x="40" y="796" w="28" h="36" />
-  <sprite name="glyph5" x="76" y="796" w="28" h="36" />
-  <sprite name="glyph6" x="112" y="796" w="28" h="36" />
-  <sprite name="glyph7" x="148" y="796" w="28" h="36" />
-  <sprite name="glyph8" x="184" y="796" w="28" h="36" />
+  <sprite name="warningLabel" x="508" y="708" w="176" h="64" />
+  <sprite name="glyphA" x="692" y="708" w="28" h="36" />
+  <sprite name="glyphB" x="728" y="708" w="28" h="36" />
+  <sprite name="glyphC" x="764" y="708" w="28" h="36" />
+  <sprite name="glyphD" x="800" y="708" w="28" h="36" />
+  <sprite name="glyphE" x="836" y="708" w="28" h="36" />
+  <sprite name="glyphF" x="872" y="708" w="28" h="36" />
+  <sprite name="glyphG" x="908" y="708" w="28" h="36" />
+  <sprite name="glyphH" x="944" y="708" w="28" h="36" />
+  <sprite name="glyph1" x="980" y="708" w="28" h="36" />
+  <sprite name="glyph2" x="4" y="796" w="28" h="36" />
+  <sprite name="glyph3" x="40" y="796" w="28" h="36" />
+  <sprite name="glyph4" x="76" y="796" w="28" h="36" />
+  <sprite name="glyph5" x="112" y="796" w="28" h="36" />
+  <sprite name="glyph6" x="148" y="796" w="28" h="36" />
+  <sprite name="glyph7" x="184" y="796" w="28" h="36" />
+  <sprite name="glyph8" x="220" y="796" w="28" h="36" />
 </atlas>
