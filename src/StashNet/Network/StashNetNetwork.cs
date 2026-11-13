@@ -33,6 +33,8 @@ namespace StashNet.Network
         public TEFeatureLockable CoreLock { get; private set; }
         public NetworkStorage Storage { get; private set; }
         public int BayCount { get; private set; }
+        /// <summary>Bays within this Core's reach that belong to a nearer Core (M8), so not in this network.</summary>
+        public int OtherCoreBays { get; private set; }
         /// <summary>Bays skipped because someone has them open.</summary>
         public int SkippedBays { get; private set; }
         /// <summary>Drives skipped because their data can't be read (left untouched).</summary>
@@ -65,7 +67,11 @@ namespace StashNet.Network
                 TEFeatureStorage storage = te.GetFeature<TEFeatureStorage>();
                 if (storage == null) continue;
                 // A bay belongs to its nearest Core only, so it is never in two networks (M8).
-                if (!IsOwner(cores, te.ToWorldPos(), corePos)) continue;
+                if (!IsOwner(cores, te.ToWorldPos(), corePos))
+                {
+                    net.OtherCoreBays++;
+                    continue;
+                }
 
                 net.BayCount++;
                 if (storage.IsUserAccessing())

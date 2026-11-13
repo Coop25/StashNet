@@ -45,6 +45,8 @@ Handy commands (F1 console):
 - [ ] Place two Cores about **8 blocks apart**, with reaches that overlap (Scrap Cores reach 6, so put bays in the overlap). Put drives in bays on both sides and in the middle.
 - [ ] Stand at each Core and run `sn heat`. Every bay's drives count toward **exactly one** Core (the nearer one). The two drive counts add up to the total number of drives.
 - [ ] Open a terminal near each Core: each one shows only its own bays' items.
+- [ ] Lock **one** of the two Cores with a code. Only the bays that Core owns ask for its code; the other Core's bays open freely.
+- [ ] Place a terminal next to a Core whose nearby bays all belong to the other Core: it says "N Drive Bay(s) in range belong to a nearer Storage Core" (not "No Drive Bays").
 
 ## 6. Chunk edges
 - [ ] Build a small network across a **chunk border** (chunks are 16×16; F3 shows your chunk). Put the Core on one side and bays on both sides. Everything shows up in the terminal.

@@ -138,10 +138,8 @@ namespace StashNet.Network
             resp.UsedStacks = net.Storage.UsedStacks;
             resp.MaxStacks = net.Storage.MaxStacks;
             resp.Drives = net.Storage.Drives.Count;
-            if (net.BayCount == 0) resp.Messages.Add(new TerminalMessage("stashnetNoBays", -1));
-            else if (net.Storage.Drives.Count == 0) resp.Messages.Add(new TerminalMessage("stashnetNoDrives", -1));
-            if (net.SkippedBays > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedBays", net.SkippedBays));
-            if (net.SkippedDrives > 0) resp.Messages.Add(new TerminalMessage("stashnetSkippedDrives", net.SkippedDrives));        }
+            resp.Messages.AddRange(NetworkStatus.Messages(net.BayCount, net.OtherCoreBays, net.Storage.Drives.Count, net.SkippedBays, net.SkippedDrives));
+        }
 
         private static bool IsValid(World world, EntityPlayer player, Vector3i pos)
         {
