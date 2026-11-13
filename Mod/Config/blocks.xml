@@ -73,8 +73,8 @@
 			<property name="StashNetHeatCap" value="6.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
-			<property name="Model" value="@:Entities/Electrical/utilityTransformerPrefab.prefab" />
-			<property name="CustomIcon" value="utilityTransformer" />
+			<property name="Model" value="@:Entities/Industrial/controlPanelBase_05Prefab.prefab" />
+			<property name="CustomIcon" value="controlPanelBase05" />
 			<property name="CustomIconTint" value="7FFF7F" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />

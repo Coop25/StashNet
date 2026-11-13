@@ -66,7 +66,7 @@
     </texture>
   </block>
 
-  <!-- Cores: electrical box (blue), transformer (green), control panel (purple). -->
+  <!-- Cores: electrical box (blue), control panel 05 (green), control panel 01 (purple). -->
   <block name="stashnetScrapCore">
     <!-- Every face of this model is mirrored (owner's grid shots, 2026-11-13): front A-C rows 6-8 with the
          seam at column C (u 0.3125), lid top F-H rows 3-4 mirrored around H, sides F-G. Words would read
@@ -82,8 +82,9 @@
     </texture>
   </block>
   <block name="stashnetStorageCore">
-    <!-- Front not found yet (wasn't in the grid screenshots): damage only for now. -->
-    <texture name="UtilityTransformer_d" tint="4A503F" strength="0.6" damage="1.0" seed="22" />
+    <!-- Owner (2026-11-13): the transformer looked jarring, so this is now controlPanelBase05. The texture name
+         is a guess (same family as the Advanced Core): confirm with sn skin dump, find the faces with sn skin grid. -->
+    <texture name="controlPanelControls" tint="4A503F" strength="0.6" damage="1.0" seed="22" />
   </block>
   <block name="stashnetAdvancedCore">
     <texture name="controlPanelControls" tint="4A503F" strength="0.55" damage="1.0" seed="23">
