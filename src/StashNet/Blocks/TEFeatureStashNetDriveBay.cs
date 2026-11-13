@@ -34,6 +34,19 @@ namespace StashNet.Blocks
             if (Equals(_module) && CommandIs(_commandName, CmdNetworkCode)) return LockedForMe();
             if (_module is TEFeatureStorage && CommandIs(_commandName, "Search")) return !LockedForMe();
             if (_module is TEFeatureLockable && (CommandIs(_commandName, "lock") || CommandIs(_commandName, "keypad"))) return false;
+            // Owner (2026-11-13): an empty bay can be picked up (vanilla pickup rule: inside your own land claim).
+            // Picking up a bay with drives in it would destroy them, so "Take" only shows when it's empty.
+            if (_module is TEFeaturePickup && CommandIs(_commandName, "Take")) return !LockedForMe() && IsEmpty(Parent);
+            return true;
+        }
+
+        /// <summary>True if the bay's storage has no items (also used by the pickup guard patch).</summary>
+        public static bool IsEmpty(TileEntityComposite bay)
+        {
+            TEFeatureStorage storage = bay?.GetFeature<TEFeatureStorage>();
+            if (storage?.ItemGrid == null) return true;
+            for (int i = 0; i < storage.ItemGrid.Length; i++)
+                if (storage.ItemGrid[i] != null && !storage.ItemGrid[i].IsEmpty()) return false;
             return true;
         }
 

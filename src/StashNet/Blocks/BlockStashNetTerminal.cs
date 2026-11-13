@@ -34,7 +34,7 @@ namespace StashNet.Blocks
             {
                 new BlockActivationCommand("open", "search", _enabled: true),
                 new BlockActivationCommand("netcode", "keypad", _enabled: locked),
-                new BlockActivationCommand("take", "hand", _enabled: true),
+                new BlockActivationCommand("take", "hand", _enabled: InMyLandClaim(_world, _blockPos)),
             };
         }
 
@@ -48,6 +48,7 @@ namespace StashNet.Blocks
                     OpenCoreKeypad(_player, _blockPos);
                     return true;
                 case "take":
+                    if (!InMyLandClaim(_world, _blockPos)) return false;
                     takeItemWithTimer(_blockPos, _blockValue, _player, PickupDelay);
                     return true;
                 default:
@@ -66,6 +67,10 @@ namespace StashNet.Blocks
             XUiC_StashNetTerminal.Open(_player, _blockPos);
             return true;
         }
+
+        /// <summary>Owner (2026-11-13): like every StashNet block (vanilla workbench rule), pick up only inside your own land claim.</summary>
+        private static bool InMyLandClaim(WorldBase world, Vector3i pos) =>
+            world.IsMyLandProtectedBlock(pos, world.GetGameManager().GetPersistentLocalPlayer());
 
         private static void OpenCoreKeypad(EntityPlayerLocal player, Vector3i terminalPos)
         {

@@ -11,7 +11,15 @@ $skinDir = Join-Path $root 'Mod/Skins'
 
 # Block -> vanilla icon, army-green tint, tier stripe sprite, readout sprite, label sprite, seed.
 $blocks = @(
-  @{ Name='stashnetDriveBay'; Icon='cntFileCabinetTallClosed'; Tint='4A503F'; Stripe='stripeBlue'; Readout='readoutDrv4'; Label='labelUnitBay'; Seed=101 }
+  # No readouts (owner removed the "DRV n/n" readouts in-game, 2026-11-13). Stripe = tier color, like in-game.
+  @{ Name='stashnetDriveBay'; Icon='cntFileCabinetTallClosed'; Tint='4A503F'; Stripe='stripeBlue'; Seed=101 },
+  @{ Name='stashnetDriveBayReinforced'; Icon='decoServerRackWhite'; Tint='4A503F'; Stripe='stripeGreen'; Seed=102 },
+  @{ Name='stashnetDriveBayArmored'; Icon='cntGunSafeWhite'; Tint='3A3F31'; Stripe='stripePurple'; Seed=103 },
+  @{ Name='stashnetScrapCore'; Icon='electricalBox02'; Tint='4A503F'; Stripe='stripeBlue'; Emblem='coreHalfBlue'; Seed=111 },
+  @{ Name='stashnetStorageCore'; Icon='controlPanelBase05'; Tint='4A503F'; Stripe='stripeGreen'; Emblem='coreHalfGreen'; Seed=112 },
+  @{ Name='stashnetAdvancedCore'; Icon='controlPanelBase01'; Tint='4A503F'; Stripe='stripePurple'; Emblem='coreHalfPurple'; Seed=113 },
+  @{ Name='stashnetTerminal'; Icon='tvCRT_Player'; Tint='4A503F'; Stripe='stripeGreen'; Seed=121 },
+  @{ Name='stashnetCraftingTerminal'; Icon='workbench'; Tint='4A503F'; Stripe='stripeGreen'; Seed=122 }
 )
 
 # ---- atlas sprites ----
@@ -69,8 +77,12 @@ foreach ($b in $blocks) {
   Sprite $g 'clawGouge' (& $X 0.32) (& $Y 0.50) ($W*0.36) ($H*0.30) 15
   Sprite $g 'bareMetal1' (& $X 0.15) (& $Y 0.94) ($W*0.28) ($H*0.10)
   Sprite $g $b.Stripe (& $X 0.5) (& $Y 0.28) ($W*0.92) ($H*0.06)
-  Sprite $g 'stencilStashnet' (& $X 0.5) (& $Y 0.88) ($W*0.80) ($H*0.09)
-  Sprite $g $b.Readout (& $X 0.5) (& $Y 0.72) ($W*0.62) ($H*0.12)
+  Sprite $g 'stencilStashnet' (& $X 0.5) (& $Y 0.84) ($W*0.62) ($H*0.08)
+  if ($b.Emblem) {
+    # Whole core emblem: the half sprite plus the same half turned 180 (the hexagon is symmetric), like in-game.
+    $e = [math]::Min($W, $H) * 0.34
+    Sprite $g $b.Emblem ((& $X 0.5) - $e/4) (& $Y 0.55) ($e/2) $e
+    Sprite $g $b.Emblem ((& $X 0.5) + $e/4) (& $Y 0.55) ($e/2) $e 180 }
   foreach ($k in 0..2) { Sprite $g 'bulletHole1' (& $X (0.55 + $rnd.NextDouble()*0.3)) (& $Y (0.4 + $rnd.NextDouble()*0.25)) 9 9 ($rnd.Next(0,360)) }
   $g.Dispose()
   # Put the original silhouette back: anything drawn outside it becomes transparent again.

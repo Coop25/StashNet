@@ -19,6 +19,7 @@
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
+				<property class="TEFeatureStashNetArea" />
 				<property class="TEFeaturePickup">
 					<property name="TakeDelay" value="2" />
 				</property>
@@ -31,8 +32,6 @@
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
-			<property name="CustomIcon" value="electricalBox02" />
-			<property name="CustomIconTint" value="FFB060" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
@@ -64,6 +63,7 @@
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
+				<property class="TEFeatureStashNetArea" />
 				<property class="TEFeaturePickup">
 					<property name="TakeDelay" value="2" />
 				</property>
@@ -74,8 +74,6 @@
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Industrial/controlPanelBase_05Prefab.prefab" />
-			<property name="CustomIcon" value="controlPanelBase05" />
-			<property name="CustomIconTint" value="7FFF7F" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
@@ -107,6 +105,7 @@
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
+				<property class="TEFeatureStashNetArea" />
 				<property class="TEFeaturePickup">
 					<property name="TakeDelay" value="2" />
 				</property>
@@ -117,8 +116,6 @@
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Industrial/controlPanelBase_01Prefab.prefab" />
-			<property name="CustomIcon" value="controlPanelBase01" />
-			<property name="CustomIconTint" value="D07FFF" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
@@ -155,6 +152,9 @@
 					<property name="LootList" value="stashnetDriveBaySlots" />
 				</property>
 				<property class="TEFeatureLockable" />
+				<property class="TEFeaturePickup">
+					<property name="TakeDelay" value="2" />
+				</property>
 			</property>
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
@@ -197,6 +197,9 @@
 					<property name="LootList" value="stashnetDriveBaySlotsReinforced" />
 				</property>
 				<property class="TEFeatureLockable" />
+				<property class="TEFeaturePickup">
+					<property name="TakeDelay" value="2" />
+				</property>
 			</property>
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
@@ -204,8 +207,6 @@
 			<property name="DisplayType" value="blockMulti" />
 			<property name="MultiBlockDim" value="1,2,1" />
 			<property name="ModelOffset" value="0,0.5,0" />
-			<property name="CustomIcon" value="decoServerRackWhite" />
-			<property name="CustomIconTint" value="7FFF7F" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Path" value="solid" />
@@ -239,6 +240,9 @@
 					<property name="LootList" value="stashnetDriveBaySlotsArmored" />
 				</property>
 				<property class="TEFeatureLockable" />
+				<property class="TEFeaturePickup">
+					<property name="TakeDelay" value="2" />
+				</property>
 			</property>
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
@@ -246,8 +250,6 @@
 			<property name="DisplayType" value="blockMulti" />
 			<property name="MultiBlockDim" value="1,2,1" />
 			<property name="ModelOffset" value="0,0.5,0" />
-			<property name="CustomIcon" value="cntGunSafeWhite" />
-			<property name="CustomIconTint" value="D07FFF" />
 			<!-- No TintColor: the darker army green is painted into the texture (Mod/Skins/paint.xml). -->
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
@@ -280,8 +282,6 @@
 			<property name="ModelOffset" value="0,0,0" />
 			<property name="GndAlign" value="1" />
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
-			<property name="CustomIcon" value="tvCRT_Player" />
-			<property name="CustomIconTint" value="7FFFB0" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Path" value="solid" />
@@ -310,8 +310,6 @@
 			     block name, so the screen wouldn't open (v0.7.0 bug). Recipes come from the inherited
 			     CraftingAreaRecipes="player,workbench"; the screen from WorkstationWindow. -->
 			<property name="WorkstationWindow" value="workstation_workbench" />
-			<property name="CustomIcon" value="workbench" />
-			<property name="CustomIconTint" value="7FFFB0" />
 			<property name="DescriptionKey" value="stashnetCraftingTerminalDesc" />
 			<property name="SortOrder1" value="B900" />
 			<property name="SortOrder2" value="0003" />
