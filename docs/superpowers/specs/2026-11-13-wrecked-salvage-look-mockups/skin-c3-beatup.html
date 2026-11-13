@@ -1,0 +1,119 @@
+<style>
+  svg{display:block;margin:0 auto;background:#1d1f22;border-radius:8px}
+  .note{font-size:13px;opacity:.8;margin:6px 0 18px}
+</style>
+<h2>C3 Military salvage, beat up: how far?</h2>
+<p class="subtitle">Same army-green bunker look, with more damage: dents, bullet holes, zombie claw marks, scorch marks, worn paint and a cracked screen. Drawn on the Drive Bay in its blue tier color. Click one.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="grime2"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .22  0 0 0 0 .15  0 0 0 0 .08  0 0 0 .75 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="scorch"><feGaussianBlur stdDeviation="5"/></filter>
+    <radialGradient id="hole"><stop offset="0" stop-color="#050505"/><stop offset=".55" stop-color="#151515"/><stop offset="1" stop-color="#8a8a80" stop-opacity=".0"/></radialGradient>
+  </defs>
+</svg>
+
+<div class="cards">
+
+  <!-- Battered -->
+  <div class="card" data-choice="c3-battered" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg width="220" height="280" viewBox="0 0 220 280">
+        <rect x="65" y="25" width="90" height="225" rx="2" fill="#4f5544" stroke="#22261c" stroke-width="2"/>
+        <rect x="72" y="35" width="76" height="64" fill="#474d3d" stroke="#22261c"/>
+        <rect x="72" y="105" width="76" height="64" fill="#474d3d" stroke="#22261c"/>
+        <rect x="72" y="175" width="76" height="64" fill="#474d3d" stroke="#22261c"/>
+        <!-- worn paint showing bare metal -->
+        <path d="M72 35 l18 0 l-6 10 l-12 4 z" fill="#8c8f88"/>
+        <path d="M148 140 l-14 6 l4 14 l10 4 z" fill="#8c8f88"/>
+        <path d="M65 200 l10 -4 l2 16 l-12 6 z" fill="#8c8f88"/>
+        <!-- stencil, partly worn -->
+        <text x="110" y="53" fill="#d8d2b8" font-family="Courier New,monospace" font-weight="bold" font-size="11" text-anchor="middle" opacity=".7">STASHNET</text>
+        <rect x="118" y="44" width="12" height="11" fill="#474d3d" opacity=".8"/>
+        <text x="110" y="64" fill="#d8d2b8" font-family="Courier New,monospace" font-size="7" text-anchor="middle" opacity=".55">UNIT 01 · BAY</text>
+        <!-- readout with crack -->
+        <rect x="84" y="70" width="52" height="20" fill="#26291f" stroke="#111"/>
+        <rect x="88" y="73" width="44" height="14" fill="#04140a"/>
+        <text x="110" y="83" fill="#3fdc66" font-family="monospace" font-size="7" text-anchor="middle" opacity=".85">DRV 4/4 OK</text>
+        <path d="M118 73 l-5 6 l4 3 l-6 5" stroke="#cfe" stroke-width=".7" fill="none" opacity=".7"/>
+        <!-- dents -->
+        <ellipse cx="96" cy="125" rx="10" ry="6" fill="#3b4031"/><ellipse cx="94" cy="123" rx="8" ry="4" fill="#5a6050" opacity=".5"/>
+        <!-- weld seams -->
+        <path d="M72 103 h76" stroke="#8a7a5a" stroke-width="2" stroke-dasharray="3 2"/>
+        <!-- chipped blue stripe -->
+        <rect x="65" y="145" width="90" height="8" fill="#3a6fb0" opacity=".75"/>
+        <rect x="84" y="145" width="14" height="8" fill="#4f5544"/><rect x="126" y="147" width="8" height="6" fill="#4f5544"/>
+        <!-- claw marks -->
+        <path d="M120 180 l12 30 M126 178 l12 30 M132 177 l11 28" stroke="#22261c" stroke-width="2"/>
+        <path d="M121 181 l12 30 M127 179 l12 30" stroke="#8c8f88" stroke-width=".8"/>
+        <!-- rust streaks -->
+        <path d="M80 105 v40" stroke="#7a4a22" stroke-width="4" opacity=".55"/>
+        <path d="M140 175 v50" stroke="#7a4a22" stroke-width="5" opacity=".5"/>
+        <path d="M100 239 v11" stroke="#7a4a22" stroke-width="3" opacity=".6"/>
+        <!-- conduit -->
+        <rect x="155" y="45" width="6" height="190" fill="#2b2b2b"/>
+        <circle cx="138" cy="225" r="2.6" fill="#3fdc66"/><circle cx="128" cy="225" r="2.6" fill="#2a2a2a"/>
+        <rect x="65" y="25" width="90" height="225" fill="#000" filter="url(#grime2)"/>
+      </svg>
+    </div>
+    <div class="card-body"><h3>Battered</h3><p>Worn through to bare metal at the edges, a dent, zombie claw marks, heavier rust streaks. The stencil is half worn off, and the screen has a crack but still works.</p></div>
+  </div>
+
+  <!-- Wrecked but working -->
+  <div class="card" data-choice="c3-wrecked" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg width="220" height="280" viewBox="0 0 220 280">
+        <!-- scorch on the ground -->
+        <ellipse cx="110" cy="252" rx="60" ry="8" fill="#000" opacity=".5" filter="url(#scorch)"/>
+        <rect x="65" y="25" width="90" height="225" rx="2" fill="#4a503f" stroke="#22261c" stroke-width="2"/>
+        <rect x="72" y="35" width="76" height="64" fill="#43493a" stroke="#22261c"/>
+        <!-- middle drawer bent outward -->
+        <polygon points="72,105 148,105 152,171 70,169" fill="#43493a" stroke="#22261c"/>
+        <rect x="72" y="175" width="76" height="64" fill="#43493a" stroke="#22261c"/>
+        <!-- big bare metal patches -->
+        <path d="M65 25 l30 0 l-10 14 l-12 2 l-8 10 z" fill="#8c8f88"/>
+        <path d="M155 120 l-22 8 l2 22 l20 4 z" fill="#8c8f88"/>
+        <path d="M65 190 l16 -6 l4 24 l-20 10 z" fill="#8c8f88"/>
+        <!-- scorch marks -->
+        <ellipse cx="130" cy="60" rx="22" ry="16" fill="#0d0d0b" opacity=".6" filter="url(#scorch)"/>
+        <ellipse cx="88" cy="215" rx="18" ry="14" fill="#0d0d0b" opacity=".55" filter="url(#scorch)"/>
+        <!-- stencil mostly gone -->
+        <text x="110" y="53" fill="#d8d2b8" font-family="Courier New,monospace" font-weight="bold" font-size="11" text-anchor="middle" opacity=".5">STASHNET</text>
+        <rect x="90" y="44" width="10" height="11" fill="#43493a" opacity=".85"/><rect x="122" y="44" width="10" height="11" fill="#43493a" opacity=".85"/>
+        <!-- readout, cracked, flickering, a strip of tape -->
+        <rect x="84" y="70" width="52" height="20" fill="#26291f" stroke="#111"/>
+        <rect x="88" y="73" width="44" height="14" fill="#04140a"/>
+        <text x="110" y="83" fill="#3fdc66" font-family="monospace" font-size="7" text-anchor="middle" opacity=".6">DRV 4/4 OK</text>
+        <rect x="88" y="78" width="44" height="2" fill="#3fdc66" opacity=".25"/>
+        <path d="M100 73 l6 5 l-3 4 l7 5 M106 78 l10 -3" stroke="#cfe" stroke-width=".8" fill="none" opacity=".8"/>
+        <rect x="80" y="66" width="20" height="6" fill="#8f8f88" transform="rotate(-15 90 69)"/>
+        <!-- bullet holes -->
+        <circle cx="125" cy="120" r="4" fill="url(#hole)"/><circle cx="125" cy="120" r="1.8" fill="#050505"/>
+        <circle cx="134" cy="132" r="4" fill="url(#hole)"/><circle cx="134" cy="132" r="1.8" fill="#050505"/>
+        <circle cx="96" cy="198" r="4" fill="url(#hole)"/><circle cx="96" cy="198" r="1.8" fill="#050505"/>
+        <circle cx="140" cy="40" r="4" fill="url(#hole)"/><circle cx="140" cy="40" r="1.8" fill="#050505"/>
+        <!-- deep claw marks -->
+        <path d="M78 112 l18 42 M85 110 l18 42 M92 109 l17 40 M99 109 l15 36" stroke="#14160f" stroke-width="2.5"/>
+        <path d="M79 113 l18 42 M86 111 l18 42 M93 110 l17 40" stroke="#9a9d95" stroke-width=".8"/>
+        <!-- blue stripe heavily chipped -->
+        <rect x="65" y="176" width="90" height="7" fill="#3a6fb0" opacity=".65"/>
+        <rect x="74" y="176" width="20" height="7" fill="#4a503f"/><rect x="110" y="178" width="12" height="5" fill="#4a503f"/><rect x="140" y="176" width="8" height="7" fill="#4a503f"/>
+        <!-- missing rivet, one hanging bolt -->
+        <circle cx="76" cy="179" r="1.8" fill="#2a2d22"/><circle cx="144" cy="179" r="2.2" fill="#111" stroke="#555" stroke-width=".5"/>
+        <!-- heavy rust -->
+        <path d="M80 105 v50" stroke="#7a4a22" stroke-width="5" opacity=".6"/>
+        <path d="M140 175 v60" stroke="#7a4a22" stroke-width="6" opacity=".55"/>
+        <path d="M118 35 v30" stroke="#7a4a22" stroke-width="4" opacity=".5"/>
+        <rect x="65" y="238" width="90" height="12" fill="#5e3a1c" opacity=".55"/>
+        <!-- conduit, broken, sparking wire -->
+        <rect x="155" y="45" width="6" height="110" fill="#2b2b2b"/><rect x="155" y="170" width="6" height="65" fill="#2b2b2b"/>
+        <path d="M158 155 c8 4, 4 10, 12 12" stroke="#b03030" stroke-width="2" fill="none"/>
+        <circle cx="171" cy="167" r="2" fill="#ffd27a"/><path d="M171 167 l5 -4 M171 167 l6 2 M171 167 l3 5" stroke="#ffd27a" stroke-width=".8"/>
+        <circle cx="138" cy="225" r="2.6" fill="#3fdc66" opacity=".8"/><circle cx="128" cy="225" r="2.6" fill="#d43a1a" opacity=".8"/>
+        <rect x="65" y="25" width="90" height="225" fill="#000" filter="url(#grime2)"/>
+      </svg>
+    </div>
+    <div class="card-body"><h3>Wrecked but working</h3><p>Everything in Battered, pushed further: bullet holes, deep claw gouges, scorch marks, a bent drawer, a flickering taped-up screen, a broken conduit with a sparking wire, and a rusted-through base. Looks like it survived a horde.</p></div>
+  </div>
+</div>
+<p class="note">Every Core, bay and terminal would get the same treatment in its own tier color. The CRT terminal would get matching scuffs and a stenciled label.</p>

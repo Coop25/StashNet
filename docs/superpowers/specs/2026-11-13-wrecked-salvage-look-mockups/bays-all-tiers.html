@@ -1,0 +1,111 @@
+<style>
+  svg{display:block;margin:0 auto;background:#1d1f22;border-radius:8px}
+  .note{font-size:13px;opacity:.8;margin:6px 0 18px}
+</style>
+<h2>All three Drive Bays, wrecked but working</h2>
+<p class="subtitle">Each tier keeps its own vanilla shape and gets the same treatment in its own tier color. Rough drawings.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="g3"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .22  0 0 0 0 .15  0 0 0 0 .08  0 0 0 .75 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="sc3"><feGaussianBlur stdDeviation="5"/></filter>
+    <radialGradient id="h3"><stop offset="0" stop-color="#050505"/><stop offset=".55" stop-color="#151515"/><stop offset="1" stop-color="#8a8a80" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
+
+<div class="cards">
+  <!-- Drive Bay: file cabinet, blue -->
+  <div class="card" data-choice="bay-basic" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg width="200" height="270" viewBox="0 0 200 270">
+        <rect x="55" y="20" width="90" height="225" rx="2" fill="#4a503f" stroke="#22261c" stroke-width="2"/>
+        <rect x="62" y="30" width="76" height="64" fill="#43493a" stroke="#22261c"/>
+        <polygon points="62,100 138,100 142,166 60,164" fill="#43493a" stroke="#22261c"/>
+        <rect x="62" y="170" width="76" height="64" fill="#43493a" stroke="#22261c"/>
+        <path d="M55 20 l28 0 l-10 14 l-18 8 z" fill="#8c8f88"/>
+        <ellipse cx="120" cy="55" rx="20" ry="14" fill="#0d0d0b" opacity=".6" filter="url(#sc3)"/>
+        <text x="100" y="47" fill="#d8d2b8" font-family="Courier New,monospace" font-weight="bold" font-size="11" text-anchor="middle" opacity=".5">STASHNET</text>
+        <rect x="74" y="64" width="52" height="20" fill="#26291f" stroke="#111"/><rect x="78" y="67" width="44" height="14" fill="#04140a"/>
+        <text x="100" y="77" fill="#3fdc66" font-family="monospace" font-size="7" text-anchor="middle" opacity=".6">DRV 4/4 OK</text>
+        <path d="M90 67 l6 5 l-3 4 l7 5" stroke="#cfe" stroke-width=".8" fill="none" opacity=".8"/>
+        <circle cx="118" cy="118" r="4" fill="url(#h3)"/><circle cx="118" cy="118" r="1.8" fill="#050505"/>
+        <circle cx="86" cy="196" r="4" fill="url(#h3)"/><circle cx="86" cy="196" r="1.8" fill="#050505"/>
+        <path d="M70 108 l16 40 M77 107 l16 40 M84 106 l15 38" stroke="#14160f" stroke-width="2.5"/>
+        <rect x="55" y="172" width="90" height="7" fill="#3a6fb0" opacity=".7"/><rect x="70" y="172" width="18" height="7" fill="#4a503f"/><rect x="118" y="174" width="10" height="5" fill="#4a503f"/>
+        <path d="M130 172 v60" stroke="#7a4a22" stroke-width="6" opacity=".55"/>
+        <rect x="55" y="234" width="90" height="11" fill="#5e3a1c" opacity=".55"/>
+        <rect x="55" y="20" width="90" height="225" fill="#000" filter="url(#g3)"/>
+      </svg>
+    </div>
+    <div class="card-body"><h3>Drive Bay (4 slots)</h3><p>Tall file cabinet, <b style="color:#5a9be0">blue</b> stripe. Screen says DRV 4/4.</p></div>
+  </div>
+
+  <!-- Reinforced: server rack, green -->
+  <div class="card" data-choice="bay-reinforced" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg width="200" height="270" viewBox="0 0 200 270">
+        <rect x="50" y="20" width="100" height="225" rx="2" fill="#4a503f" stroke="#22261c" stroke-width="2"/>
+        <rect x="58" y="28" width="84" height="200" fill="#2a2e24" stroke="#22261c"/>
+        <g fill="#3d4334" stroke="#1a1d15">
+          <rect x="62" y="34" width="76" height="16"/><rect x="62" y="54" width="76" height="16"/><rect x="62" y="74" width="76" height="16"/>
+          <rect x="62" y="94" width="76" height="16"/><rect x="62" y="114" width="76" height="16"/><rect x="62" y="134" width="76" height="16"/>
+          <rect x="62" y="154" width="76" height="16"/><rect x="62" y="174" width="76" height="16"/><rect x="62" y="194" width="76" height="16"/>
+        </g>
+        <!-- one unit hanging out -->
+        <polygon points="62,114 138,114 146,132 66,134" fill="#555b48" stroke="#1a1d15"/>
+        <g fill="#3fdc66"><circle cx="130" cy="42" r="1.6"/><circle cx="130" cy="62" r="1.6"/><circle cx="130" cy="162" r="1.6" opacity=".5"/></g>
+        <circle cx="130" cy="82" r="1.6" fill="#d43a1a"/>
+        <path d="M50 20 l24 0 l-6 12 l-18 10 z" fill="#8c8f88"/>
+        <text x="100" y="17" fill="#d8d2b8" font-family="Courier New,monospace" font-weight="bold" font-size="10" text-anchor="middle" opacity=".55">STASHNET · UNIT 02</text>
+        <rect x="70" y="96" width="44" height="13" fill="#04140a" stroke="#111"/>
+        <text x="92" y="105" fill="#3fdc66" font-family="monospace" font-size="6.5" text-anchor="middle" opacity=".6">DRV 8/8 OK</text>
+        <rect x="66" y="92" width="18" height="5" fill="#8f8f88" transform="rotate(-12 75 94)"/>
+        <ellipse cx="80" cy="180" rx="20" ry="16" fill="#0d0d0b" opacity=".6" filter="url(#sc3)"/>
+        <circle cx="112" cy="66" r="4" fill="url(#h3)"/><circle cx="112" cy="66" r="1.8" fill="#050505"/>
+        <circle cx="96" cy="206" r="4" fill="url(#h3)"/><circle cx="96" cy="206" r="1.8" fill="#050505"/>
+        <rect x="50" y="214" width="100" height="7" fill="#4caf50" opacity=".7"/><rect x="66" y="214" width="20" height="7" fill="#4a503f"/><rect x="120" y="216" width="10" height="5" fill="#4a503f"/>
+        <path d="M58 200 c-14 10, -6 30, -14 40" stroke="#b03030" stroke-width="2" fill="none"/>
+        <path d="M60 205 c-10 14, -2 26, -10 38" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+        <rect x="50" y="232" width="100" height="13" fill="#5e3a1c" opacity=".55"/>
+        <rect x="50" y="20" width="100" height="225" fill="#000" filter="url(#g3)"/>
+      </svg>
+    </div>
+    <div class="card-body"><h3>Reinforced (8 slots)</h3><p>Server rack, <b style="color:#4caf50">green</b> stripe. One rack unit hangs half out, cables spill from the bottom.</p></div>
+  </div>
+
+  <!-- Armored: gun safe, purple -->
+  <div class="card" data-choice="bay-armored" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg width="200" height="270" viewBox="0 0 200 270">
+        <rect x="50" y="20" width="100" height="225" rx="5" fill="#3a3f31" stroke="#16180f" stroke-width="3"/>
+        <rect x="58" y="30" width="84" height="205" rx="3" fill="#353a2d" stroke="#16180f" stroke-width="2"/>
+        <!-- hinges -->
+        <rect x="52" y="50" width="8" height="18" fill="#22251b"/><rect x="52" y="190" width="8" height="18" fill="#22251b"/>
+        <!-- dial and handle -->
+        <circle cx="120" cy="120" r="13" fill="#2a2d22" stroke="#111" stroke-width="2"/><circle cx="120" cy="120" r="4" fill="#555"/>
+        <rect x="114" y="140" width="4" height="26" fill="#2a2d22"/><rect x="114" y="140" width="22" height="4" fill="#2a2d22"/>
+        <!-- pry marks around the door edge -->
+        <path d="M142 80 l-8 4 l8 3 l-8 4 l8 3" stroke="#9a9d95" stroke-width="1.2" fill="none"/>
+        <path d="M142 170 l-6 3 l6 3 l-6 3" stroke="#9a9d95" stroke-width="1.2" fill="none"/>
+        <!-- many bullet hits (survived) -->
+        <g><circle cx="80" cy="60" r="3.5" fill="#6e7168"/><circle cx="80" cy="60" r="1.5" fill="#22251b"/>
+        <circle cx="96" cy="74" r="3.5" fill="#6e7168"/><circle cx="96" cy="74" r="1.5" fill="#22251b"/>
+        <circle cx="74" cy="150" r="3.5" fill="#6e7168"/><circle cx="74" cy="150" r="1.5" fill="#22251b"/>
+        <circle cx="90" cy="200" r="3.5" fill="#6e7168"/><circle cx="90" cy="200" r="1.5" fill="#22251b"/>
+        <circle cx="132" cy="210" r="3.5" fill="#6e7168"/><circle cx="132" cy="210" r="1.5" fill="#22251b"/></g>
+        <ellipse cx="86" cy="110" rx="22" ry="18" fill="#0d0d0b" opacity=".65" filter="url(#sc3)"/>
+        <text x="100" y="45" fill="#d8d2b8" font-family="Courier New,monospace" font-weight="bold" font-size="11" text-anchor="middle" opacity=".55">STASHNET</text>
+        <rect x="104" y="40" width="10" height="8" fill="#353a2d" opacity=".85"/>
+        <rect x="70" y="90" width="44" height="16" fill="#26291f" stroke="#111"/><rect x="73" y="92" width="38" height="12" fill="#04140a"/>
+        <text x="92" y="101" fill="#3fdc66" font-family="monospace" font-size="6.5" text-anchor="middle" opacity=".6">DRV 12/12</text>
+        <path d="M84 92 l5 4 l-3 3 l6 4" stroke="#cfe" stroke-width=".8" fill="none" opacity=".8"/>
+        <rect x="50" y="176" width="100" height="8" fill="#9c5fd0" opacity=".7"/><rect x="64" y="176" width="16" height="8" fill="#3a3f31"/><rect x="110" y="178" width="12" height="6" fill="#3a3f31"/>
+        <path d="M140 30 v80" stroke="#7a4a22" stroke-width="5" opacity=".5"/>
+        <rect x="50" y="234" width="100" height="11" fill="#5e3a1c" opacity=".55"/>
+        <rect x="50" y="20" width="100" height="225" fill="#000" filter="url(#g3)"/>
+      </svg>
+    </div>
+    <div class="card-body"><h3>Armored (12 slots)</h3><p>Gun safe in a darker green, <b style="color:#b07fe0">purple</b> stripe. Bullet hits only dent it (no holes), with pry marks around the door: it took the hits and held.</p></div>
+  </div>
+</div>
+<p class="note">The Cores get the same treatment on their own shapes: electrical box (blue), transformer (green), control panel (purple).</p>
