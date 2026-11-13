@@ -1,0 +1,34 @@
+<atlas width="1024" height="1024">
+  <sprite name="crtScreen" x="4" y="4" w="256" h="192" />
+  <sprite name="stencilStashnet" x="268" y="4" w="256" h="48" />
+  <sprite name="rustBase" x="532" y="4" w="256" h="40" />
+  <sprite name="stripeBlue" x="4" y="204" w="256" h="24" />
+  <sprite name="stripeGreen" x="268" y="204" w="256" h="24" />
+  <sprite name="stripePurple" x="532" y="204" w="256" h="24" />
+  <sprite name="labelUnitBay" x="4" y="236" w="256" h="32" />
+  <sprite name="labelUnitCore" x="268" y="236" w="256" h="32" />
+  <sprite name="labelUnitTerminal" x="532" y="236" w="256" h="32" />
+  <sprite name="labelUnitCraft" x="4" y="276" w="256" h="32" />
+  <sprite name="readoutDrv4" x="268" y="276" w="160" h="56" />
+  <sprite name="readoutDrv8" x="436" y="276" w="160" h="56" />
+  <sprite name="readoutDrv12" x="604" y="276" w="160" h="56" />
+  <sprite name="readoutCore" x="772" y="276" w="160" h="56" />
+  <sprite name="readoutCraft" x="4" y="340" w="160" h="56" />
+  <sprite name="clawGouge" x="172" y="340" w="128" h="192" />
+  <sprite name="scorch1" x="308" y="340" w="160" h="128" />
+  <sprite name="scorch2" x="476" y="340" w="160" h="128" />
+  <sprite name="cableBundle" x="644" y="340" w="160" h="96" />
+  <sprite name="pryMarks" x="812" y="340" w="64" h="160" />
+  <sprite name="rustStreak1" x="884" y="340" w="40" h="200" />
+  <sprite name="rustStreak2" x="932" y="340" w="40" h="200" />
+  <sprite name="conduit" x="980" y="340" w="24" h="256" />
+  <sprite name="bareMetal1" x="4" y="604" w="96" h="80" />
+  <sprite name="bareMetal2" x="108" y="604" w="96" h="80" />
+  <sprite name="bareMetal3" x="212" y="604" w="96" h="80" />
+  <sprite name="dent1" x="316" y="604" w="96" h="64" />
+  <sprite name="wireSpark" x="420" y="604" w="96" h="80" />
+  <sprite name="ductTape" x="524" y="604" w="96" h="28" />
+  <sprite name="bulletHole1" x="628" y="604" w="48" h="48" />
+  <sprite name="bulletHole2" x="684" y="604" w="48" h="48" />
+  <sprite name="bulletDent" x="740" y="604" w="48" h="48" />
+</atlas>
