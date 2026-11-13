@@ -239,6 +239,69 @@ function Draw-Label($g, [float]$w, [float]$h, [string]$text, [int]$seed) {
 function Draw-Glyph($g, [float]$w, [float]$h, [string]$ch) {
   Text $g $ch 'Arial' ($h*0.95) ([System.Drawing.FontStyle]::Bold) (C 255 255 255 255) 0 0 $w $h }
 
+function Draw-PaintPatch($g, [float]$w, [float]$h, [int]$seed) {
+  # Rough brushed-on dark army green over old branding: opaque, ragged edges, faint brush strokes.
+  $rnd = New-Object System.Random $seed
+  $pts = @(); $n = 18
+  for ($i=0; $i -lt $n; $i++) { $a = $i / $n * 2 * [math]::PI; $r = 0.88 + $rnd.NextDouble()*0.12
+    $pts += ,@(($w/2 + [math]::Cos($a)*$w/2*$r), ($h/2 + [math]::Sin($a)*$h/2*$r)) }
+  Poly $g (Brush (C 255 44 48 38)) $pts
+  for ($i=0; $i -lt 26; $i++) { $y = $rnd.NextDouble()*$h; $x = $rnd.NextDouble()*$w*0.3
+    $v = $rnd.Next(-6,7)
+    $g.DrawLine((Pen (C 70 ([int](44+$v)) ([int](49+$v)) ([int](38+$v))) (2+$rnd.Next(4))), [float]$x, [float]$y, [float]($x+$w*0.4+$rnd.NextDouble()*$w*0.3), [float]($y+$rnd.Next(-3,4))) }
+  Grime $g $w $h 90 ($seed+1) 90 }
+function Draw-LedPanel($g, [float]$w, [float]$h, [int]$seed) {
+  $rnd = New-Object System.Random $seed
+  $g.FillRectangle((Brush (C 255 22 24 20)), 0, 0, $w, $h)
+  $g.DrawRectangle((Pen (C 255 70 72 64) 2), 1, 1, $w-2, $h-2)
+  foreach ($p in @(@(5,5),@(($w-5),5),@(5,($h-5)),@(($w-5),($h-5)))) { $g.FillEllipse((Brush (C 255 90 90 82)), [float]($p[0]-2), [float]($p[1]-2), 4, 4) }
+  Text $g 'DRIVE ARRAY' 'Consolas' ($h*0.16) ([System.Drawing.FontStyle]::Bold) (C 200 200 196 170) 4 2 ($w-8) ($h*0.24)
+  $cols = 10; $rows = 3
+  for ($r=0; $r -lt $rows; $r++) { for ($c=0; $c -lt $cols; $c++) {
+    $x = 10 + $c*($w-20)/($cols-1); $y = $h*0.42 + $r*$h*0.18
+    $roll = $rnd.NextDouble(); $col = if ($roll -lt 0.62) { C 255 70 230 100 } elseif ($roll -lt 0.8) { C 255 240 170 40 } elseif ($roll -lt 0.9) { C 255 230 50 40 } else { C 255 40 44 40 }
+    if ($col.R -ne 40) { Blotch $g ([float]$x) ([float]$y) 6 5 ([System.Drawing.Color]::FromArgb(90, $col.R, $col.G, $col.B)) }
+    $g.FillEllipse((Brush $col), [float]($x-2.5), [float]($y-2.5), 5, 5) } }
+  Grime $g $w $h 60 ($seed+2) 130 }
+
+function Draw-Vent($g, [float]$w, [float]$h, [int]$seed) {
+  $g.FillRectangle((Brush (C 255 46 50 40)), 0, 0, $w, $h)
+  $g.DrawRectangle((Pen (C 255 20 22 18) 3), 1.5, 1.5, $w-3, $h-3)
+  for ($y = 8; $y -lt $h - 6; $y += 9) {
+    $g.FillRectangle((Brush (C 255 10 11 9)), 8, [float]$y, $w-16, 5)
+    $g.DrawLine((Pen (C 160 120 124 110) 1.2), 8, [float]($y+5.5), [float]($w-8), [float]($y+5.5)) }
+  foreach ($p in @(@(4,4),@(($w-4),4),@(4,($h-4)),@(($w-4),($h-4)))) { $g.FillEllipse((Brush (C 255 110 110 100)), [float]($p[0]-2), [float]($p[1]-2), 4, 4) }
+  Blotch $g ($w*0.7) ($h*0.8) ($w*0.25) ($h*0.3) (C 150 100 52 22)
+  Grime $g $w $h 80 ($seed+3) 150 }
+
+function Draw-Ports($g, [float]$w, [float]$h, [int]$seed) {
+  # A dirty connector strip with thin, dull, sagging cables (not toy-colored).
+  $rnd = New-Object System.Random $seed
+  $g.FillRectangle((Brush (C 255 30 32 27)), 0, $h*0.12, $w, $h*0.42)
+  $g.DrawRectangle((Pen (C 255 12 13 10) 2), 1, [float]($h*0.12), $w-2, [float]($h*0.42))
+  $g.DrawLine((Pen (C 90 120 120 110) 1), 2, [float]($h*0.14), $w-2, [float]($h*0.14))
+  $cols = @((C 255 92 34 28), (C 255 26 26 24), (C 255 120 100 44), (C 255 38 52 70), (C 255 32 32 30), (C 255 58 76 48), (C 255 26 26 24))
+  for ($i=0; $i -lt 7; $i++) {
+    $x = 11 + $i*($w-22)/6; $y = $h*0.34
+    $g.FillRectangle((Brush (C 255 8 8 8)), [float]($x-5), [float]($y-4.5), 10, 9)
+    $g.FillRectangle((Brush (C 255 112 110 100)), [float]($x-3.5), [float]($y-3), 7, 6)
+    $g.FillRectangle((Brush (C 255 70 68 62)), [float]($x-2), [float]($y+3), 4, 4)
+    $sag = $rnd.Next(-6, 7)
+    $pts = [System.Drawing.PointF[]]@((PtF $x ($y+5)), (PtF ($x + $sag*0.5) ($h*0.66)), (PtF ($x + $sag) ($h*0.84)), (PtF ($x + $sag + $rnd.Next(-3,4)) $h))
+    $g.DrawCurve((Pen (C 255 10 10 9) 3.6), $pts); $g.DrawCurve((Pen $cols[$i] 2.4), $pts)
+    $g.DrawCurve((Pen (C 40 220 220 210) 0.6), $pts) }
+  Blotch $g ($w*0.3) ($h*0.3) ($w*0.25) ($h*0.25) (C 90 90 48 20)
+  Grime $g $w $h 120 ($seed+4) 170 }
+function Draw-Warning($g, [float]$w, [float]$h, [int]$seed) {
+  $rnd = New-Object System.Random $seed
+  $g.FillRectangle((Brush (C 255 220 180 30)), 0, 0, $w, $h)
+  $g.FillRectangle((Brush (C 255 20 20 20)), 3, [float]($h*0.36), $w-6, [float]($h*0.6))
+  for ($x = -$h; $x -lt $w; $x += 12) { Poly $g (Brush (C 255 20 20 20)) @(@($x,($h*0.32)),@(($x+6),($h*0.32)),@(($x+6+$h*0.3),0),@(($x+$h*0.3),0)) }
+  Text $g 'DATA STORAGE' 'Arial' ($h*0.26) ([System.Drawing.FontStyle]::Bold) (C 255 220 180 30) 3 ([float]($h*0.38)) ($w-6) ([float]($h*0.3))
+  Text $g 'HANDLE WITH CARE' 'Arial' ($h*0.16) ([System.Drawing.FontStyle]::Bold) (C 255 220 180 30) 3 ([float]($h*0.66)) ($w-6) ([float]($h*0.26))
+  for ($i=0; $i -lt 3; $i++) { Wipe $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) ([float](6+$rnd.Next(10))) ([float](5+$rnd.Next(8))) }
+  Grime $g $w $h 70 ($seed+5) 160 }
+
 # ---------- Sprite list: name, width, height, drawer. Fixed order = fixed packing. ----------
 $sprites = @(
   @('crtScreen', 256, 192, { param($g,$w,$h) Draw-Crt $g $w $h 1 }),
@@ -273,6 +336,11 @@ $sprites = @(
   @('bulletHole1', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 30 $true }),
   @('bulletHole2', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 31 $true }),
   @('bulletDent', 48, 48, { param($g,$w,$h) Draw-BulletHole $g $w $h 32 $false }),
+  @('paintPatch', 128, 96, { param($g,$w,$h) Draw-PaintPatch $g $w $h 51 }),
+  @('ledPanel', 160, 80, { param($g,$w,$h) Draw-LedPanel $g $w $h 52 }),
+  @('ventGrille', 160, 80, { param($g,$w,$h) Draw-Vent $g $w $h 53 }),
+  @('portPanel', 160, 72, { param($g,$w,$h) Draw-Ports $g $w $h 54 }),
+  @('warningLabel', 128, 64, { param($g,$w,$h) Draw-Warning $g $w $h 55 }),
   @('glyphA', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'A' }),
   @('glyphB', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'B' }),
   @('glyphC', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'C' }),

@@ -36,6 +36,7 @@ namespace StashNet.Core.Tests
             "stripeBlue", "stripeGreen", "stripePurple",
             "readoutDrv4", "readoutDrv8", "readoutDrv12", "readoutCore", "readoutCraft",
             "ductTape", "conduit", "cableBundle", "wireSpark", "crtScreen",
+            "paintPatch", "ledPanel", "ventGrille", "portPanel", "warningLabel",
             "glyphA", "glyphB", "glyphC", "glyphD", "glyphE", "glyphF", "glyphG", "glyphH",
             "glyph1", "glyph2", "glyph3", "glyph4", "glyph5", "glyph6", "glyph7", "glyph8",
         };
