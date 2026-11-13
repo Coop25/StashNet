@@ -1,4 +1,4 @@
-# Draws the StashNet "wrecked but working military salvage" decal atlas: one 1024x1024 transparent PNG plus
+# Draws the StashNet "wrecked but working military salvage" decal atlas: one 1024x2048 transparent PNG plus
 # atlas.xml (sprite name -> pixel rect, origin top-left). The mod sticks these decals onto the vanilla models
 # at runtime (Mod/Skins/layouts.xml says where). Deterministic: fixed seeds, fixed order, so re-running
 # reproduces both files byte for byte. Regenerate with:
@@ -8,7 +8,7 @@ param([string]$OutDir = '.')
 Add-Type -AssemblyName System.Drawing
 $ErrorActionPreference = 'Stop'
 $S = 2          # supersample factor (each sprite is drawn at 2x, then scaled into the atlas)
-$AtlasW = 1024; $AtlasH = 1024; $Pad = 4
+$AtlasW = 1024; $AtlasH = 2048; $Pad = 4
 
 function C([int]$a,[int]$r,[int]$g,[int]$b) { [System.Drawing.Color]::FromArgb($a,$r,$g,$b) }
 function Hex([int]$a, [string]$hex) { C $a ([Convert]::ToInt32($hex.Substring(0,2),16)) ([Convert]::ToInt32($hex.Substring(2,2),16)) ([Convert]::ToInt32($hex.Substring(4,2),16)) }
@@ -302,6 +302,65 @@ function Draw-Warning($g, [float]$w, [float]$h, [int]$seed) {
   for ($i=0; $i -lt 3; $i++) { Wipe $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) ([float](6+$rnd.Next(10))) ([float](5+$rnd.Next(8))) }
   Grime $g $w $h 70 ($seed+5) 160 }
 
+function Draw-LedStrip($g, [float]$w, [float]$h, [int]$seed) {
+  # Status lights only, no text (for mirrored faces, where words would read backwards).
+  $rnd = New-Object System.Random $seed
+  $g.FillRectangle((Brush (C 255 22 24 20)), 0, 0, $w, $h)
+  $g.DrawRectangle((Pen (C 255 70 72 64) 2), 1, 1, $w-2, $h-2)
+  $cols = 9; $rows = 2
+  for ($r=0; $r -lt $rows; $r++) { for ($c=0; $c -lt $cols; $c++) {
+    $x = 9 + $c*($w-18)/($cols-1); $y = $h*0.33 + $r*$h*0.34
+    $roll = $rnd.NextDouble(); $col = if ($roll -lt 0.62) { C 255 70 230 100 } elseif ($roll -lt 0.8) { C 255 240 170 40 } elseif ($roll -lt 0.9) { C 255 230 50 40 } else { C 255 40 44 40 }
+    if ($col.R -ne 40) { Blotch $g ([float]$x) ([float]$y) 6 5 ([System.Drawing.Color]::FromArgb(90, $col.R, $col.G, $col.B)) }
+    $g.FillEllipse((Brush $col), [float]($x-2.5), [float]($y-2.5), 5, 5) } }
+  Grime $g $w $h 50 ($seed+2) 130 }
+
+function Hex-Points([float]$cx, [float]$cy, [float]$r) {
+  $pts = @(); for ($i=0; $i -lt 6; $i++) { $a = ($i*60 - 90) * [math]::PI / 180; $pts += ,@(($cx + [math]::Cos($a)*$r), ($cy + [math]::Sin($a)*$r)) }; return ,$pts }
+
+function Draw-CoreHalf($g, [float]$w, [float]$h, [string]$hex, [int]$seed) {
+  # The LEFT half of a Core emblem, centered on the sprite's right edge. On a mirrored face, placed against
+  # the mirror seam, it shows up as one whole glowing hexagon.
+  $rnd = New-Object System.Random $seed
+  $tier = Hex 255 $hex; $cx = $w; $cy = $h/2; $R = $h*0.46
+  Poly $g (Brush (C 255 26 28 23)) (Hex-Points $cx $cy $R)
+  $outer = Hex-Points $cx $cy $R; $arr = @(); foreach ($p in $outer) { $arr += PtF $p[0] $p[1] }
+  $g.DrawPolygon((Pen (C 255 120 122 112) 3), [System.Drawing.PointF[]]$arr)
+  foreach ($p in $outer) { $g.FillEllipse((Brush (C 255 80 80 74)), [float]($p[0]-3), [float]($p[1]-3), 6, 6) }
+  Blotch $g $cx $cy ($R*0.95) ($R*0.95) ([System.Drawing.Color]::FromArgb(120, $tier.R, $tier.G, $tier.B))
+  $ring = Hex-Points $cx $cy ($R*0.66); $arr = @(); foreach ($p in $ring) { $arr += PtF $p[0] $p[1] }
+  $g.DrawPolygon((Pen ([System.Drawing.Color]::FromArgb(255, [math]::Min(255,$tier.R+70), [math]::Min(255,$tier.G+70), [math]::Min(255,$tier.B+70))) 4), [System.Drawing.PointF[]]$arr)
+  $g.DrawPolygon((Pen $tier 7), [System.Drawing.PointF[]]$arr)
+  Blotch $g $cx $cy ($R*0.42) ($R*0.42) ([System.Drawing.Color]::FromArgb(220, $tier.R, $tier.G, $tier.B))
+  Blotch $g $cx $cy ($R*0.2) ($R*0.2) (C 255 235 245 255)
+  # Circuit traces running out to the left.
+  for ($i=0; $i -lt 5; $i++) {
+    $y = $cy + ($i-2)*$R*0.32; $x0 = $cx - $R*0.72; $x1 = $x0 - $R*(0.15+$rnd.NextDouble()*0.2)
+    $g.DrawLine((Pen ([System.Drawing.Color]::FromArgb(200, $tier.R, $tier.G, $tier.B)) 1.6), [float]$x0, [float]$y, [float]$x1, [float]$y)
+    $g.FillEllipse((Brush $tier), [float]($x1-2), [float]($y-2), 4, 4) }
+  Grime $g $w $h 70 ($seed+1) 120 }
+
+function Draw-HazardBand($g, [float]$w, [float]$h, [int]$seed) {
+  $rnd = New-Object System.Random $seed
+  $g.FillRectangle((Brush (C 245 200 160 30)), 0, 0, $w, $h)
+  for ($x = -$h; $x -lt $w + $h; $x += 18) { Poly $g (Brush (C 250 22 22 20)) @(@($x,$h),@(($x+9),$h),@(($x+9+$h),0),@(($x+$h),0)) }
+  for ($i=0; $i -lt 10; $i++) { Wipe $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) ([float](6+$rnd.Next(18))) ([float](4+$rnd.Next(10))) }
+  for ($i=0; $i -lt 40; $i++) { Wipe $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) 2 2 }
+  Grime $g $w $h 160 ($seed+1) 170 }
+
+function Draw-CableRun($g, [float]$w, [float]$h, [int]$seed) {
+  # Thick armored cables running down into the ground, with clamps.
+  $rnd = New-Object System.Random $seed
+  for ($k=0; $k -lt 3; $k++) {
+    $x = $w*(0.22 + $k*0.28); $pts = @(); for ($y = 0; $y -le $h; $y += $h/6) { $pts += PtF ($x + $rnd.Next(-2,3)) $y }
+    $p = [System.Drawing.PointF[]]$pts
+    $g.DrawCurve((Pen (C 255 12 13 11) 11), $p); $g.DrawCurve((Pen (C 255 46 48 42) 8), $p)
+    for ($y = 4; $y -lt $h; $y += 6) { $g.DrawLine((Pen (C 120 20 20 18) 1), [float]($x-4), [float]$y, [float]($x+4), [float]$y) }
+    $g.DrawCurve((Pen (C 60 200 200 190) 1.2), $p) }
+  for ($y = $h*0.15; $y -lt $h; $y += $h*0.3) { $g.FillRectangle((Brush (C 255 70 70 64)), 2, [float]$y, $w-4, 7); $g.DrawRectangle((Pen (C 255 20 20 18) 1), 2, [float]$y, $w-4, 7) }
+  Blotch $g ($w/2) ($h*0.95) ($w*0.6) ($h*0.08) (C 170 70 46 24)
+  Grime $g $w $h 120 ($seed+2) 170 }
+
 # ---------- Sprite list: name, width, height, drawer. Fixed order = fixed packing. ----------
 $sprites = @(
   @('crtScreen', 256, 192, { param($g,$w,$h) Draw-Crt $g $w $h 1 }),
@@ -341,6 +400,12 @@ $sprites = @(
   @('ventGrille', 160, 80, { param($g,$w,$h) Draw-Vent $g $w $h 53 }),
   @('portPanel', 160, 72, { param($g,$w,$h) Draw-Ports $g $w $h 54 }),
   @('warningLabel', 176, 64, { param($g,$w,$h) Draw-Warning $g $w $h 55 }),
+  @('ledStrip', 144, 40, { param($g,$w,$h) Draw-LedStrip $g $w $h 56 }),
+  @('coreHalfBlue', 64, 128, { param($g,$w,$h) Draw-CoreHalf $g $w $h '3A6FB0' 61 }),
+  @('coreHalfGreen', 64, 128, { param($g,$w,$h) Draw-CoreHalf $g $w $h '4CAF50' 62 }),
+  @('coreHalfPurple', 64, 128, { param($g,$w,$h) Draw-CoreHalf $g $w $h '9C5FD0' 63 }),
+  @('hazardBand', 256, 24, { param($g,$w,$h) Draw-HazardBand $g $w $h 64 }),
+  @('cableRun', 40, 256, { param($g,$w,$h) Draw-CableRun $g $w $h 65 }),
   @('glyphA', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'A' }),
   @('glyphB', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'B' }),
   @('glyphC', 28, 36, { param($g,$w,$h) Draw-Glyph $g $w $h 'C' }),
