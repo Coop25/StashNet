@@ -12,7 +12,7 @@ namespace StashNet.Skins
     /// <summary>
     /// sn skin dump: for each StashNet block type with a model loaded nearby, saves the textures its vanilla
     /// model really uses (as PNG), a map of where the model's faces sit on them (uv-*.png), and info.txt
-    /// (shaders, texture slots, sizes). Goes to Mods/StashNet/SkinDump/&lt;block&gt;/. This is what the texture
+    /// (shaders, texture slots, sizes). Goes to %APPDATA%\7DaysToDie\StashNetSkinDump\&lt;block&gt;\. This is what the texture
     /// repaint is painted from. Read-only for the game: nothing is changed.
     /// </summary>
     internal static class SkinDump
@@ -21,7 +21,8 @@ namespace StashNet.Skins
 
         public static string Run()
         {
-            string outDir = Path.Combine(StashNetMod.ModPath ?? "", "SkinDump");
+            // Outside the mod folder: installing a new version replaces Mods/StashNet and would delete it.
+            string outDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "7DaysToDie", "StashNetSkinDump");
             var done = new HashSet<string>();
             int files = 0;
             foreach (SkinOwner owner in SkinOwner.Live.ToList())

@@ -89,7 +89,7 @@ namespace StashNet.Core.Skins
         public static void Stamp(byte[] px, int w, int h, SpriteImage sprite, float u, float v, float wFrac, float hFrac, float rotDeg)
         {
             float cx = u * w, cy = v * h, sw = wFrac * w, sh = hFrac * h;
-            if (sw <= 0f || sh <= 0f) return;
+            if (sprite == null || sw <= 0f || sh <= 0f) return;
             double a = rotDeg * Math.PI / 180.0;
             float cos = (float)Math.Cos(a), sin = (float)Math.Sin(a);
             float reach = 0.5f * (float)Math.Sqrt(sw * sw + sh * sh);

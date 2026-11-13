@@ -20,7 +20,7 @@ namespace StashNet.Dev
 
         public override string[] getCommands() => new[] { "stashnet", "sn" };
 
-        public override string getDescription() => "StashNet developer tools (info, heat, drive, skin reload/grid/dump, metatest, metacheck, metaclear).";
+        public override string getDescription() => "StashNet developer tools (info, heat, drive, skin reload/grid/dump/inspect, metatest, metacheck, metaclear).";
 
         public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
         {
@@ -72,15 +72,20 @@ namespace StashNet.Dev
                     {
                         Out(Skins.SkinDump.Run());
                     }
+                    else if (skinSub == "inspect")
+                    {
+                        Out(Skins.SkinInspect.Run());
+                    }
                     else
                     {
                         Out("Usage: stashnet skin reload   (re-reads Mods/StashNet/Skins/paint.xml and repaints every StashNet block in view)");
                         Out("       stashnet skin grid     (toggles a lettered grid on the textures, to find where each face is)");
-                        Out("       stashnet skin dump     (saves the textures of each StashNet block's model to Mods/StashNet/SkinDump)");
+                        Out("       stashnet skin dump     (saves the vanilla textures of each StashNet block's model to %APPDATA%\\7DaysToDie\\StashNetSkinDump)");
+                        Out("       stashnet skin inspect  (writes what each StashNet model is wearing right now to the game log)");
                     }
                     return;
                 default:
-                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], skin [reload|grid|dump], metatest [n], metacheck, metaclear");
+                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], skin [reload|grid|dump|inspect], metatest [n], metacheck, metaclear");
                     return;
             }
         }

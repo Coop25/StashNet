@@ -58,6 +58,16 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Parse_MuteTrue_SilencesTheBlock()
+        {
+            PaintSpec spec = Parse("<block name=\"tv\" mute=\"true\" /><block name=\"bay\" />", new List<string>());
+            spec.TryGet("tv", out BlockPaint tv);
+            spec.TryGet("bay", out BlockPaint bay);
+            Assert.True(tv.Mute);
+            Assert.False(bay.Mute);
+        }
+
+        [Fact]
         public void Parse_HolesFalse_ForArmored()
         {
             PaintSpec spec = Parse("<block name=\"b\"><texture name=\"t\" tint=\"000000\" holes=\"false\" /><texture name=\"u\" tint=\"000000\" /></block>", new List<string>());

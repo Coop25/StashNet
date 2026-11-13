@@ -31,6 +31,10 @@ namespace StashNet.Core.Skins
     {
         public string BlockName;
         public string Screen;
+
+        /// <summary>Silence the model's own sounds (the CRT TV's hum).</summary>
+        public bool Mute;
+
         internal readonly Dictionary<string, TexturePaint> Textures = new Dictionary<string, TexturePaint>();
 
         public bool TryGetTexture(string name, out TexturePaint paint) => Textures.TryGetValue(name ?? "", out paint);
@@ -58,7 +62,11 @@ namespace StashNet.Core.Skins
                     warnings.Add("a <block> has no name; skipped");
                     continue;
                 }
-                var block = new BlockPaint { BlockName = name };
+                var block = new BlockPaint
+                {
+                    BlockName = name,
+                    Mute = string.Equals((string)b.Attribute("mute"), "true", System.StringComparison.OrdinalIgnoreCase),
+                };
                 string screen = (string)b.Attribute("screen");
                 if (!string.IsNullOrEmpty(screen))
                 {

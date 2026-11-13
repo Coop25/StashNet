@@ -5,6 +5,30 @@ The look is "military salvage, wrecked but working". Design: `docs/superpowers/s
 ## Part 1 (v0.10.1): done 2026-11-13
 The texture dump worked for all 8 blocks.
 
+## Part 3 (v0.10.3): fixes after Part 2
+
+**Part 2 found:**
+- The CRT screen stayed black until a reload.
+- Most blocks looked grey or vanilla instead of green.
+- The Drive Bay file cabinets never changed, not even with the grid on.
+- Each repaint froze the game for about 1.5 s.
+- The TV's sound should be muted.
+
+**v0.10.3 changes:**
+- Painting happens in the background (no freeze). Blocks start vanilla and switch to the new look within a second or two.
+- Each block's look is applied again half a second after it appears.
+- The paint's tint color is now green, not white.
+- The TV is muted.
+- A new `sn skin inspect` command.
+- `sn skin dump` now saves to `%APPDATA%\7DaysToDie\StashNetSkinDump`, so installing doesn't delete it.
+
+### Steps
+- [ ] Load the test world near your StashNet blocks. Within a couple of seconds they turn army green and beat up. No freeze. The CRT shows the green StashNet screen right away (no reload needed) and is **silent**.
+- [ ] Do the Drive Bay file cabinets change? (They didn't in v0.10.2.)
+- [ ] Stand near a Drive Bay and type `sn skin inspect` in F1. It writes details to the log for me.
+- [ ] `sn skin grid`, then note the labels on each block's **front** (as in Part 2; say if they're mirrored). Then `sn skin grid` again to turn it off.
+- [ ] Close the game and tell me how it looks. A screenshot helps.
+
 ## Part 2 (v0.10.2): first repaint + find the fronts
 
 **What's new:**

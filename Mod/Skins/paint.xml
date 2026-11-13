@@ -7,7 +7,7 @@
        holes     "false" = bullet hits are dents, never holes (armor)
        <stamp sprite u v w h rot>  one atlas sprite painted in: u,v = its center in the texture (0..1, from the
                  bottom-left), w,h = its size as a fraction of the texture, rot = degrees counter-clockwise.
-     screen="sprite" replaces the picture on a screen part (the CRT TV).
+     screen="sprite" replaces the picture on a screen part (the CRT TV). mute="true" silences the model's own sounds.
      Tune in-game: edit Mods/StashNet/Skins/paint.xml, then F1 "sn skin reload". "sn skin grid" shows a lettered
      grid instead, to find where each face is (columns A-H left to right, rows 1-8 from the top of the texture).
      Style rule (owner): when in doubt, dirtier and more worn. -->
@@ -35,7 +35,7 @@
   </block>
 
   <!-- Storage Terminal: the CRT TV, with the green StashNet screen. -->
-  <block name="stashnetTerminal" screen="crtScreen">
+  <block name="stashnetTerminal" screen="crtScreen" mute="true">
     <texture name="tvCRT" tint="4A503F" strength="0.7" damage="1.0" seed="31" />
   </block>
 

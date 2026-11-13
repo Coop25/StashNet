@@ -87,6 +87,14 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Stamp_MissingSprite_LeavesTexture()
+        {
+            byte[] dst = Solid(8, 8, 9, 9, 9);
+            TextureRepaint.Stamp(dst, 8, 8, null, 0.5f, 0.5f, 1f, 1f, 0f);
+            Assert.Equal(Solid(8, 8, 9, 9, 9), dst);
+        }
+
+        [Fact]
         public void Stamp_TransparentSprite_LeavesTexture()
         {
             byte[] dst = Solid(8, 8, 9, 9, 9);
