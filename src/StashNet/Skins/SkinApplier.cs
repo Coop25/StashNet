@@ -40,8 +40,16 @@ namespace StashNet.Skins
             SetScreens(owner, painted && !SkinPainter.GridMode ? paint.Screen : null);
             if (painted && paint.Mute)
             {
-                // The CRT's hum comes from the game's AudioPlayer script: stop what's playing, then switch it off
-                // so it can't start again (SkinOwner switches it back on if the model is reused).
+                // The CRT's hum comes from the game's AudioPlayer script, which the TV's LightLOD script switches
+                // back on every frame (v0.10.5 stayed noisy). Unhook it from LightLOD and drop LightLOD's own
+                // cycling sound, then stop and switch off the player. SkinOwner puts it all back on reuse.
+                foreach (LightLOD l in owner.GetComponentsInChildren<LightLOD>(true))
+                {
+                    owner.RememberLight(l);
+                    l.audioPlayer = null;
+                    l.cyclingAudioClipPath = null;
+                    l.cyclingAudioHandle?.SetVolume(0f);
+                }
                 foreach (AudioPlayer p in owner.GetComponentsInChildren<AudioPlayer>(true))
                 {
                     p.StopAudio();

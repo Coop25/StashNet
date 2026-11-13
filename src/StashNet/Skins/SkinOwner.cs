@@ -22,6 +22,14 @@ namespace StashNet.Skins
         private readonly Dictionary<Material, (Texture tex, Vector2 scale, Vector2 offset)> screens =
             new Dictionary<Material, (Texture, Vector2, Vector2)>();
 
+        private readonly Dictionary<LightLOD, (AudioPlayer player, string cycling)> lights =
+            new Dictionary<LightLOD, (AudioPlayer, string)>();
+
+        internal void RememberLight(LightLOD l)
+        {
+            if (!lights.ContainsKey(l)) lights[l] = (l.audioPlayer, l.cyclingAudioClipPath);
+        }
+
         internal void RememberScreen(Material m)
         {
             if (!screens.ContainsKey(m)) screens[m] = (m.GetTexture("_Albedo"), m.GetTextureScale("_Albedo"), m.GetTextureOffset("_Albedo"));
@@ -53,6 +61,13 @@ namespace StashNet.Skins
             if (Renderers != null)
                 for (int i = 0; i < Renderers.Length; i++)
                     if (Renderers[i] != null) Renderers[i].sharedMaterials = Originals[i];
+            foreach (KeyValuePair<LightLOD, (AudioPlayer player, string cycling)> l in lights)
+                if (l.Key != null)
+                {
+                    l.Key.audioPlayer = l.Value.player;
+                    l.Key.cyclingAudioClipPath = l.Value.cycling;
+                }
+            lights.Clear();
             foreach (AudioPlayer p in Silenced) if (p != null) p.enabled = true;
             Silenced.Clear();
             foreach (Material m in new List<Material>(screens.Keys)) RestoreScreen(m);

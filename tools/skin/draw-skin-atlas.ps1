@@ -214,7 +214,7 @@ function Draw-Spark($g, [float]$w, [float]$h, [int]$seed) {
 function Draw-Crt($g, [float]$w, [float]$h, [int]$seed) {
   $g.FillRectangle((Brush (C 255 4 20 10)), 0, 0, $w, $h)
   Blotch $g ($w/2) ($h/2) ($w*0.62) ($h*0.62) (C 70 63 220 102)
-  $lines = @('STASHNET v1.0', '> CORE ......... OK', '> DRIVES ....... 12', '> LINK ........ OK', '> _')
+  $lines = @('STASHNET v1.0', '> CORE ......... OK', '> DRIVES ....... OK', '> LINK ........ OK', '> _')
   $fs = $h*0.088; $y = $h*0.12
   foreach ($l in $lines) {
     $size = if ($l -eq 'STASHNET v1.0') { $fs*1.25 } else { $fs }

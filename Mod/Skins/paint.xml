@@ -45,9 +45,9 @@
   <!-- Cores: electrical box (blue), transformer (green), control panel (purple). -->
   <block name="stashnetScrapCore">
     <texture name="utilityElectricalBox_02" tint="4A503F" strength="0.6" damage="1.2" seed="21">
-      <!-- Front strip E2-G2. -->
-      <stamp sprite="stencilStashnet" u="0.69" v="0.82" w="0.3" h="0.045" />
-      <stamp sprite="stripeBlue" u="0.69" v="0.765" w="0.36" h="0.014" />
+      <!-- Front strip E2-G2, upside down on the texture (v0.10.5 showed the stencil upside down). -->
+      <stamp sprite="stencilStashnet" u="0.69" v="0.82" w="0.3" h="0.045" rot="180" />
+      <stamp sprite="stripeBlue" u="0.69" v="0.765" w="0.36" h="0.014" rot="180" />
     </texture>
   </block>
   <block name="stashnetStorageCore">
@@ -73,10 +73,8 @@
 
   <!-- Crafting Terminal: the workbench (lighter touch on the wood) and its toolbox. -->
   <block name="stashnetCraftingTerminal">
-    <texture name="woodWorkBench" tint="4A503F" strength="0.4" damage="1.0" seed="41">
-      <!-- Front drawer D2. -->
-      <stamp sprite="stencilStashnet" u="0.4375" v="0.815" w="0.1" h="0.018" />
-    </texture>
+    <!-- No stencil: the two front drawers share one spot, mirrored on the lower one (v0.10.5). -->
+    <texture name="woodWorkBench" tint="4A503F" strength="0.4" damage="1.0" seed="41" />
     <texture name="metalToolBox_d" tint="4A503F" strength="0.7" damage="1.0" seed="42" />
   </block>
 </paint>
