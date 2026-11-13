@@ -59,6 +59,28 @@
     <Message Importance="high" Text="StashNet staged at $(ModStageDir)" />
   </Target>
 
+  <!-- Release zip (M9): add -p:Package=true to also write dist\StashNet-v<ModInfo version>.zip.
+       It holds one StashNet\ folder (the staged mod + README.md) that players drop into their Mods folder. -->
+  <Target Name="PackageMod" AfterTargets="StageMod" Condition="'$(Package)' == 'true'">
+    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)..\..\Mod\ModInfo.xml" Query="/xml/Version/@value">
+      <Output TaskParameter="Result" PropertyName="ModVersion" />
+    </XmlPeek>
+    <PropertyGroup>
+      <PackageRoot>$(MSBuildThisFileDirectory)..\..\dist\package\</PackageRoot>
+      <PackageZip>$(MSBuildThisFileDirectory)..\..\dist\StashNet-v$(ModVersion).zip</PackageZip>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageFiles Include="$(ModStageDir)**\*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(PackageRoot)" />
+    <Copy SourceFiles="@(PackageFiles)" DestinationFiles="@(PackageFiles->'$(PackageRoot)StashNet\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)..\..\README.md" DestinationFolder="$(PackageRoot)StashNet" />
+    <Delete Files="$(PackageZip)" />
+    <ZipDirectory SourceDirectory="$(PackageRoot)" DestinationFile="$(PackageZip)" />
+    <RemoveDir Directories="$(PackageRoot)" />
+    <Message Importance="high" Text="StashNet release zip: $(PackageZip)" />
+  </Target>
+
   <Target Name="DeployMod" AfterTargets="StageMod" Condition="'$(Deploy)' == 'true'">
     <ItemGroup>
       <StagedFiles Include="$(ModStageDir)**\*" />
