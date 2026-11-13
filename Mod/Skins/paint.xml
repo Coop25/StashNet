@@ -20,16 +20,16 @@
   <!-- Drive Bays: file cabinet (blue), server rack (green), gun safe (purple, darker green, dented not holed). -->
   <block name="stashnetDriveBay">
     <texture name="FileCabinet_d" tint="4A503F" strength="0.6" damage="1.2" seed="11">
-      <!-- On each drawer front (all four share this spot): a stencil and a blue tier stripe. -->
-      <stamp sprite="stencilStashnet" u="0.375" v="0.655" w="0.085" h="0.016" />
-      <stamp sprite="stripeBlue" u="0.375" v="0.588" w="0.11" h="0.01" />
+      <!-- Drawer fronts (owner's test pattern, 2026-11-13): each drawer has its own spot, all upside down (rot 180;
+           the top of a drawer is the lower v). Top drawer ~(0.60, 0.62), 2nd ~(0.48, 0.74), 3rd ~(0.48, 0.62), bottom ~(0.35, 0.74). -->
+      <stamp sprite="stencilStashnet" u="0.6" v="0.655" w="0.1" h="0.02" rot="180" />
+      <stamp sprite="stripeBlue" u="0.35" v="0.765" w="0.12" h="0.015" rot="180" />
     </texture>
   </block>
   <block name="stashnetDriveBayReinforced">
     <texture name="serverComputer" tint="4A503F" strength="0.6" damage="1.2" seed="12">
       <!-- Door front A4-D5, turned 90 degrees: u runs down the door, v runs left to right. -->
       <stamp sprite="stencilStashnet" u="0.07" v="0.5" w="0.2" h="0.036" rot="90" />
-      <stamp sprite="readoutDrv8" u="0.17" v="0.5" w="0.11" h="0.038" rot="90" />
       <stamp sprite="stripeGreen" u="0.44" v="0.5" w="0.22" h="0.016" rot="90" />
     </texture>
   </block>
@@ -37,7 +37,6 @@
     <texture name="safeGunLarge" tint="3A3F31" strength="0.65" damage="1.0" seed="13" holes="false">
       <!-- Door front C5-D8, upside down on the texture (row 8 is the top of the door). -->
       <stamp sprite="stencilStashnet" u="0.375" v="0.07" w="0.2" h="0.032" rot="180" />
-      <stamp sprite="readoutDrv12" u="0.375" v="0.15" w="0.1" h="0.035" rot="180" />
       <stamp sprite="stripePurple" u="0.375" v="0.43" w="0.24" h="0.018" rot="180" />
     </texture>
   </block>
