@@ -98,6 +98,23 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Stamp_Solid_RaisesAlphaOnGlass()
+        {
+            byte[] glass = Solid(8, 8, 200, 200, 200, 40);
+            TextureRepaint.Stamp(glass, 8, 8, Whole(Solid(4, 4, 255, 0, 0), 4, 4), 0.5f, 0.5f, 0.5f, 0.5f, 0f, solid: true);
+            Assert.Equal((255, 0, 0, 255), At(glass, 8, 4, 4));
+            Assert.Equal((200, 200, 200, 40), At(glass, 8, 0, 0));
+        }
+
+        [Fact]
+        public void Stamp_NotSolid_KeepsAlpha()
+        {
+            byte[] glass = Solid(8, 8, 200, 200, 200, 40);
+            TextureRepaint.Stamp(glass, 8, 8, Whole(Solid(4, 4, 255, 0, 0), 4, 4), 0.5f, 0.5f, 0.5f, 0.5f, 0f);
+            Assert.Equal(40, At(glass, 8, 4, 4).a);
+        }
+
+        [Fact]
         public void Stamp_MissingSprite_LeavesTexture()
         {
             byte[] dst = Solid(8, 8, 9, 9, 9);

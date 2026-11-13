@@ -26,6 +26,9 @@ namespace StashNet.Core.Skins
         /// </summary>
         public int Mask;
 
+        /// <summary>True for glass: stamps are painted solid (they raise the texture's see-through alpha).</summary>
+        public bool SolidStamps;
+
         /// <summary>False for armor: bullet hits become dents, never holes.</summary>
         public bool Holes = true;
 
@@ -114,6 +117,7 @@ namespace StashNet.Core.Skins
                 }
                 tex.Mask = m;
             }
+            tex.SolidStamps = string.Equals((string)t.Attribute("solid"), "true", System.StringComparison.OrdinalIgnoreCase);
             tex.Holes = !string.Equals((string)t.Attribute("holes"), "false", System.StringComparison.OrdinalIgnoreCase);
 
             var stamps = new List<TextureStamp>();

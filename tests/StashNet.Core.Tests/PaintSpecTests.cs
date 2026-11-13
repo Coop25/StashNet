@@ -86,6 +86,17 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Parse_SolidStamps_ForGlass()
+        {
+            PaintSpec spec = Parse("<block name=\"b\"><texture name=\"g\" tint=\"000000\" solid=\"true\" /><texture name=\"m\" tint=\"000000\" /></block>", new List<string>());
+            spec.TryGet("b", out BlockPaint block);
+            block.TryGetTexture("g", out TexturePaint g);
+            block.TryGetTexture("m", out TexturePaint m);
+            Assert.True(g.SolidStamps);
+            Assert.False(m.SolidStamps);
+        }
+
+        [Fact]
         public void Parse_MuteTrue_SilencesTheBlock()
         {
             PaintSpec spec = Parse("<block name=\"tv\" mute=\"true\" /><block name=\"bay\" />", new List<string>());

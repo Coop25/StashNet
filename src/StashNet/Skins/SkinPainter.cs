@@ -56,8 +56,8 @@ namespace StashNet.Skins
                 // SkinApplier (the game drives that exact material; a copy of it rendered black in v0.10.3/4).
                 if (IsScreen(m) && paint.Screen != null && !GridMode && !IsPerRenderer(m))
                     result[i] = ScreenCopy(block, m, paint.Screen) ?? m;
-                else if (m.HasProperty("_MainTex") && m.GetTexture("_MainTex") is Texture tex && paint.TryGetTexture(tex.name, out TexturePaint tp))
-                    result[i] = PaintedCopy(block, m, tex, tp) ?? m;
+                else if (ColorTexture(m, out string prop) is Texture tex && paint.TryGetTexture(tex.name, out TexturePaint tp))
+                    result[i] = PaintedCopy(block, m, prop, tex, tp) ?? m;
             }
             return result;
         }
@@ -101,7 +101,23 @@ namespace StashNet.Skins
             materials.Clear();
         }
 
-        private static Material PaintedCopy(string block, Material original, Texture tex, TexturePaint tp)
+        /// <summary>
+        /// A material's color texture: _MainTex on the game's tint-mask shader, _Albedo on its glass shader
+        /// (the server rack's window, v0.10.7). Screens are handled separately.
+        /// </summary>
+        private static Texture ColorTexture(Material m, out string prop)
+        {
+            foreach (string p in new[] { "_MainTex", "_Albedo" })
+                if (m.HasProperty(p) && m.GetTexture(p) is Texture t && !IsScreen(m))
+                {
+                    prop = p;
+                    return t;
+                }
+            prop = null;
+            return null;
+        }
+
+        private static Material PaintedCopy(string block, Material original, string prop, Texture tex, TexturePaint tp)
         {
             string texKey = $"{block}|{tex.name}|{GridMode}";
             string matKey = $"{texKey}|{original.name}";
@@ -128,7 +144,7 @@ namespace StashNet.Skins
             if (waiting) return null;
 
             var copy = new Material(original) { name = $"StashNet_{original.name}" };
-            copy.SetTexture("_MainTex", painted);
+            copy.SetTexture(prop, painted);
             if (mask != null) copy.SetTexture("_RMOM", mask);
             if (copy.HasProperty("_Color")) copy.SetColor("_Color", Color.white);
             materials[matKey] = copy;
@@ -219,7 +235,7 @@ namespace StashNet.Skins
                 TextureRepaint.Recolor(job.Pixels, job.W, job.H, tp.R, tp.G, tp.B, tp.Strength);
                 TextureRepaint.Grime(job.Pixels, job.W, job.H, tp.Seed, tp.Damage);
                 foreach ((SpriteImage img, TextureStamp s) in stamps)
-                    TextureRepaint.Stamp(job.Pixels, job.W, job.H, img, s.U, s.V, s.W, s.H, s.Rot);
+                    TextureRepaint.Stamp(job.Pixels, job.W, job.H, img, s.U, s.V, s.W, s.H, s.Rot, tp.SolidStamps);
             });
         }
 

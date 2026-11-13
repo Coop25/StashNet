@@ -95,7 +95,8 @@ namespace StashNet.Core.Skins
         }
 
         /// <summary>Paint a sprite over the texture (alpha-over). u,v = center, w,h = fraction of the texture.</summary>
-        public static void Stamp(byte[] px, int w, int h, SpriteImage sprite, float u, float v, float wFrac, float hFrac, float rotDeg)
+        /// <param name="solid">Also raise the texture's alpha under the sprite, so marks on glass aren't see-through.</param>
+        public static void Stamp(byte[] px, int w, int h, SpriteImage sprite, float u, float v, float wFrac, float hFrac, float rotDeg, bool solid = false)
         {
             float cx = u * w, cy = v * h, sw = wFrac * w, sh = hFrac * h;
             if (sprite == null || sw <= 0f || sh <= 0f) return;
@@ -118,6 +119,7 @@ namespace StashNet.Core.Skins
                     px[i] = Mix(px[i], r, k);
                     px[i + 1] = Mix(px[i + 1], g, k);
                     px[i + 2] = Mix(px[i + 2], b, k);
+                    if (solid) px[i + 3] = Mix(px[i + 3], 255f, k);
                 }
         }
 
