@@ -1,13 +1,21 @@
 <configs>
 	<append xpath="/blocks">
 
-		<!-- Scrap Storage Core: the network's brain. Holds the network's code (vanilla lock, M4).
-		     Bays and terminals have no lock of their own; they ask this one.
-		     Heat (M7, Heat/TEFeatureStashNetHeat.cs): about every 167 s the server reports
-		     min(drives x StashNetHeatPerDrive, StashNetHeatCap) to the game's heat system. -->
+		<!-- ===== Cores =====
+		     The network's brain. Holds the network's code (vanilla lock, M4). Bays and terminals have no
+		     lock of their own; they ask their Core. A bay or terminal belongs to the NEAREST Core whose
+		     StashNetRadius reaches it (M8).
+		     Heat (M7/M8, Heat/TEFeatureStashNetHeat.cs): about every 167 s the server reports
+		     min(total drive heat weight x StashNetHeatPerDrive, StashNetHeatCap). A Basic drive weighs 1.
+		     Tiers (M8): Scrap 6 / 0.25, Storage 12 / 0.18, Advanced 24 / 0.12; cap 6.5 for all.
+		     Upgrade in place with a hammer and the next tier's block: vanilla carries the lock code,
+		     allowed players and owner over to the new block (GameManager.ChangeBlocks -> UpgradeDowngradeFrom).
+		     Each tier is written out in full (no Extends) so no tier inherits another's UpgradeBlock. -->
 		<block name="stashnetScrapCore">
 			<property name="CreativeMode" value="Player" />
-			<property name="Class" value="CompositeTileEntity" />
+			<!-- A composite block (Blocks/BlockStashNetCore.cs) that also refuses placement within
+			     2 x the largest Core reach of another Core (owner's spacing rule, 2026-11-13). -->
+			<property name="Class" value="StashNet.Blocks.StashNetCore, StashNet" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureLockable" />
 				<property class="TEFeatureStashNetHeat" />
@@ -17,7 +25,7 @@
 			</property>
 			<!-- Network reach in blocks (cube distance). Bays and Terminals within this range join. -->
 			<property name="StashNetRadius" value="6" />
-			<!-- Heat per drive in the network, and the most heat one report can be (placeholders, playtest). -->
+			<!-- Heat per heat weight (Basic drive = 1), and the most heat one report can be (placeholders, playtest). -->
 			<property name="StashNetHeatPerDrive" value="0.25" />
 			<property name="StashNetHeatCap" value="6.5" />
 			<property name="Material" value="Mmetal" />
@@ -34,6 +42,13 @@
 			<property class="RepairItems">
 				<property name="resourceScrapIron" value="10" />
 			</property>
+			<property class="UpgradeBlock">
+				<property name="ToBlock" value="stashnetStorageCore" />
+				<property name="Item" value="stashnetStorageCore" />
+				<property name="ItemCount" value="1" />
+				<property name="UpgradeHitCount" value="4" />
+			</property>
+			<property name="UpgradeSound" value="place_block_metal" />
 			<drop event="Destroy" name="resourceScrapIron" count="5,10" />
 			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
 			<property name="Group" value="Building,advBuilding" />
@@ -42,10 +57,94 @@
 			<property name="SortOrder2" value="0000" />
 		</block>
 
-		<!-- Drive Bay: 4-slot container that only accepts drives (Patches/DriveBayOnlyDrivesPatches.cs).
-		     Access follows the network Core's lock (Blocks/TEFeatureStashNetDriveBay.cs, listed FIRST so
-		     its "network locked" prompt wins). The bay's own TEFeatureLockable is kept only so bays
-		     placed before M4 keep loading; its lock/keypad commands are disabled. -->
+		<!-- Storage Core (M8, tier 2): reach 12, runs cooler. -->
+		<block name="stashnetStorageCore">
+			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="StashNet.Blocks.StashNetCore, StashNet" />
+			<property class="CompositeFeatures">
+				<property class="TEFeatureLockable" />
+				<property class="TEFeatureStashNetHeat" />
+				<property class="TEFeaturePickup">
+					<property name="TakeDelay" value="2" />
+				</property>
+			</property>
+			<property name="StashNetRadius" value="12" />
+			<property name="StashNetHeatPerDrive" value="0.18" />
+			<property name="StashNetHeatCap" value="6.5" />
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
+			<property name="CustomIcon" value="electricalBox01" />
+			<property name="CustomIconTint" value="7FFF7F" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="5000" />
+			<property name="DescriptionKey" value="stashnetStorageCoreDesc" />
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="5" />
+			</property>
+			<property class="UpgradeBlock">
+				<property name="ToBlock" value="stashnetAdvancedCore" />
+				<property name="Item" value="stashnetAdvancedCore" />
+				<property name="ItemCount" value="1" />
+				<property name="UpgradeHitCount" value="4" />
+			</property>
+			<property name="UpgradeSound" value="place_block_metal" />
+			<drop event="Destroy" name="resourceScrapIron" count="10,20" />
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0004" />
+		</block>
+
+		<!-- Advanced Storage Core (M8, tier 3): reach 24, runs coolest. Top tier: no upgrade. -->
+		<block name="stashnetAdvancedCore">
+			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="StashNet.Blocks.StashNetCore, StashNet" />
+			<property class="CompositeFeatures">
+				<property class="TEFeatureLockable" />
+				<property class="TEFeatureStashNetHeat" />
+				<property class="TEFeaturePickup">
+					<property name="TakeDelay" value="2" />
+				</property>
+			</property>
+			<property name="StashNetRadius" value="24" />
+			<property name="StashNetHeatPerDrive" value="0.12" />
+			<property name="StashNetHeatCap" value="6.5" />
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
+			<property name="CustomIcon" value="electricalBox01" />
+			<property name="CustomIconTint" value="D07FFF" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="10000" />
+			<property name="DescriptionKey" value="stashnetAdvancedCoreDesc" />
+			<property class="RepairItems">
+				<property name="resourceForgedSteel" value="5" />
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="15,30" />
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0005" />
+		</block>
+
+		<!-- ===== Drive Bays =====
+		     Container that only accepts drives (Patches/DriveBayOnlyDrivesPatches.cs). Access follows the
+		     network Core's lock (Blocks/TEFeatureStashNetDriveBay.cs, listed FIRST so its "network locked"
+		     prompt wins). The bay's own TEFeatureLockable is kept only so bays placed before M4 keep
+		     loading; its lock/keypad commands are disabled.
+		     Tiers (M8): Drive Bay 4 slots / 1,000 HP, Reinforced 8 / 5,000, Armored 12 / 10,000 (hard cap).
+		     Upgrade in place with a hammer and the next tier's block: vanilla moves the drives into the
+		     new, bigger slot grid. A broken bay of any tier drops its drives in a loot bag (no downgrade).
+		     Each tier is written out in full (no Extends). -->
 		<block name="stashnetDriveBay">
 			<property name="CreativeMode" value="Player" />
 			<property name="Class" value="CompositeTileEntity" />
@@ -72,12 +171,96 @@
 			<property class="RepairItems">
 				<property name="resourceScrapIron" value="8" />
 			</property>
+			<property class="UpgradeBlock">
+				<property name="ToBlock" value="stashnetDriveBayReinforced" />
+				<property name="Item" value="stashnetDriveBayReinforced" />
+				<property name="ItemCount" value="1" />
+				<property name="UpgradeHitCount" value="4" />
+			</property>
+			<property name="UpgradeSound" value="place_block_metal" />
 			<drop event="Destroy" name="resourceScrapIron" count="4,8" />
 			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
 			<property name="Group" value="Building,advBuilding" />
 			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
 			<property name="SortOrder1" value="B900" />
 			<property name="SortOrder2" value="0001" />
+		</block>
+
+		<!-- Reinforced Drive Bay (M8, tier 2): 8 drives, about as tough as concrete. -->
+		<block name="stashnetDriveBayReinforced">
+			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="CompositeTileEntity" />
+			<property class="CompositeFeatures">
+				<property class="TEFeatureStashNetDriveBay" />
+				<property class="TEFeatureStorage">
+					<property name="LootList" value="stashnetDriveBaySlotsReinforced" />
+				</property>
+				<property class="TEFeatureLockable" />
+			</property>
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Electrical/serverComputerPrefab.prefab" />
+			<property name="DisplayType" value="blockMulti" />
+			<property name="MultiBlockDim" value="1,2,1" />
+			<property name="ModelOffset" value="0,0.5,0" />
+			<property name="CustomIcon" value="decoServerRackWhite" />
+			<property name="CustomIconTint" value="7FFF7F" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="5000" />
+			<property name="DescriptionKey" value="stashnetDriveBayReinforcedDesc" />
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="5" />
+			</property>
+			<property class="UpgradeBlock">
+				<property name="ToBlock" value="stashnetDriveBayArmored" />
+				<property name="Item" value="stashnetDriveBayArmored" />
+				<property name="ItemCount" value="1" />
+				<property name="UpgradeHitCount" value="4" />
+			</property>
+			<property name="UpgradeSound" value="place_block_metal" />
+			<drop event="Destroy" name="resourceScrapIron" count="8,16" />
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0006" />
+		</block>
+
+		<!-- Armored Drive Bay (M8, tier 3): 12 drives, about as tough as steel (hard cap). Top tier. -->
+		<block name="stashnetDriveBayArmored">
+			<property name="CreativeMode" value="Player" />
+			<property name="Class" value="CompositeTileEntity" />
+			<property class="CompositeFeatures">
+				<property class="TEFeatureStashNetDriveBay" />
+				<property class="TEFeatureStorage">
+					<property name="LootList" value="stashnetDriveBaySlotsArmored" />
+				</property>
+				<property class="TEFeatureLockable" />
+			</property>
+			<property name="Material" value="Mmetal" />
+			<property name="Shape" value="ModelEntity" />
+			<property name="Model" value="@:Entities/Electrical/serverComputerPrefab.prefab" />
+			<property name="DisplayType" value="blockMulti" />
+			<property name="MultiBlockDim" value="1,2,1" />
+			<property name="ModelOffset" value="0,0.5,0" />
+			<property name="CustomIcon" value="decoServerRackWhite" />
+			<property name="CustomIconTint" value="D07FFF" />
+			<property name="WaterFlow" value="permitted" />
+			<property name="Place" value="TowardsPlacerInverted" />
+			<property name="Path" value="solid" />
+			<property name="MaxDamage" value="10000" />
+			<property name="DescriptionKey" value="stashnetDriveBayArmoredDesc" />
+			<property class="RepairItems">
+				<property name="resourceForgedSteel" value="5" />
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="12,24" />
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1" />
+			<property name="Group" value="Building,advBuilding" />
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0007" />
 		</block>
 
 		<!-- Storage Terminal: browse the network (src/StashNet/Blocks/BlockStashNetTerminal.cs). -->

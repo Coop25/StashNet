@@ -2,14 +2,18 @@ using System;
 
 namespace StashNet.Core.Heat
 {
-    /// <summary>How much heat a network reports each time (Milestone 7). Numbers come from the Core block's XML.</summary>
+    /// <summary>How much heat a network reports each time (Milestones 7-8). Numbers come from the Core block's XML.</summary>
     public static class NetworkHeat
     {
-        /// <summary>drives × heatPerDrive, capped. Bad (negative) inputs count as 0, so a bad config never crashes.</summary>
-        public static float PerReport(int drives, float heatPerDrive, float cap)
+        /// <summary>
+        /// totalWeight × heatPerDrive, capped. totalWeight is the sum of every drive's heat weight
+        /// (Basic 1, Standard 2, High-Density 4, from items.xml), so bigger drives run hotter (M8).
+        /// Bad (negative) inputs count as 0, so a bad config never crashes.
+        /// </summary>
+        public static float PerReport(float totalWeight, float heatPerDrive, float cap)
         {
-            if (drives <= 0 || heatPerDrive <= 0f || cap <= 0f) return 0f;
-            return Math.Min(drives * heatPerDrive, cap);
+            if (totalWeight <= 0f || heatPerDrive <= 0f || cap <= 0f) return 0f;
+            return Math.Min(totalWeight * heatPerDrive, cap);
         }
     }
 }

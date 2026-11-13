@@ -33,10 +33,14 @@ namespace StashNet.Network
         public TEFeatureLockable CoreLock { get; private set; }
         public NetworkStorage Storage { get; private set; }
         public int BayCount { get; private set; }
+        /// <summary>Bays within this Core's reach that belong to a nearer Core (M8), so not in this network.</summary>
+        public int OtherCoreBays { get; private set; }
         /// <summary>Bays skipped because someone has them open.</summary>
         public int SkippedBays { get; private set; }
         /// <summary>Drives skipped because their data can't be read (left untouched).</summary>
         public int SkippedDrives { get; private set; }
+        /// <summary>Sum of every drive's heat weight (readable or not) in bays nobody has open (M8).</summary>
+        public float HeatWeight { get; private set; }
 
         public static bool IsCore(Block block) => block != null && block.Properties.Contains(PropRadius);
 
@@ -53,16 +57,21 @@ namespace StashNet.Network
             }
 
             var net = new StashNetNetwork { CorePos = corePos, CoreLock = NetworkLock.GetCoreLock(world, corePos) };
+            // Every Core that could claim a bay within this Core's reach, gathered once (M8).
+            List<CoreSite> cores = CoresNear(world, corePos, radius + MaxCoreRadius());
 
             var drives = new List<NetworkDrive>();
-            foreach (Vector3i pos in Cube(corePos, radius))
+            foreach (TileEntityComposite te in TileEntityScan.InCube(world, corePos, radius))
             {
-                BlockValue bv = world.GetBlock(pos);
-                if (bv.ischild || !(bv.Block is BlockCompositeTileEntity)) continue;
-                TileEntityComposite te = world.GetTileEntity(pos) as TileEntityComposite;
-                if (te?.GetFeature<TEFeatureStashNetDriveBay>() == null) continue;
+                if (te.GetFeature<TEFeatureStashNetDriveBay>() == null) continue;
                 TEFeatureStorage storage = te.GetFeature<TEFeatureStorage>();
                 if (storage == null) continue;
+                // A bay belongs to its nearest Core only, so it is never in two networks (M8).
+                if (!IsOwner(cores, te.ToWorldPos(), corePos))
+                {
+                    net.OtherCoreBays++;
+                    continue;
+                }
 
                 net.BayCount++;
                 if (storage.IsUserAccessing())
@@ -74,6 +83,7 @@ namespace StashNet.Network
                 {
                     ItemValue drive = storage.ItemGrid[i].itemValue;
                     if (drive == null || drive.IsEmpty() || !DriveRules.IsDrive(drive)) continue;
+                    net.HeatWeight += DriveItem.HeatWeight(drive); // readable or not (M8)
 
                     if (!DriveItem.TryGetCapacity(drive, out DriveCapacity cap) || !DriveItem.TryLoad(drive, out DriveContents contents, out _))
                     {
@@ -109,24 +119,53 @@ namespace StashNet.Network
             }
         }
 
-        /// <summary>Nearest Core (cube distance) whose own radius reaches <paramref name="from"/>.</summary>
+        /// <summary>
+        /// The Core that owns <paramref name="from"/>: the nearest Core (cube distance) whose own radius
+        /// reaches it, ties broken by position (StashNet.Core CorePicker). Terminals, bays and lock
+        /// checks all use this one rule.
+        /// </summary>
         public static bool TryFindCore(World world, Vector3i from, out Vector3i corePos, out int coreRadius)
         {
             corePos = default;
             coreRadius = 0;
-            int best = int.MaxValue;
-            foreach (Vector3i pos in Cube(from, MaxCoreRadius()))
+            List<CoreSite> cores = CoresNear(world, from, MaxCoreRadius());
+            int i = CorePicker.Pick(cores, from.x, from.y, from.z);
+            if (i < 0) return false;
+            corePos = new Vector3i(cores[i].X, cores[i].Y, cores[i].Z);
+            coreRadius = cores[i].Reach;
+            return true;
+        }
+
+        /// <summary>Every Core tile entity within cube distance <paramref name="r"/>, with its reach.</summary>
+        private static List<CoreSite> CoresNear(World world, Vector3i center, int r)
+        {
+            var cores = new List<CoreSite>();
+            foreach (TileEntityComposite te in TileEntityScan.InCube(world, center, r))
             {
-                BlockValue bv = world.GetBlock(pos);
-                if (bv.ischild || !IsCore(bv.Block)) continue;
-                int radius = bv.Block.Properties.GetInt(PropRadius);
-                int dist = CubeDistance(pos, from);
-                if (dist > radius || dist >= best) continue;
-                best = dist;
-                corePos = pos;
-                coreRadius = radius;
+                Vector3i pos = te.ToWorldPos();
+                Block block = world.GetBlock(pos).Block;
+                if (!IsCore(block)) continue;
+                cores.Add(new CoreSite(pos.x, pos.y, pos.z, block.Properties.GetInt(PropRadius)));
             }
-            return best != int.MaxValue;
+            return cores;
+        }
+
+        private static bool IsOwner(List<CoreSite> cores, Vector3i pos, Vector3i corePos)
+        {
+            int i = CorePicker.Pick(cores, pos.x, pos.y, pos.z);
+            return i >= 0 && cores[i].X == corePos.x && cores[i].Y == corePos.y && cores[i].Z == corePos.z;
+        }
+
+        /// <summary>
+        /// Owner's spacing rule: true if a Core placed at <paramref name="pos"/> would be within
+        /// 2 x the largest Core reach of an existing Core (StashNet.Core CoreSpacing). Loaded chunks only.
+        /// </summary>
+        public static bool CoreTooClose(World world, Vector3i pos, out int distance, out int minGap)
+        {
+            int maxReach = MaxCoreRadius();
+            minGap = CoreSpacing.MinGap(maxReach);
+            List<CoreSite> cores = CoresNear(world, pos, minGap);
+            return CoreSpacing.TooClose(cores, pos.x, pos.y, pos.z, maxReach, out distance);
         }
 
         private static int MaxCoreRadius()
@@ -139,17 +178,6 @@ namespace StashNet.Network
             }
             maxCoreRadius = max;
             return max;
-        }
-
-        private static int CubeDistance(Vector3i a, Vector3i b) =>
-            Math.Max(Math.Abs(a.x - b.x), Math.Max(Math.Abs(a.y - b.y), Math.Abs(a.z - b.z)));
-
-        private static IEnumerable<Vector3i> Cube(Vector3i center, int r)
-        {
-            for (int y = -r; y <= r; y++)
-                for (int x = -r; x <= r; x++)
-                    for (int z = -r; z <= r; z++)
-                        yield return new Vector3i(center.x + x, center.y + y, center.z + z);
         }
     }
 }

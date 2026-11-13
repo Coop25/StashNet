@@ -27,6 +27,23 @@ namespace StashNet.Core.Drives
             return sb.ToString();
         }
 
+        /// <summary>
+        /// True unless the drive data is certainly empty (M8 scrap guard). Unreadable data counts as
+        /// holding items: it may be someone's stuff, so it must never be thrown away.
+        /// </summary>
+        public static bool HoldsItems(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return false;
+            try
+            {
+                return Deserialize(text).TypeCount > 0;
+            }
+            catch (DriveFormatException)
+            {
+                return true;
+            }
+        }
+
         public static DriveContents Deserialize(string text)
         {
             var contents = new DriveContents();

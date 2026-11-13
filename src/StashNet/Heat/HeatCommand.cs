@@ -28,9 +28,9 @@ namespace StashNet.Heat
             if (StashNetNetwork.TryFindCore(world, here, out Vector3i corePos, out _))
             {
                 Block core = world.GetBlock(corePos).Block;
-                float heat = HeatEmitter.CoreHeat(world, corePos, out int drives);
-                output($"Core at {corePos}: {drives} drive(s) -> {heat:0.##} heat per report " +
-                       $"({HeatEmitter.GetFloat(core, HeatEmitter.PropHeatPerDrive):0.##} per drive, cap {HeatEmitter.GetFloat(core, HeatEmitter.PropHeatCap):0.##}), " +
+                float heat = HeatEmitter.CoreHeat(world, corePos, out int drives, out float weight);
+                output($"Core at {corePos}: {drives} drive(s), heat weight {weight:0.#} -> {heat:0.##} heat per report " +
+                       $"({HeatEmitter.GetFloat(core, HeatEmitter.PropHeatPerDrive):0.##} per weight, cap {HeatEmitter.GetFloat(core, HeatEmitter.PropHeatCap):0.##}), " +
                        "about every 3 minutes.");
             }
             else

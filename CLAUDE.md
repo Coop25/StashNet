@@ -1,10 +1,10 @@
 # StashNet: project notes
 
-## ▶ RESUME HERE (last session ended 2026-11-12)
-- **State:** v0.8.0 on main (github.com/Coop25/StashNet, private). Milestones 0–7 are done (M7 = Heat, confirmed working in-game 2026-11-12).
-- **v0.8.0 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-12 for the M7 test). Redeploy only after the owner says the game is closed.
+## ▶ RESUME HERE (last session: 2026-11-13)
+- **State:** **v0.9.1 on main** (github.com/Coop25/StashNet, private; local merge, not pushed). Milestones 0–8 are done. M8 Progression (design `docs/superpowers/specs/2026-11-13-m8-progression-design.md`, plan `docs/superpowers/plans/2026-11-13-m8-progression.md`) was **accepted by the owner 2026-11-13** ("everything seems to work"). The v0.9.0 log was clean (`Loaded v0.9.0 (20 methods patched)`, no StashNet errors), but the in-world session was only about 2.5 min with no `sn heat`, so not every checklist step was confirmed. The **Core spacing rule (v0.9.1)** is merged but **never deployed or tested**. The owner chose to test it with M9 (M8 checklist step 9).
+- **v0.9.0 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-13). Redeploy only after the owner says the game is closed.
 - **The owner's StashNet test world contains StashNet blocks.** Don't load it without the mod installed (those blocks would break). Their real saves never had StashNet.
-- **Next (roadmap in `docs/PLAN.md`):** M8 Progression (Standard/High-Density drives 96/384 stacks, upgrade kits, Reinforced/Armored bays, Core tiers + radius) → M9 multiplayer testing + release package. Ask the owner which to do first.
+- **Next: M9** (multiplayer testing + hardening + release package). It's being designed. Open question to the owner: who the release is for and how they'd get it. That decides the anti-cheat bar and the package. Parked balance idea: a running cost (fuel or electricity), decide after the owner has played M8.
 - **Open items:**
   - ⚠️ Multiplayer has never been tested with a second player (M3b Part B, the M4 lockout, M6 client "click twice"). Must happen in M9.
   - Terminal window layout: no screenshot received yet.
@@ -54,6 +54,15 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Milestone 5: ✅ done 2026-11-12 (v0.6.1). The owner confirmed drive unload and the tier/durability bars work. The v0.6.0 and v0.6.1 sessions loaded with 6 patches and no StashNet errors, which also covers v0.5.x's lock changes loading. Scope (owner): unload only, with no fill/wipe/format.
 - Milestone 6: ✅ done 2026-11-12 (v0.7.3). The owner confirmed the Crafting Terminal works, including the capped craft count, cancel refunds to storage, and finished crafts to storage. The log shows `Loaded v0.7.3 (19 methods patched)` and no StashNet errors.
 - Milestone 7: ✅ done 2026-11-12 (v0.8.0). The owner confirmed it in-game: `sn heat` showed 24 drives → 6 per report, and the area heat rose, faded between reports, and reset (most likely a screamer roll). The log shows `Loaded v0.8.0 (19 methods patched)` and no StashNet errors. Existing Cores loaded with a harmless vanilla warning ("1 feature(s) ... not present in the saved data"). Deferred for M8: overlapping Cores double-count shared bays; each heat report re-reads every drive (re-check with bigger radius/drives). Offered, not done: `sn heat` reading the Core's own area instead of the player's.
+
+## Progression (M8, v0.9.0)
+- Owner's balance goal: StashNet should help without being overpowered. M8 balances with prices and size-weighted heat. A running cost (fuel or power) is parked until after playtesting.
+- Tiers (all numbers in XML): drives Basic/Standard/High-Density = 24/96/384 stacks, heat weight 1/2/4 (`StashNetHeatWeight`). Bays Drive Bay/Reinforced/Armored = 4/8/12 slots (`stashnetDriveBaySlots*` loot containers), 1,000/5,000/10,000 HP. Cores Scrap/Storage/Advanced = reach 6/12/24, heat 0.25/0.18/0.12 per weight, cap 6.5.
+- **No drive upgrade kits** (owner). Move up a drive tier by crafting the new drive, unloading the old one (shift-click in a terminal), then scrapping it. `Patches/DriveScrapGuardPatch.cs` refuses Scrap on a drive that holds items or can't be read.
+- **Bay/Core upgrades = vanilla `UpgradeBlock` with the next tier's block as the item** (owner's choice). Vanilla carries the tile entity over (`GameManager.ChangeBlocks` → `UpgradeDowngradeFrom`: storage grid resized to the new loot size, lock locked/allowed/password, owner). Our items are appended to every tool's `Allowed_upgrade_items` (items.xml; the XPath `append` on an attribute does `Value += text`). No downgrade on break (owner): a broken bay drops its drives in a loot bag.
+- Tier blocks are written out in full, **never `Extends`**: inheriting would copy the lower tier's `UpgradeBlock` (a block upgrading into itself) and nested `CompositeFeatures`.
+- **Core spacing (v0.9.1, owner):** a Core can't be placed within 2 × the largest Core reach (48) of ANY other Core, any tier or owner. All Core tiers use `Class="StashNet.Blocks.StashNetCore, StashNet"` (`Blocks/BlockStashNetCore.cs`, a `BlockCompositeTileEntity` subclass overriding `CanPlaceBlockAt`; game-free math in `StashNet.Core/Network/CoreSpacing.cs`). It's checked on the placing client, like vanilla placement rules, and skipped in edit mode. Cores already too close keep working.
+- Discovery walks chunk tile entities (`Network/TileEntityScan.cs`), not every block. A bay or terminal belongs to the nearest in-reach Core, with ties to the lowest Y, then X, then Z (`StashNet.Core/Network/CorePicker.cs`, tested). This fixed M7's double-counted shared bays. A Core without a tile entity (placed before M4) is no longer found.
 
 ## Heat (M7)
 - Vanilla heat (decompiled): per 5×5-chunk area; workstations report `HeatMapStrength` every `AIDirector.GetActivityWorldTimeDelay()` (~167 real s), each report fades over 720 s, so repeats build to ~4.3× one report. At 25 the area rolls 20% for screamers and resets. Forge 6, workbench/campfire 5. The game ticks every loaded tile entity (`Chunk.UpdateTick`), composite features included.

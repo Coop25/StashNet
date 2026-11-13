@@ -8,6 +8,15 @@ namespace StashNet.Drives
     {
         public const string MetadataKey = "StashNetDrive";
         public const string PropMaxStacks = "StashNetMaxStacks";
+        public const string PropHeatWeight = "StashNetHeatWeight";
+
+        /// <summary>How much this drive counts toward its network's heat (M8): items.xml, default 1, never below 0.</summary>
+        public static float HeatWeight(ItemValue drive)
+        {
+            ItemClass ic = drive?.ItemClass;
+            if (ic == null || !ic.Properties.Contains(PropHeatWeight)) return 1f;
+            return System.Math.Max(0f, ic.Properties.GetFloat(PropHeatWeight));
+        }
 
         public static bool TryGetCapacity(ItemValue drive, out DriveCapacity capacity)
         {
@@ -54,6 +63,14 @@ namespace StashNet.Drives
 
         /// <summary>One-time token on a drive emptied for an unload, so its leftovers can find it again.</summary>
         public const string PendingKey = "StashNetPending";
+
+        /// <summary>True unless the drive is certainly empty; unreadable data counts as items (M8 scrap guard).</summary>
+        public static bool HoldsItems(ItemValue drive)
+        {
+            if (drive == null) return false;
+            drive.TryGetMetadata(MetadataKey, out string text);
+            return DriveSerializer.HoldsItems(text);
+        }
 
         public static bool HasStamp(ItemValue drive) => drive != null && drive.HasMetadata(LegacyStampKey);
 

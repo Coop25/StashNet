@@ -27,7 +27,7 @@ namespace StashNet.Heat
             {
                 if (!HeatThrottle.ShouldEmit(_world.worldTime, ref nextHeatTime, AIDirector.GetActivityWorldTimeDelay())) return;
                 Vector3i pos = ToWorldPos();
-                HeatEmitter.Emit(_world, pos, HeatEmitter.CoreHeat(_world, pos, out _));
+                HeatEmitter.Emit(_world, pos, HeatEmitter.CoreHeat(_world, pos, out _, out _));
             }
             catch (Exception e)
             {

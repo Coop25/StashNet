@@ -34,19 +34,23 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 
 | Piece | Type | What it does |
 |---|---|---|
-| **Scrap Storage Core** | Block | The network's brain. One per network. Holds the password. Emits heat. |
-| **Drive Bay** | Block | Holds 4 drives. Upgradeable armor (2.4). |
+| **Scrap Storage Core** → **Storage Core** → **Advanced Storage Core** | Block | The network's brain. One per network. Holds the password. Emits heat. Higher tiers reach farther and run cooler (M8). |
+| **Drive Bay** → **Reinforced** → **Armored Drive Bay** | Block | Holds 4 / 8 / 12 drives, tougher each tier (2.4). |
 | **Basic / Standard / High-Density Drive** | Item | Where items actually live. Contents travel with the drive. |
 | **Storage Terminal** | Block | Browse, search, sort, deposit, withdraw. Has a Drive Port slot. |
 | **Crafting Terminal** | Block | Storage Terminal + a full workbench that crafts from network stock. |
-| **Drive Upgrade Kit** (Basic→Standard, Standard→HD) | Item | Upgrades a drive in place, keeping its contents. |
-| *Later:* Core upgrades, Network Relay, Heat Sink | Block | See section 4 |
+| *Later:* Network Relay, Heat Sink | Block | See section 4 |
+
+~~Drive Upgrade Kit~~ **Dropped (2026-11-13):** to move up a drive tier, craft the bigger drive, shift-click the old one in a terminal to empty it into the network, then scrap it. A drive that still holds items can't be scrapped.
+
+**Bay and Core upgrades (M8):** the upgrade item is the **next tier's block itself**. You craft it at a workbench, then hit the lower tier with a hammer while carrying it (like vanilla's iron → vault doors). The game moves the drives, the lock code, the allowed players and the owner over to the new block. Higher tiers can also be placed directly.
 
 ### 2.2 How a network forms
 
 - **Early game: proximity, no power, no wires.** Bays and terminals within the Core's radius join automatically.
-  - Scrap Core radius: **6 blocks**. Higher Core tiers: **12**, then **24**.
-- **One Core per network.** A bay or terminal in range of two Cores joins the nearest one.
+  - Scrap Storage Core radius: **6 blocks**. Storage Core: **12**. Advanced Storage Core: **24**.
+- **One Core per network.** A bay or terminal in range of two Cores joins the nearest one (ties are broken by position, so every lookup agrees). A bay is never in two networks (enforced since M8).
+- **Cores keep their distance (2026-11-13, owner):** a Core can't be placed within 2 × the largest Core reach (48 blocks) of any other Core, whatever its tier or owner. Fully upgraded networks then never overlap. Cores already placed closer keep working.
 - **Later: powered Network Relays** (wired with the vanilla wire tool) extend reach beyond the radius.
 - **Terminals do not need power in v1.** Powered tiers come later as an upgrade, never a requirement.
 
@@ -55,11 +59,11 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 - Each drive stores its own contents. Pull it out → the items leave with it.
 - Capacity is **stacks only**. Each item type uses `ceil(count ÷ its stack size)` stacks, like slots in a chest: 6,000 stone = 1 stack, 3 rifles = 3 stacks. There is no separate type limit. *(Changed 2026-11-12, twice: raw item counts made 6,000-stack resources overflow a drive, and a per-drive type limit double-counted items spread across drives.)* All numbers are tunable in items.xml:
 
-| Drive | Stacks | Tier |
-|---|---|---|
-| Basic | 24 | Early (scrap, duct tape, wood) |
-| Standard | 96 | Mid (forged iron, electrical parts) |
-| High-Density | 384 | Late (forged steel, circuitry) |
+| Drive | Stacks | Heat weight | Tier |
+|---|---|---|---|
+| Basic | 24 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
+| Standard | 96 | 2 | Mid (workbench: forged iron, electrical + mechanical parts) |
+| High-Density | 384 | 4 | Late (workbench: forged steel, electrical + mechanical parts) |
 
   For scale: a vanilla wooden crate holds 48 stacks, so a Drive Bay of 4 Basic Drives (96 stacks) is about two crates.
 
@@ -69,15 +73,17 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 
 ### 2.4 Armored Drive Bays
 
-Uses 7DTD's normal block-upgrade system (hit it with a hammer/nailgun holding the upgrade materials):
+Uses 7DTD's normal block-upgrade system. Hit the bay with a hammer, stone axe or nail gun while carrying the **next tier's bay** (crafted at a workbench). The drives stay inside.
 
-| Tier | Upgrade cost | Toughness target |
-|---|---|---|
-| Drive Bay | base craft | about a vanilla mid-tier block |
-| Reinforced Drive Bay | forged iron + mechanical parts | about concrete |
-| Armored Drive Bay | forged steel + mechanical parts | about a steel block — **hard cap, never above** |
+| Tier | Drive slots | Health | Recipe (workbench) |
+|---|---|---|---|
+| Drive Bay | 4 | 1,000 (about a vanilla mid-tier block) | base craft (backpack) |
+| Reinforced Drive Bay | 8 | 5,000 (about concrete) | 30 forged iron, 8 mechanical parts, 4 electrical parts |
+| Armored Drive Bay | 12 | 10,000 (about a steel block, **hard cap, never above**) | 25 forged steel, 10 mechanical parts, 8 electrical parts |
 
-Mid/late-game, no god-tier materials.
+Mid/late-game, no god-tier materials. A broken bay of any tier breaks completely and drops its drives in a loot bag. Bays don't step down a tier (owner, 2026-11-13).
+
+Core tiers work the same way: Storage Core (40 forged iron, 15 electrical parts, 10 mechanical parts, 1 radiator) and Advanced Storage Core (30 forged steel, 25 electrical parts, 10 mechanical parts, 2 radiators).
 
 ### 2.5 Terminals and the Drive Port
 
@@ -102,8 +108,8 @@ Mid/late-game, no god-tier materials.
 
 Uses the game's existing heat system (the same one forges and campfires feed, which spawns screamers):
 
-- Heat per Core = **(drives in the network) × (heat per drive for that Core tier)**, with a cap.
-- Better Cores run cooler per drive — upgrading the Core is also about stealth.
+- Heat per Core = **(total heat weight of the network's drives) × (heat per weight for that Core tier)**, with a cap. A Basic drive weighs 1, Standard 2, High-Density 4, so a big hoard runs hotter (M8).
+- Better Cores run cooler: 0.25 / 0.18 / 0.12 per weight, cap 6.5 for all. Upgrading the Core is also about stealth.
 - Small extra heat while a terminal is open or the Crafting Terminal is crafting.
 - Cap keeps big late-game bases at "regular screamer visits," not "endless screamers."
 - *Later:* a powered **Heat Sink** block that reduces network heat.
@@ -151,13 +157,13 @@ Each milestone ends with something you can load and try in-game. A detailed step
 | **0** | **Setup + proof of concept.** Dev tools, empty mod that loads, answers to the 4 unknowns. | Game loads with mod; log shows "StashNet loaded". |
 | **1** | **Blocks & items exist.** Core, Drive Bay, Basic Drive, Storage Terminal — vanilla looks, tinted icons, recipes. Bay only accepts drives. | Craft and place everything; put drives in a bay. |
 | **2** | **Drives hold items.** Game-free storage library + tests; saving contents on the drive item. | Items survive save/reload and moving a drive between bays. |
-| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ M3b ✅ single-player / ⚠️ multiplayer untested, M4 ✅ (lock on bays + terminals; drive locking dropped), M5 ✅ (unload only) + tier/durability bars, M6 ✅ Crafting Terminal (+ craft cap, cancel/output to storage) (v0.7.3), M7 ✅ Heat (v0.8.0) (2026-11-12). Next: M8.* | |
+| | *Status: M0 ✅ M1 ✅ M2 ✅ M3a ✅ M3b ✅ single-player / ⚠️ multiplayer untested, M4 ✅ (lock on bays + terminals; drive locking dropped), M5 ✅ (unload only) + tier/durability bars, M6 ✅ Crafting Terminal (+ craft cap, cancel/output to storage) (v0.7.3), M7 ✅ Heat (v0.8.0) (2026-11-12), M8 ✅ Progression (v0.9.0, + Core spacing v0.9.1) (2026-11-13). Next: M9.* | |
 | **3** | **Network + Storage Terminal.** Proximity discovery, combined view, search/sort, deposit/withdraw. | One screen shows every drive's contents; take and put items. |
 | **4** | **Password.** Core lock guards bays + terminals, allowed list. (Drive locking dropped.) | A second player is locked out until they enter the code. |
 | **5** | **Drive Port.** Unload / load / format. | Empty a full drive into the network; load another network's drive. |
 | **6** | **Crafting Terminal.** Workbench recipes using network stock. | Craft something without carrying the ingredients. |
 | **7** | **Heat.** Formula, cap, terminal-use spikes. | Big network → screamers show up. |
-| **8** | **Progression.** Standard/HD drives, Upgrade Kits, Reinforced/Armored bays, Core tiers 2–3 and radius. | Upgrade a full drive without losing anything; armored bay soaks damage. |
+| **8** | **Progression.** Standard/HD drives, Reinforced/Armored bays, Core tiers 2–3 and radius, size-weighted heat. | Unload and scrap a drive; upgrade a bay and a Core without losing anything; armored bay soaks damage. |
 | **9** | **Multiplayer hardening + release package.** Dedicated server test, dupe tests, zip for sharing. **Must include M3b checklist Part B** (never tested). | Two players use one network on a server at once with no dupes. |
 
 **v1 = milestones 0–9.**
@@ -170,6 +176,8 @@ Each milestone ends with something you can load and try in-game. A detailed step
 - **More stations** in the Crafting Terminal (forge, chem station).
 - **Autocrafting** — recipe cartridges, crafting queue, sub-recipes.
 - **Custom 3D models and textures.**
+- **Running cost (balance lever).** Decide after playtesting M8 whether the network needs an ongoing cost to stay balanced: fuel the Core burns while the network is used, or electricity (generator/solar). Raised by the owner 2026-11-13; parked so M8 could ship with prices and heat first.
+- **Selling a full drive to a trader** destroys its contents (deliberate player action, no guard yet). Revisit in M9.
 
 ---
 
