@@ -31,7 +31,7 @@
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
 			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
-			<property name="CustomIcon" value="electricalBox01" />
+			<property name="CustomIcon" value="electricalBox02" />
 			<property name="CustomIconTint" value="FFB060" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
@@ -73,8 +73,8 @@
 			<property name="StashNetHeatCap" value="6.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
-			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
-			<property name="CustomIcon" value="electricalBox01" />
+			<property name="Model" value="@:Entities/Electrical/utilityTransformerPrefab.prefab" />
+			<property name="CustomIcon" value="utilityTransformer" />
 			<property name="CustomIconTint" value="7FFF7F" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
@@ -116,8 +116,8 @@
 			<property name="StashNetHeatCap" value="6.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
-			<property name="Model" value="@:Entities/Industrial/utilityElectricalBox_02Prefab.prefab" />
-			<property name="CustomIcon" value="electricalBox01" />
+			<property name="Model" value="@:Entities/Industrial/controlPanelBase_01Prefab.prefab" />
+			<property name="CustomIcon" value="controlPanelBase01" />
 			<property name="CustomIconTint" value="D07FFF" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
@@ -157,11 +157,11 @@
 			</property>
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
-			<property name="Model" value="@:Entities/Electrical/serverComputerPrefab.prefab" />
+			<property name="Model" value="@:Entities/LootContainers/filecabinet_tall_closedPrefab.prefab" />
 			<property name="DisplayType" value="blockMulti" />
 			<property name="MultiBlockDim" value="1,2,1" />
-			<property name="ModelOffset" value="0,0.5,0" />
-			<property name="CustomIcon" value="decoServerRackWhite" />
+			<property name="ModelOffset" value="0,0,0" />
+			<property name="CustomIcon" value="cntFileCabinetTallClosed" />
 			<property name="CustomIconTint" value="7FB2FF" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
@@ -241,12 +241,14 @@
 			</property>
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
-			<property name="Model" value="@:Entities/Electrical/serverComputerPrefab.prefab" />
+			<property name="Model" value="@:Entities/LootContainers/safeGunLargeFullPrefab.prefab" />
 			<property name="DisplayType" value="blockMulti" />
 			<property name="MultiBlockDim" value="1,2,1" />
 			<property name="ModelOffset" value="0,0.5,0" />
-			<property name="CustomIcon" value="decoServerRackWhite" />
+			<property name="CustomIcon" value="cntGunSafeWhite" />
 			<property name="CustomIconTint" value="D07FFF" />
+			<!-- The game tints its own gun safe dark in the world; same here. -->
+			<property name="TintColor" value="404040" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Path" value="solid" />
