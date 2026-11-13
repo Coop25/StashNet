@@ -1,6 +1,15 @@
 # StashNet look: "wrecked but working" military salvage
 
-Date: 2026-11-13. Branch: `m9-release` (lands before 1.0). Status: design, waiting for the owner's approval.
+Date: 2026-11-13. Branch: `m9-release` (lands before 1.0). Status: approved; **revised the same day (see below)**.
+
+## Revision 1 (2026-11-13): repaint the model textures instead of floating decals
+
+After v0.10.0 (decals on the Drive Bay) was built, the owner said they expected the **model's own textures** to be edited, not decals stuck on top: "go straight to the texture repaint and do the crt thing … for the terminal". New direction:
+- **The look is painted into copies of each vanilla model's textures.** That covers army green, rust, holes, stencil, stripe and the green screens. The mod swaps the copies onto **StashNet blocks only** at runtime, so vanilla props stay untouched. Still no Unity.
+- **Step 1 (v0.10.1):** `sn skin dump` saves each StashNet model's real textures plus UV maps (where each face sits on the texture) and `info.txt` (shaders, texture slots). It goes to `Mods/StashNet/SkinDump/<block>/`. Repaints are painted from those files by a script.
+- **Step 2:** a deterministic repaint script plus runtime texture swap (cloned materials per StashNet block). The decal system (`Mod/Skins/layouts.xml`) stays available but is expected to shrink to nothing, or to screens only.
+- **Storage Terminal is now the CRT TV** (`tvCRTPlayerOnPrefab`, 1×1×1) as of v0.10.1. Its green text screen comes in step 2, once the dump shows how the TV's screen is textured.
+- Limit the owner accepted: surface bumps (normal maps) stay vanilla, so painted dents look flat.
 
 ## Why
 

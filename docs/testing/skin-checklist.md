@@ -1,41 +1,32 @@
 # Salvage look: in-game checklist
 
-The look is "military salvage, wrecked but working". Design: `docs/superpowers/specs/2026-11-13-wrecked-salvage-look-design.md`.
+The look is "military salvage, wrecked but working". Design: `docs/superpowers/specs/2026-11-13-wrecked-salvage-look-design.md` (see "Revision 1": the look is painted into the models' own textures).
 
-## Part 1: the Drive Bay only (v0.10.0)
+## Part 1: save the textures, try the CRT terminal (v0.10.1)
 
-Only the plain **Drive Bay** has the new look in this version. Everything else looks the same as before.
+This version changes nothing about how blocks look except two things:
+- The Storage Terminal is now the **old CRT TV** (screen on). It still shows the TV's own picture; the green StashNet screen comes next.
+- The Drive Bay still wears the test decals from v0.10.0.
 
-**Before installing:** nothing to pick up. Use your StashNet test world.
+Its main job is to save the real textures of each StashNet model, so I can repaint them.
 
-### Looks
-- [ ] Place a Drive Bay (`cm` creative menu, search "drive bay"). It's army green, with:
-  - "STASHNET" stenciled near the top, mostly worn off
-  - a small green screen reading "DRV 4/4 OK"
-  - a chipped **blue** stripe low on the front
-  - rust, scorch marks, claw gouges and bullet holes
-  - a broken pipe with a sparking wire on its right side
-- [ ] Look at it from the front, both sides and the top, by day and at night.
-  - Nothing floats away from the cabinet, and nothing flickers or disappears into it.
-  - Holes and gouges have no square background around them.
-- [ ] The blue stripe stays **blue**, not green.
-- [ ] The green screen is readable in the dark.
-- [ ] A normal vanilla file cabinet elsewhere still looks normal (not green, no decals).
-- [ ] Its icon (backpack and creative menu) is the green, beat-up cabinet.
+**Before installing:** in your StashNet test world, **pick up every Storage Terminal**. They're 2 blocks wide now and become 1 wide. Leaving one placed could leave a broken half-block behind. Place them again afterwards.
 
-### It keeps working
-- [ ] Put drives in and take them out. A terminal still sees them.
-- [ ] Upgrade it to a Reinforced bay. The old decals go away, and the Reinforced bay looks as it did before (it gets its look in the next version).
-- [ ] Walk about 200 blocks away and come back. The look is still there, only once (not doubled).
-- [ ] Pick the bay up (or break it). No decals are left floating in the air.
+### Save the textures (about 2 minutes)
+- [ ] Load the test world. Using `cm` (creative menu), place **one of each** StashNet block close together:
+  - Scrap Core, Storage Core, Advanced Core
+  - Drive Bay, Reinforced Drive Bay, Armored Drive Bay
+  - Storage Terminal, Crafting Terminal
 
-### Tuning (if something is in the wrong place)
-Tell me what to move, for example "the stripe is too low" or "the screen floats off the front". I'll change the layout file and copy just that file into the game. Then open the console (F1), type `sn skin reload` and look again. No restart needed.
+  The Cores must be at least 49 blocks apart, so place them in three spots and do the next step at each one. Alternatively: place one Core, run the next step, upgrade the Core in place, and repeat.
+- [ ] Stand next to them, open the console (F1) and type `sn skin dump`. It answers with something like "Saved N files for M block types". Run it again at each spot until all 8 are covered.
+- [ ] Close the game and tell me. The files are in `Mods\StashNet\SkinDump`, and I'll read them myself.
 
-### Send me
-- Your verdict on the look: keep it as is, tweak it, or go another direction.
-- A screenshot if you can.
-- I'll read the newest game log myself.
+### CRT terminal
+- [ ] Place a Storage Terminal. It's the old CRT TV, it sits flat on the floor, and you can't walk through it.
+- [ ] Press E: the terminal opens and works as before (withdraw, deposit).
+- [ ] Pick it up again: that works too.
 
-## Part 2: everything else (next version)
-Written when Phase 2 is built.
+### Nothing broke
+- [ ] Cores, bays and the Crafting Terminal still work: storing, crafting, upgrading, the code lock.
+- [ ] I'll read the newest game log myself.

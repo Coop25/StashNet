@@ -21,18 +21,21 @@ namespace StashNet.Skins
             string blockName = block.GetBlockName();
 
             Transform model = bed.transform;
+
+            // Every StashNet model is tracked, skinned or not, so sn skin dump can find it.
+            SkinOwner owner = model.GetComponent<SkinOwner>();
+            if (owner == null) owner = model.gameObject.AddComponent<SkinOwner>();
+            if (owner.Root != null) Object.Destroy(owner.Root);
+            owner.Root = null;
+            owner.BlockName = blockName;
+            owner.Bed = bed;
+            owner.Track();
+
             Renderer sample = model.GetComponentsInChildren<Renderer>(true).FirstOrDefault();
             if (!SkinAssets.TryGet(sample, out SkinAtlas atlas, out SkinLayout layout, out Material normal, out Material glow)) return;
             if (!layout.TryGet(blockName, out BlockSkin skin)) return;
             if (!TryModelBounds(model, out Vec3 min, out Vec3 max)) return;
             if (boundsLogged.Add(blockName)) Log.Out($"[StashNet] Skin {blockName}: model bounds {min}..{max}");
-
-            SkinOwner owner = model.GetComponent<SkinOwner>();
-            if (owner == null) owner = model.gameObject.AddComponent<SkinOwner>();
-            if (owner.Root != null) Object.Destroy(owner.Root);
-            owner.BlockName = blockName;
-            owner.Bed = bed;
-            owner.Track();
 
             var root = new GameObject("StashNetSkin");
             root.layer = model.gameObject.layer;

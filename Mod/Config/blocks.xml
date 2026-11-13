@@ -191,7 +191,7 @@
 		<!-- Reinforced Drive Bay (M8, tier 2): 8 drives, about as tough as concrete. -->
 		<block name="stashnetDriveBayReinforced">
 			<property name="CreativeMode" value="Player" />
-			<property name="Class" value="CompositeTileEntity" />
+			<property name="Class" value="StashNet.Blocks.StashNetDriveBay, StashNet" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureStashNetDriveBay" />
 				<property class="TEFeatureStorage">
@@ -233,7 +233,7 @@
 		<!-- Armored Drive Bay (M8, tier 3): 12 drives, about as tough as steel (hard cap). Top tier. -->
 		<block name="stashnetDriveBayArmored">
 			<property name="CreativeMode" value="Player" />
-			<property name="Class" value="CompositeTileEntity" />
+			<property name="Class" value="StashNet.Blocks.StashNetDriveBay, StashNet" />
 			<property class="CompositeFeatures">
 				<property class="TEFeatureStashNetDriveBay" />
 				<property class="TEFeatureStorage">
@@ -275,12 +275,14 @@
 			<property name="StashNetHeatOnUse" value="0.5" />
 			<property name="Material" value="Mmetal" />
 			<property name="Shape" value="ModelEntity" />
-			<property name="Model" value="@:Entities/Electrical/monitorKeyboardMousePCPrefab.prefab" />
-			<property name="DisplayType" value="blockMulti" />
-			<property name="MultiBlockDim" value="2,1,1" />
-			<property name="ModelOffset" value=".5,0,0" />
+			<!-- The vanilla CRT TV, screen on (model of tvCRT_PlayerOn), 1x1x1. Owner's pick 2026-11-13; it was a
+			     2-wide desktop PC before v0.10.1, so terminals placed earlier must be picked up before updating.
+			     The green StashNet screen comes from the texture repaint (Mod/Skins). -->
+			<property name="Model" value="@:Entities/Electrical/tvCRTPlayerOnPrefab.prefab" />
+			<property name="ModelOffset" value="0,0,0" />
 			<property name="GndAlign" value="1" />
-			<property name="CustomIcon" value="decoComputerMonitorKeyboardMousePC" />
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket" />
+			<property name="CustomIcon" value="tvCRT_Player" />
 			<property name="CustomIconTint" value="7FFFB0" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
@@ -304,6 +306,8 @@
 		<block name="stashnetCraftingTerminal">
 			<property name="Extends" value="workbench" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
 			<property name="StashNetCraftingTerminal" value="true" />
+			<!-- Our subclass of the vanilla Workstation class: same workbench, plus the salvage look (Mod/Skins). -->
+			<property name="Class" value="StashNet.Blocks.StashNetCraftingTerminal, StashNet" />
 			<!-- Do NOT set WorkstationName: the game files workstation data under it but looks it up by
 			     block name, so the screen wouldn't open (v0.7.0 bug). Recipes come from the inherited
 			     CraftingAreaRecipes="player,workbench"; the screen from WorkstationWindow. -->

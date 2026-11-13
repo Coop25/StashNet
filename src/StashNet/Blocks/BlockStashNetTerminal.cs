@@ -13,6 +13,12 @@ namespace StashNet.Blocks
     {
         private const float PickupDelay = 1f;
 
+        public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, BlockEntityData _ebcd)
+        {
+            base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
+            Skins.SkinApplier.Apply(this, _ebcd);
+        }
+
         public override string GetActivationText(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos, EntityAlive _entityFocusing)
         {
             string key = CoreLookupCache.LockedForLocalPlayer(GameManager.Instance.World, _blockPos, out _) ? "stashnetTerminalLocked" : "stashnetUseTerminal";

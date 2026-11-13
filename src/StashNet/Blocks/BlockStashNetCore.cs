@@ -13,6 +13,12 @@ namespace StashNet.Blocks
     {
         private static float nextTooltip;
 
+        public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, BlockEntityData _bed)
+        {
+            base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _bed);
+            Skins.SkinApplier.Apply(this, _bed);
+        }
+
         public override bool CanPlaceBlockAt(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, bool _bOmitCollideCheck = false)
         {
             if (!base.CanPlaceBlockAt(_world, _blockPos, _blockValue, _bOmitCollideCheck)) return false;
