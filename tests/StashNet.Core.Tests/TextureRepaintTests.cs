@@ -65,6 +65,42 @@ namespace StashNet.Core.Tests
                 Assert.Equal(new byte[] { 10, 20, 30, 0 }, new[] { px[i], px[i + 1], px[i + 2], px[i + 3] });
         }
 
+        // ---- Normal maps ----
+
+        [Fact]
+        public void NormalLayout_RedAlwaysFull_AlphaVaries_IsAlphaGreen()
+        {
+            byte[] n = Solid(4, 1, 255, 128, 0, 128);
+            n[3] = 60; n[7] = 200;
+            Assert.True(TextureRepaint.NormalXInAlpha(n, 4, 1));
+        }
+
+        [Fact]
+        public void NormalLayout_PlainRgb_IsNotAlphaGreen()
+        {
+            byte[] n = Solid(4, 1, 128, 128, 255, 255);
+            n[0] = 60; n[4] = 200;
+            Assert.False(TextureRepaint.NormalXInAlpha(n, 4, 1));
+        }
+
+        [Fact]
+        public void FlattenNormals_Rgb_MakesFlatUnderSpriteOnly()
+        {
+            byte[] n = Solid(8, 8, 30, 220, 200, 255);
+            TextureRepaint.FlattenNormals(n, 8, 8, Whole(Solid(4, 4, 0, 0, 0), 4, 4), 0.5f, 0.5f, 0.5f, 0.5f, 0f, xInAlpha: false);
+            Assert.Equal((128, 128, 255, 255), At(n, 8, 4, 4));
+            Assert.Equal((30, 220, 200, 255), At(n, 8, 0, 0));
+        }
+
+        [Fact]
+        public void FlattenNormals_AlphaGreen_FlattensAlphaAndGreenOnly()
+        {
+            byte[] n = Solid(8, 8, 255, 220, 77, 30);
+            TextureRepaint.FlattenNormals(n, 8, 8, Whole(Solid(4, 4, 0, 0, 0), 4, 4), 0.5f, 0.5f, 0.5f, 0.5f, 0f, xInAlpha: true);
+            Assert.Equal((255, 128, 77, 128), At(n, 8, 4, 4));
+            Assert.Equal((255, 220, 77, 30), At(n, 8, 0, 0));
+        }
+
         // ---- Grime ----
 
         [Fact]

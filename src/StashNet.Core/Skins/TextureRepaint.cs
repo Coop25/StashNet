@@ -123,6 +123,70 @@ namespace StashNet.Core.Skins
                 }
         }
 
+        /// <summary>
+        /// Which layout a normal map uses, judged from its pixels: "x in alpha" (DXT5nm style: red is always full,
+        /// alpha carries x) or plain RGB (red carries x, alpha is full).
+        /// </summary>
+        public static bool NormalXInAlpha(byte[] px, int w, int h)
+        {
+            long n = 0, fullRed = 0, aMin = 255, aMax = 0;
+            int step = Math.Max(1, w * h / 4096) * 4;     // about 4096 samples, whatever the size
+            for (int i = 0; i < w * h * 4; i += step)
+            {
+                n++;
+                if (px[i] >= 240) fullRed++;
+                aMin = Math.Min(aMin, px[i + 3]);
+                aMax = Math.Max(aMax, px[i + 3]);
+            }
+            return n > 0 && fullRed * 10 >= n * 9 && aMax - aMin > 10;
+        }
+
+        /// <summary>
+        /// Smooths a normal map to flat under a sprite's footprint (weighted by the sprite's alpha), so painted
+        /// patches hide embossed details like a maker's logo, not just their color.
+        /// </summary>
+        public static void FlattenNormals(byte[] px, int w, int h, SpriteImage sprite, float u, float v, float wFrac, float hFrac, float rotDeg, bool xInAlpha)
+        {
+            Footprint(w, h, sprite, u, v, wFrac, hFrac, rotDeg, (i, r, g, b, k) =>
+            {
+                if (xInAlpha)
+                {
+                    px[i + 1] = Mix(px[i + 1], 128f, k);
+                    px[i + 3] = Mix(px[i + 3], 128f, k);
+                }
+                else
+                {
+                    px[i] = Mix(px[i], 128f, k);
+                    px[i + 1] = Mix(px[i + 1], 128f, k);
+                    px[i + 2] = Mix(px[i + 2], 255f, k);
+                    px[i + 3] = Mix(px[i + 3], 255f, k);
+                }
+            });
+        }
+
+        /// <summary>Calls back for every texture pixel a placed sprite covers: (pixel index, sprite r, g, b, alpha 0..1).</summary>
+        private static void Footprint(int w, int h, SpriteImage sprite, float u, float v, float wFrac, float hFrac, float rotDeg, Action<int, byte, byte, byte, float> pixel)
+        {
+            float cx = u * w, cy = v * h, sw = wFrac * w, sh = hFrac * h;
+            if (sprite == null || sw <= 0f || sh <= 0f) return;
+            double a = rotDeg * Math.PI / 180.0;
+            float cos = (float)Math.Cos(a), sin = (float)Math.Sin(a);
+            float reach = 0.5f * (float)Math.Sqrt(sw * sw + sh * sh);
+            int xa = Math.Max(0, (int)Math.Floor(cx - reach)), xb = Math.Min(w - 1, (int)Math.Ceiling(cx + reach));
+            int ya = Math.Max(0, (int)Math.Floor(cy - reach)), yb = Math.Min(h - 1, (int)Math.Ceiling(cy + reach));
+            for (int y = ya; y <= yb; y++)
+                for (int x = xa; x <= xb; x++)
+                {
+                    float dx = x + 0.5f - cx, dy = y + 0.5f - cy;
+                    float s = (dx * cos + dy * sin) / sw + 0.5f;
+                    float t = (-dx * sin + dy * cos) / sh + 0.5f;
+                    if (s < 0f || s >= 1f || t < 0f || t >= 1f) continue;
+                    sprite.Sample(s, t, out byte r, out byte g, out byte b, out byte sa);
+                    if (sa == 0) continue;
+                    pixel((y * w + x) * 4, r, g, b, sa / 255f);
+                }
+        }
+
         private static readonly (string sprite, float min, float max, float aspect, int weight)[] Damage =
         {
             ("scorch1", 0.08f, 0.16f, 0.8f, 3), ("scorch2", 0.08f, 0.16f, 0.8f, 3),

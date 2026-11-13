@@ -86,6 +86,20 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Parse_FlatStamp()
+        {
+            PaintSpec spec = Parse(
+                "<block name=\"b\"><texture name=\"t\" tint=\"000000\">" +
+                "<stamp sprite=\"stencilStashnet\" u=\"0.5\" v=\"0.5\" w=\"0.1\" h=\"0.1\" flat=\"true\" />" +
+                "<stamp sprite=\"stencilStashnet\" u=\"0.5\" v=\"0.5\" w=\"0.1\" h=\"0.1\" />" +
+                "</texture></block>", new List<string>());
+            spec.TryGet("b", out BlockPaint block);
+            block.TryGetTexture("t", out TexturePaint t);
+            Assert.True(t.Stamps[0].Flat);
+            Assert.False(t.Stamps[1].Flat);
+        }
+
+        [Fact]
         public void Parse_SolidStamps_ForGlass()
         {
             PaintSpec spec = Parse("<block name=\"b\"><texture name=\"g\" tint=\"000000\" solid=\"true\" /><texture name=\"m\" tint=\"000000\" /></block>", new List<string>());

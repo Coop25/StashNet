@@ -9,6 +9,9 @@ namespace StashNet.Core.Skins
     {
         public string Sprite;
         public float U, V, W, H, Rot;
+
+        /// <summary>Also smooth the surface bumps (normal map) under this stamp, e.g. to hide an embossed logo.</summary>
+        public bool Flat;
     }
 
     /// <summary>How one of a model's vanilla textures (by its name) gets repainted.</summary>
@@ -136,7 +139,8 @@ namespace StashNet.Core.Skins
                     continue;
                 }
                 SkinXml.TryNumber(s, "rot", out float rot);
-                stamps.Add(new TextureStamp { Sprite = sprite, U = u, V = v, W = w, H = h, Rot = rot });
+                bool flat = string.Equals((string)s.Attribute("flat"), "true", System.StringComparison.OrdinalIgnoreCase);
+                stamps.Add(new TextureStamp { Sprite = sprite, U = u, V = v, W = w, H = h, Rot = rot, Flat = flat });
             }
             tex.Stamps = stamps;
             return tex;

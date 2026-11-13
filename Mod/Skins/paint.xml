@@ -6,7 +6,7 @@
        seed      changes where the damage lands
        holes     "false" = bullet hits are dents, never holes (armor)
        mask      0 (default) turns off the game's tint mask so the paint shows on every part; "keep" leaves it
-       <stamp sprite u v w h rot>  one atlas sprite painted in: u,v = its center in the texture (0..1, from the
+       <stamp sprite u v w h rot flat>  one atlas sprite painted in (flat="true" also smooths the surface bumps under it): u,v = its center in the texture (0..1, from the
                  bottom-left), w,h = its size as a fraction of the texture, rot = degrees counter-clockwise.
      screen="sprite" replaces the picture on a screen part (the CRT TV). mute="true" silences the model's own sounds.
      Tune in-game: edit Mods/StashNet/Skins/paint.xml, then F1 "sn skin reload". "sn skin grid" shows a lettered
@@ -46,9 +46,9 @@
            and the door's right side is the lower u). Owner (2026-11-13): hide the safe maker's livery and make it
            look like it holds drives and electronics. -->
       <!-- Paint over the maker's logo, the corner flourishes and the decorative frame lines. -->
-      <stamp sprite="paintPatch" u="0.374" v="0.123" w="0.18" h="0.105" rot="180" />
-      <stamp sprite="paintPatch" u="0.458" v="0.045" w="0.05" h="0.045" rot="180" />
-      <stamp sprite="paintPatch" u="0.3" v="0.045" w="0.05" h="0.045" rot="180" />
+      <stamp sprite="paintPatch" u="0.374" v="0.123" w="0.18" h="0.105" rot="180" flat="true" />
+      <stamp sprite="paintPatch" u="0.458" v="0.045" w="0.05" h="0.045" rot="180" flat="true" />
+      <stamp sprite="paintPatch" u="0.3" v="0.045" w="0.05" h="0.045" rot="180" flat="true" />
       <stamp sprite="paintPatch" u="0.4815" v="0.246" w="0.022" h="0.47" rot="180" />
       <stamp sprite="paintPatch" u="0.3185" v="0.246" w="0.022" h="0.47" rot="180" />
       <stamp sprite="paintPatch" u="0.4" v="0.017" w="0.185" h="0.02" rot="180" />

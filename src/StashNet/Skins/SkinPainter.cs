@@ -141,11 +141,21 @@ namespace StashNet.Skins
                 waiting = true;
                 if (!jobs.ContainsKey(maskKey) && !failed.Contains(maskKey)) StartMask(block, maskKey, rmom, (byte)tp.Mask);
             }
+            // Patches marked flat also smooth the bumps under them (an embossed logo shows through paint otherwise).
+            Texture normal = !GridMode && HasFlat(tp) && original.HasProperty("_Normal") ? original.GetTexture("_Normal") : null;
+            string flatKey = normal != null ? $"{block}|{normal.name}|flat" : null;
+            Texture2D flat = null;
+            if (flatKey != null && !Alive(textures, flatKey, out flat))
+            {
+                waiting = true;
+                if (!jobs.ContainsKey(flatKey) && !failed.Contains(flatKey)) StartFlatten(block, flatKey, normal, tp);
+            }
             if (waiting) return null;
 
             var copy = new Material(original) { name = $"StashNet_{original.name}" };
             copy.SetTexture(prop, painted);
             if (mask != null) copy.SetTexture("_RMOM", mask);
+            if (flat != null) copy.SetTexture("_Normal", flat);
             if (copy.HasProperty("_Color")) copy.SetColor("_Color", Color.white);
             materials[matKey] = copy;
             made.Add(copy);
@@ -201,6 +211,26 @@ namespace StashNet.Skins
                 }
                 job.Ms = timer.ElapsedMilliseconds;
                 if (gen == generation) job.Done = true;
+            });
+        }
+
+        private static bool HasFlat(TexturePaint tp)
+        {
+            foreach (TextureStamp s in tp.Stamps) if (s.Flat) return true;
+            return false;
+        }
+
+        private static void StartFlatten(string block, string key, Texture normal, TexturePaint tp)
+        {
+            Job job = NewJob(block, key, normal, true);
+            if (job == null) return;
+            var flats = new List<(SpriteImage, TextureStamp)>();
+            foreach (TextureStamp s in tp.Stamps) if (s.Flat) flats.Add((SkinAssets.Sprite(s.Sprite), s));
+            Run(job, () =>
+            {
+                bool xInAlpha = TextureRepaint.NormalXInAlpha(job.Pixels, job.W, job.H);
+                foreach ((SpriteImage img, TextureStamp s) in flats)
+                    TextureRepaint.FlattenNormals(job.Pixels, job.W, job.H, img, s.U, s.V, s.W, s.H, s.Rot, xInAlpha);
             });
         }
 
