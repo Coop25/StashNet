@@ -79,5 +79,28 @@ namespace StashNet.Core.Tests
             Assert.Equal(1, d.TypeCount);
             Assert.Equal(12, d.CountOf("resourceWood", null));
         }
+
+        // M8 scrap guard: only a drive that is certainly empty may be scrapped.
+        [Fact]
+        public void HoldsItems_Null_False() => Assert.False(DriveSerializer.HoldsItems(null));
+
+        [Fact]
+        public void HoldsItems_Empty_False() => Assert.False(DriveSerializer.HoldsItems(""));
+
+        [Fact]
+        public void HoldsItems_HeaderOnly_False() =>
+            Assert.False(DriveSerializer.HoldsItems(DriveSerializer.Serialize(new DriveContents())));
+
+        [Fact]
+        public void HoldsItems_WithItem_True()
+        {
+            var d = new DriveContents();
+            d.TryInsert(Big, One, "resourceWood", null, 5);
+            Assert.True(DriveSerializer.HoldsItems(DriveSerializer.Serialize(d)));
+        }
+
+        /// <summary>Unreadable data might be someone's items: never treat it as empty.</summary>
+        [Fact]
+        public void HoldsItems_Unreadable_True() => Assert.True(DriveSerializer.HoldsItems("not a drive"));
     }
 }

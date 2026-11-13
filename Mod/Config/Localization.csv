@@ -36,3 +36,4 @@ stashnetDepositAllTip,UI,XUi,,,Deposit all (backpack). Shift-click a drive to un
 stashnetNetworkLocked,UI,XUi,,,This storage network is locked. Enter the code set on its Core.
 stashnetBayLocked,UI,HUD,,,"{1}\nNetwork locked - press {0} to enter the code"
 stashnetTerminalLocked,UI,HUD,,,Network locked - press {0} to enter the code
+stashnetUnloadBeforeScrap,UI,XUi,,,Unload this drive first: shift-click it in a Storage Terminal.

@@ -64,6 +64,14 @@ namespace StashNet.Drives
         /// <summary>One-time token on a drive emptied for an unload, so its leftovers can find it again.</summary>
         public const string PendingKey = "StashNetPending";
 
+        /// <summary>True unless the drive is certainly empty; unreadable data counts as items (M8 scrap guard).</summary>
+        public static bool HoldsItems(ItemValue drive)
+        {
+            if (drive == null) return false;
+            drive.TryGetMetadata(MetadataKey, out string text);
+            return DriveSerializer.HoldsItems(text);
+        }
+
         public static bool HasStamp(ItemValue drive) => drive != null && drive.HasMetadata(LegacyStampKey);
 
         public static void ClearStamp(ItemValue drive) => drive.RemoveMetaData(LegacyStampKey);
