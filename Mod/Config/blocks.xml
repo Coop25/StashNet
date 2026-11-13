@@ -162,9 +162,8 @@
 			<property name="DisplayType" value="blockMulti" />
 			<property name="MultiBlockDim" value="1,2,1" />
 			<property name="ModelOffset" value="0,0,0" />
-			<property name="CustomIcon" value="cntFileCabinetTallClosed" />
-			<property name="CustomIconTint" value="7FB2FF" />
-			<!-- Army green, the salvage look's base paint (decals: Mod/Skins/layouts.xml). -->
+			<!-- No CustomIcon: the game uses Mod/UIAtlases/ItemIconAtlas/stashnetDriveBay.png (tools/icons/draw-block-icons.ps1).
+			     Army green, the salvage look's base paint (decals: Mod/Skins/layouts.xml). -->
 			<property name="TintColor" value="4A503F" />
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
