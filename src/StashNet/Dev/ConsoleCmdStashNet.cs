@@ -20,7 +20,7 @@ namespace StashNet.Dev
 
         public override string[] getCommands() => new[] { "stashnet", "sn" };
 
-        public override string getDescription() => "StashNet developer tools (info, heat, drive, skin reload/dump, metatest, metacheck, metaclear).";
+        public override string getDescription() => "StashNet developer tools (info, heat, drive, skin reload/grid/dump, metatest, metacheck, metaclear).";
 
         public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
         {
@@ -56,7 +56,17 @@ namespace StashNet.Dev
                     if (skinSub == "reload")
                     {
                         Skins.SkinAssets.Reload();
-                        Out($"Skins reloaded: {Skins.SkinApplier.ReapplyAll()} blocks rebuilt.");
+                        Skins.SkinPainter.Clear();
+                        Out($"Skins reloaded: {Skins.SkinApplier.ReapplyAll()} blocks repainted.");
+                    }
+                    else if (skinSub == "grid")
+                    {
+                        Skins.SkinPainter.GridMode = !Skins.SkinPainter.GridMode;
+                        Skins.SkinPainter.Clear();
+                        int painted = Skins.SkinApplier.ReapplyAll();
+                        Out(Skins.SkinPainter.GridMode
+                            ? $"Grid ON for {painted} blocks. Look at each block's front and note the cells (like C4) you see there. Run 'sn skin grid' again to turn it off."
+                            : $"Grid OFF; {painted} blocks repainted.");
                     }
                     else if (skinSub == "dump")
                     {
@@ -64,12 +74,13 @@ namespace StashNet.Dev
                     }
                     else
                     {
-                        Out("Usage: stashnet skin reload   (re-reads Mods/StashNet/Skins and rebuilds every skin in view)");
+                        Out("Usage: stashnet skin reload   (re-reads Mods/StashNet/Skins/paint.xml and repaints every StashNet block in view)");
+                        Out("       stashnet skin grid     (toggles a lettered grid on the textures, to find where each face is)");
                         Out("       stashnet skin dump     (saves the textures of each StashNet block's model to Mods/StashNet/SkinDump)");
                     }
                     return;
                 default:
-                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], skin [reload|dump], metatest [n], metacheck, metaclear");
+                    Out("Unknown subcommand. Try: info, heat, drive [show|deposit|withdraw|wipe], skin [reload|grid|dump], metatest [n], metacheck, metaclear");
                     return;
             }
         }

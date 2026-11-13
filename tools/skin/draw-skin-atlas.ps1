@@ -55,13 +55,13 @@ function Draw-BareMetal($g, [float]$w, [float]$h, [int]$seed) {
   for ($i=0; $i -lt $n; $i++) {
     $a = $i / $n * 2 * [math]::PI; $r = 0.62 + $rnd.NextDouble()*0.38
     $pts += ,@(($w/2 + [math]::Cos($a)*$w/2*$r*0.95), ($h/2 + [math]::Sin($a)*$h/2*$r*0.95)) }
-  Poly $g (Brush (C 255 150 152 146)) $pts
+  Poly $g (Brush (C 235 118 120 114)) $pts
   # Paint-chip rim: a slightly lighter edge where the paint flaked.
   $arr = @(); foreach ($p in $pts) { $arr += PtF $p[0] $p[1] }
-  $g.DrawPolygon((Pen (C 200 196 194 184) 2), [System.Drawing.PointF[]]$arr)
+  $g.DrawPolygon((Pen (C 150 160 158 150) 2), [System.Drawing.PointF[]]$arr)
   for ($i=0; $i -lt 26; $i++) {
     $x = $rnd.NextDouble()*$w; $y = $rnd.NextDouble()*$h; $len = 6 + $rnd.Next(22); $ang = -0.3 + $rnd.NextDouble()*0.6
-    $g.DrawLine((Pen (C 150 214 214 206) 0.8), [float]$x, [float]$y, [float]($x + [math]::Cos($ang)*$len), [float]($y + [math]::Sin($ang)*$len)) }
+    $g.DrawLine((Pen (C 110 200 200 192) 0.8), [float]$x, [float]$y, [float]($x + [math]::Cos($ang)*$len), [float]($y + [math]::Sin($ang)*$len)) }
   for ($i=0; $i -lt 4; $i++) { Blotch $g ([float]($rnd.NextDouble()*$w)) ([float]($rnd.NextDouble()*$h)) ([float](8+$rnd.Next(14))) ([float](6+$rnd.Next(10))) (C 170 122 66 30) }
   Grime $g $w $h 70 ($seed+2) 150 }
 
@@ -71,9 +71,9 @@ function Draw-RustStreak($g, [float]$w, [float]$h, [int]$seed) {
     $x = $w*0.25 + $rnd.NextDouble()*$w*0.5; $top = $rnd.NextDouble()*$h*0.15; $len = $h*(0.55 + $rnd.NextDouble()*0.45)
     $wd = 4 + $rnd.NextDouble()*($w*0.35)
     $rect = New-Object System.Drawing.RectangleF ([float]($x-$wd/2)), ([float]$top), ([float]$wd), ([float]$len)
-    $lg = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, (C 220 120 62 22), (C 0 92 46 18), 90
+    $lg = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, (C 150 104 58 26), (C 0 80 44 20), 90
     $g.FillEllipse($lg, $rect); $lg.Dispose() }
-  Blotch $g ($w/2) ($h*0.06) ($w*0.5) ($h*0.07) (C 230 98 48 16)
+  Blotch $g ($w/2) ($h*0.06) ($w*0.5) ($h*0.07) (C 170 90 46 18)
   Grime $g $w $h 60 ($seed+3) 120 }
 
 function Draw-RustBase($g, [float]$w, [float]$h, [int]$seed) {

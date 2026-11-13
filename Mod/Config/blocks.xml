@@ -163,8 +163,7 @@
 			<property name="MultiBlockDim" value="1,2,1" />
 			<property name="ModelOffset" value="0,0,0" />
 			<!-- No CustomIcon: the game uses Mod/UIAtlases/ItemIconAtlas/stashnetDriveBay.png (tools/icons/draw-block-icons.ps1).
-			     Army green, the salvage look's base paint (decals: Mod/Skins/layouts.xml). -->
-			<property name="TintColor" value="4A503F" />
+			     No TintColor: the salvage look is painted into the texture (Mod/Skins/paint.xml). -->
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Path" value="solid" />
@@ -249,8 +248,7 @@
 			<property name="ModelOffset" value="0,0.5,0" />
 			<property name="CustomIcon" value="cntGunSafeWhite" />
 			<property name="CustomIconTint" value="D07FFF" />
-			<!-- The game tints its own gun safe dark in the world; same here. -->
-			<property name="TintColor" value="404040" />
+			<!-- No TintColor: the darker army green is painted into the texture (Mod/Skins/paint.xml). -->
 			<property name="WaterFlow" value="permitted" />
 			<property name="Place" value="TowardsPlacerInverted" />
 			<property name="Path" value="solid" />

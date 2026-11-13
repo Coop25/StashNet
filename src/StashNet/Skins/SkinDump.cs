@@ -29,25 +29,28 @@ namespace StashNet.Skins
                 if (owner == null || owner.Bed == null || owner.Bed.transform == null || !done.Add(owner.BlockName)) continue;
                 string dir = Path.Combine(outDir, owner.BlockName);
                 Directory.CreateDirectory(dir);
-                files += DumpModel(owner.BlockName, owner.Bed.transform, dir);
+                files += DumpModel(owner, dir);
             }
             return done.Count == 0
                 ? "No StashNet blocks loaded nearby. Place one of each block you want, stand near them, and run it again."
                 : $"Saved {files} files for {done.Count} block types ({string.Join(", ", done)}) to {outDir}";
         }
 
-        private static int DumpModel(string blockName, Transform model, string dir)
+        /// <summary>Always the vanilla materials (the ones remembered before any repaint).</summary>
+        private static int DumpModel(SkinOwner owner, string dir)
         {
+            Transform model = owner.Bed.transform;
             int files = 0;
             var info = new StringBuilder();
-            info.AppendLine($"block: {blockName}");
+            info.AppendLine($"block: {owner.BlockName}");
             info.AppendLine($"model: {model.name}  layer {model.gameObject.layer}  localScale {model.localScale}");
             var savedTextures = new HashSet<int>();
 
-            Renderer[] renderers = model.GetComponentsInChildren<Renderer>(true);
+            Renderer[] renderers = owner.Renderers ?? model.GetComponentsInChildren<Renderer>(true);
             for (int r = 0; r < renderers.Length; r++)
             {
                 Renderer rend = renderers[r];
+                if (rend == null) continue;
                 string rname = Safe($"{r:00}-{rend.name}");
                 info.AppendLine();
                 info.AppendLine($"renderer {rname}: {rend.GetType().Name}, enabled {rend.enabled}, path {PathOf(rend.transform, model)}");
@@ -71,7 +74,7 @@ namespace StashNet.Skins
                     }
                 }
 
-                Material[] mats = rend.sharedMaterials;
+                Material[] mats = owner.Originals != null && r < owner.Originals.Length ? owner.Originals[r] : rend.sharedMaterials;
                 for (int m = 0; m < mats.Length; m++)
                 {
                     Material mat = mats[m];
@@ -117,27 +120,8 @@ namespace StashNet.Skins
             }
         }
 
-        private static void Save(Texture tex, int slice, string path)
-        {
-            RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            RenderTexture prev = RenderTexture.active;
-            try
-            {
-                if (slice >= 0) Graphics.Blit(tex, rt, slice, 0);
-                else Graphics.Blit(tex, rt);
-                RenderTexture.active = rt;
-                var copy = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
-                copy.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
-                copy.Apply();
-                File.WriteAllBytes(path, ImageConversion.EncodeToPNG(copy));
-                Object.Destroy(copy);
-            }
-            finally
-            {
-                RenderTexture.active = prev;
-                RenderTexture.ReleaseTemporary(rt);
-            }
-        }
+        private static void Save(Texture tex, int slice, string path) =>
+            File.WriteAllBytes(path, TextureReadback.ToPng(TextureReadback.ToRgba(tex, slice), tex.width, tex.height));
 
         private static void SaveMask(bool[] mask, string path)
         {

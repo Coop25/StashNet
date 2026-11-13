@@ -116,7 +116,7 @@ namespace StashNet.Core.Skins
         {
             ("scorch1", 0.08f, 0.16f, 0.8f, 3), ("scorch2", 0.08f, 0.16f, 0.8f, 3),
             ("rustStreak1", 0.03f, 0.05f, 5f, 4), ("rustStreak2", 0.03f, 0.05f, 5f, 4),
-            ("bareMetal1", 0.04f, 0.08f, 0.8f, 3), ("bareMetal2", 0.04f, 0.08f, 0.8f, 3), ("bareMetal3", 0.04f, 0.08f, 0.8f, 2),
+            ("bareMetal1", 0.03f, 0.06f, 0.8f, 2), ("bareMetal2", 0.03f, 0.06f, 0.8f, 2), ("bareMetal3", 0.03f, 0.06f, 0.8f, 1),
             ("dent1", 0.04f, 0.07f, 0.66f, 2), ("clawGouge", 0.06f, 0.1f, 1.5f, 2),
             ("bulletHole1", 0.022f, 0.035f, 1f, 4), ("bulletHole2", 0.022f, 0.035f, 1f, 4),
         };
@@ -152,6 +152,18 @@ namespace StashNet.Core.Skins
                 });
             }
             return list;
+        }
+
+        /// <summary>Copies one sprite out of the atlas pixels (e.g. the CRT screen picture, used as its own texture).</summary>
+        public static byte[] Crop(byte[] atlas, int aw, int ah, UvRect rect, out int w, out int h)
+        {
+            int x0 = (int)Math.Round(rect.U0 * aw), x1 = (int)Math.Round(rect.U1 * aw);
+            int y0 = (int)Math.Round(rect.V0 * ah), y1 = (int)Math.Round(rect.V1 * ah);
+            w = Math.Max(0, x1 - x0); h = Math.Max(0, y1 - y0);
+            var crop = new byte[w * h * 4];
+            for (int y = 0; y < h; y++)
+                Buffer.BlockCopy(atlas, ((y0 + y) * aw + x0) * 4, crop, y * w * 4, w * 4);
+            return crop;
         }
 
         /// <summary>Grid cell name: column A-H left to right, row 1-8 from the top of the texture.</summary>

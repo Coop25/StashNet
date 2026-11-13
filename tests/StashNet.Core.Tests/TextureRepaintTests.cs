@@ -125,6 +125,19 @@ namespace StashNet.Core.Tests
             Assert.Equal(255, g);
         }
 
+        [Fact]
+        public void Crop_CopiesTheSpritesPixels()
+        {
+            // 4x2 atlas, bottom row: r=0..3; top row: r=10..13. The sprite is x 2..3 of the top row.
+            var atlas = new byte[4 * 2 * 4];
+            for (int y = 0; y < 2; y++)
+                for (int x = 0; x < 4; x++) { int i = (y * 4 + x) * 4; atlas[i] = (byte)(y * 10 + x); atlas[i + 3] = 255; }
+            byte[] crop = TextureRepaint.Crop(atlas, 4, 2, new UvRect(0.5f, 0.5f, 1f, 1f), out int w, out int h);
+            Assert.Equal(2, w);
+            Assert.Equal(1, h);
+            Assert.Equal(new byte[] { 12, 0, 0, 255, 13, 0, 0, 255 }, crop);
+        }
+
         // ---- Scatter ----
 
         [Fact]

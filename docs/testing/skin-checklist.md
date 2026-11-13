@@ -1,32 +1,30 @@
 # Salvage look: in-game checklist
 
-The look is "military salvage, wrecked but working". Design: `docs/superpowers/specs/2026-11-13-wrecked-salvage-look-design.md` (see "Revision 1": the look is painted into the models' own textures).
+The look is "military salvage, wrecked but working". Design: `docs/superpowers/specs/2026-11-13-wrecked-salvage-look-design.md` (Revisions 1 and 2: the look is painted into copies of the models' own textures while the game runs).
 
-## Part 1: save the textures, try the CRT terminal (v0.10.1)
+## Part 1 (v0.10.1): done 2026-11-13
+The texture dump worked for all 8 blocks.
 
-This version changes nothing about how blocks look except two things:
-- The Storage Terminal is now the **old CRT TV** (screen on). It still shows the TV's own picture; the green StashNet screen comes next.
-- The Drive Bay still wears the test decals from v0.10.0.
+## Part 2 (v0.10.2): first repaint + find the fronts
 
-Its main job is to save the real textures of each StashNet model, so I can repaint them.
+**What's new:**
+- All 8 StashNet blocks are repainted: army green, grime, rust, scorch marks, bullet holes (dents on the Armored bay), claw marks and worn bare metal.
+- The CRT terminal shows the green "STASHNET v1.0" screen.
+- No stencils or tier stripes yet. Those come once we know where each block's front is (the grid step below).
 
-**Before installing:** in your StashNet test world, **pick up every Storage Terminal**. They're 2 blocks wide now and become 1 wide. Leaving one placed could leave a broken half-block behind. Place them again afterwards.
+**Before installing:** nothing to pick up.
 
-### Save the textures (about 2 minutes)
-- [ ] Load the test world. Using `cm` (creative menu), place **one of each** StashNet block close together:
-  - Scrap Core, Storage Core, Advanced Core
-  - Drive Bay, Reinforced Drive Bay, Armored Drive Bay
-  - Storage Terminal, Crafting Terminal
+### Look
+- [ ] Load your StashNet test world. Every StashNet block is army green and beat up. Vanilla file cabinets, safes, TVs, server racks, electrical boxes, transformers, control panels and workbenches elsewhere look **unchanged**.
+- [ ] The CRT terminal's screen shows green text ("STASHNET v1.0", CORE / DRIVES / LINK lines) and flickers like an old TV.
+- [ ] The first time each block type appears, the game may stutter for a moment while it repaints. It shouldn't happen again after that.
+- [ ] Does it look the way you wanted? Too dirty, not dirty enough, the wrong green? Tell me in your own words.
 
-  The Cores must be at least 49 blocks apart, so place them in three spots and do the next step at each one. Alternatively: place one Core, run the next step, upgrade the Core in place, and repeat.
-- [ ] Stand next to them, open the console (F1) and type `sn skin dump`. It answers with something like "Saved N files for M block types". Run it again at each spot until all 8 are covered.
-- [ ] Close the game and tell me. The files are in `Mods\StashNet\SkinDump`, and I'll read them myself.
-
-### CRT terminal
-- [ ] Place a Storage Terminal. It's the old CRT TV, it sits flat on the floor, and you can't walk through it.
-- [ ] Press E: the terminal opens and works as before (withdraw, deposit).
-- [ ] Pick it up again: that works too.
+### Find the fronts (about 3 minutes)
+- [ ] Stand near one of each StashNet block (the same spots as for the dump). Open the console (F1) and type `sn skin grid`. The blocks now show a yellow grid with labels like `C4`.
+- [ ] For each block, look at the **front** (the side facing you when you placed it) and note which labels you see there, for example: "Drive Bay front: B5, C5, B6, C6". If a label looks mirrored or upside down, say so. A screenshot of each works too.
+- [ ] Type `sn skin grid` again to turn the grid off.
 
 ### Nothing broke
-- [ ] Cores, bays and the Crafting Terminal still work: storing, crafting, upgrading, the code lock.
-- [ ] I'll read the newest game log myself.
+- [ ] Cores, bays and both terminals still work: storing, crafting, upgrading, the code lock.
+- [ ] Close the game when done. I'll read the log.
