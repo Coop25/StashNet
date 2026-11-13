@@ -1,10 +1,10 @@
 # StashNet: project notes
 
 ## ▶ RESUME HERE (last session: 2026-11-13)
-- **State:** v0.8.0 on main (github.com/Coop25/StashNet, private). Milestones 0–7 are done. **M8 Progression is built as v0.9.0 on branch `m8-progression`** (design `docs/superpowers/specs/2026-11-13-m8-progression-design.md`, plan `docs/superpowers/plans/2026-11-13-m8-progression.md`). v0.9.0 was deployed 2026-11-13. The owner reported "everything seems to work". The log showed `Loaded v0.9.0 (20 methods patched)` with no StashNet errors, but only about 2.5 min in-world and no `sn heat`, so which checklist steps were done is unconfirmed. **v0.9.1** (Core spacing rule) is built on the branch, **not deployed**. Next: deploy v0.9.1 on the owner's yes, confirm the checklist steps (especially step 1, upgrade carry-over, and step 9, spacing), then merge to main.
+- **State:** **v0.9.1 on main** (github.com/Coop25/StashNet, private; local merge, not pushed). Milestones 0–8 are done. M8 Progression (design `docs/superpowers/specs/2026-11-13-m8-progression-design.md`, plan `docs/superpowers/plans/2026-11-13-m8-progression.md`) was **accepted by the owner 2026-11-13** ("everything seems to work"). The v0.9.0 log was clean (`Loaded v0.9.0 (20 methods patched)`, no StashNet errors), but the in-world session was only about 2.5 min with no `sn heat`, so not every checklist step was confirmed. The **Core spacing rule (v0.9.1)** is merged but **never deployed or tested**. The owner chose to test it with M9 (M8 checklist step 9).
 - **v0.9.0 IS installed** in the game's `Mods\StashNet` (deployed 2026-11-13). Redeploy only after the owner says the game is closed.
 - **The owner's StashNet test world contains StashNet blocks.** Don't load it without the mod installed (those blocks would break). Their real saves never had StashNet.
-- **Next after M8 (roadmap in `docs/PLAN.md`):** M9 multiplayer testing + release package. Parked balance idea: a running cost (fuel or electricity), decide after the owner has played M8.
+- **Next: M9** (multiplayer testing + hardening + release package). It's being designed. Open question to the owner: who the release is for and how they'd get it. That decides the anti-cheat bar and the package. Parked balance idea: a running cost (fuel or electricity), decide after the owner has played M8.
 - **Open items:**
   - ⚠️ Multiplayer has never been tested with a second player (M3b Part B, the M4 lockout, M6 client "click twice"). Must happen in M9.
   - Terminal window layout: no screenshot received yet.
