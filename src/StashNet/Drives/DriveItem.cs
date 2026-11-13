@@ -8,6 +8,15 @@ namespace StashNet.Drives
     {
         public const string MetadataKey = "StashNetDrive";
         public const string PropMaxStacks = "StashNetMaxStacks";
+        public const string PropHeatWeight = "StashNetHeatWeight";
+
+        /// <summary>How much this drive counts toward its network's heat (M8): items.xml, default 1, never below 0.</summary>
+        public static float HeatWeight(ItemValue drive)
+        {
+            ItemClass ic = drive?.ItemClass;
+            if (ic == null || !ic.Properties.Contains(PropHeatWeight)) return 1f;
+            return System.Math.Max(0f, ic.Properties.GetFloat(PropHeatWeight));
+        }
 
         public static bool TryGetCapacity(ItemValue drive, out DriveCapacity capacity)
         {

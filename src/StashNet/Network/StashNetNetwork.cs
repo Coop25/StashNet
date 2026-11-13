@@ -37,6 +37,8 @@ namespace StashNet.Network
         public int SkippedBays { get; private set; }
         /// <summary>Drives skipped because their data can't be read (left untouched).</summary>
         public int SkippedDrives { get; private set; }
+        /// <summary>Sum of every drive's heat weight (readable or not) in bays nobody has open (M8).</summary>
+        public float HeatWeight { get; private set; }
 
         public static bool IsCore(Block block) => block != null && block.Properties.Contains(PropRadius);
 
@@ -75,6 +77,7 @@ namespace StashNet.Network
                 {
                     ItemValue drive = storage.ItemGrid[i].itemValue;
                     if (drive == null || drive.IsEmpty() || !DriveRules.IsDrive(drive)) continue;
+                    net.HeatWeight += DriveItem.HeatWeight(drive); // readable or not (M8)
 
                     if (!DriveItem.TryGetCapacity(drive, out DriveCapacity cap) || !DriveItem.TryLoad(drive, out DriveContents contents, out _))
                     {
