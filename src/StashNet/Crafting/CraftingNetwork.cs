@@ -45,6 +45,41 @@ namespace StashNet.Crafting
         /// <summary>Free stacks in the network per the last listing (minus what we've sent since).</summary>
         private static int freeStacks;
 
+        /// <summary>
+        /// A Storage Terminal is open: stored repair kits count for the Repair button (only inside
+        /// <see cref="InRepairCheck"/>), using the terminal's own listings.
+        /// </summary>
+        public static bool RepairMode { get; private set; }
+
+        /// <summary>Set while vanilla checks whether Repair is possible (ItemActionEntryRepair.RefreshEnabled).</summary>
+        public static bool InRepairCheck { get; set; }
+
+        /// <summary>Set while vanilla performs a repair: counts must be what the player really carries.</summary>
+        public static bool SuppressStock { get; set; }
+
+        /// <summary>Whether the inventory count hooks add network stock right now.</summary>
+        public static bool CountsStock => !SuppressStock && (Active || (RepairMode && InRepairCheck));
+
+        public static void OpenForRepair(Vector3i terminalPos)
+        {
+            stationPos = terminalPos;
+            RepairMode = true;
+            stockByType.Clear();
+        }
+
+        public static void CloseRepair()
+        {
+            RepairMode = false;
+            if (!Active) stockByType.Clear();
+        }
+
+        /// <summary>Repair needs kits: pull up to <paramref name="want"/> into the backpack. True when they're there now.</summary>
+        public static bool TryFetchForRepair(XUiM_PlayerInventory inventory, ItemValue kit, int want)
+        {
+            if (want <= 0) return true;
+            return TryFetchShortfall(inventory, new List<ItemStack> { new ItemStack(kit, RawCount(inventory, kit) + want) }, 1);
+        }
+
         public static bool IsCraftingTerminal(Block block) =>
             block != null && block.Properties.Contains("StashNetCraftingTerminal");
 
@@ -152,7 +187,9 @@ namespace StashNet.Crafting
                 bool on = response.StationOutput == StationOutputState.On;
                 if (on != OutputOn) { OutputOn = on; RefreshUi(); }
             }
-            if (!listRequests.Remove(response.RequestId) || !Active) return;
+            bool ours = listRequests.Remove(response.RequestId) && Active;
+            bool forRepair = RepairMode && !Active && response.HasListing;
+            if (!ours && !forRepair) return;
             stockByType.Clear();
             freeStacks = response.HasListing ? Math.Max(0, response.MaxStacks - response.UsedStacks) : 0;
             if (response.HasListing)
@@ -170,9 +207,12 @@ namespace StashNet.Crafting
         }
 
         /// <summary>Network stock of this item (plain items only; 0 when inactive).</summary>
-        public static int Count(ItemValue iv)
+        public static int Count(ItemValue iv) => CountsStock ? Stock(iv) : 0;
+
+        /// <summary>Network stock of this plain item per the last listing (station or repair mode), ignoring the count gates.</summary>
+        public static int Stock(ItemValue iv)
         {
-            if (!Active || iv == null || iv.HasQuality) return 0;
+            if (!(Active || RepairMode) || iv == null || iv.HasQuality) return 0;
             return stockByType.TryGetValue(iv.type, out int n) ? n : 0;
         }
 
@@ -198,7 +238,7 @@ namespace StashNet.Crafting
             {
                 int missing = need.count * multiplier - RawCount(inventory, need.itemValue);
                 if (missing <= 0) continue;
-                if (need.itemValue.HasQuality || Count(need.itemValue) < missing) return false;
+                if (need.itemValue.HasQuality || Stock(need.itemValue) < missing) return false;
                 shortfalls.Add(new ItemAmount(need.itemValue.ItemClass.GetItemName(), null, missing));
             }
             if (shortfalls.Count == 0) return true;

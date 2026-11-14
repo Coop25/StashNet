@@ -46,7 +46,7 @@ namespace StashNet.Crafting
     {
         public static void Postfix(ItemValue _itemValue, ref int __result)
         {
-            if (CraftingNetwork.Active) __result += CraftingNetwork.Count(_itemValue);
+            if (CraftingNetwork.CountsStock) __result += CraftingNetwork.Count(_itemValue);
         }
     }
 
@@ -55,7 +55,7 @@ namespace StashNet.Crafting
     {
         public static void Postfix(int _itemId, ref int __result)
         {
-            if (CraftingNetwork.Active) __result += CraftingNetwork.Count(new ItemValue(_itemId));
+            if (CraftingNetwork.CountsStock) __result += CraftingNetwork.Count(new ItemValue(_itemId));
         }
     }
 

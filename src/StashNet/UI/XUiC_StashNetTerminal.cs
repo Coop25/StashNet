@@ -94,6 +94,8 @@ namespace StashNet.UI
             // Vanilla menus (inventory tabs, the loot/workstation header) set this. Without it the
             // drag-and-drop window puts a dragged item straight back every frame, so dragging fails.
             if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = true;
+            // Repair (info panel of a backpack item) may use stored repair kits while this window is open.
+            Crafting.CraftingNetwork.OpenForRepair(terminalPos);
             page = 0;
             listing.Clear();
             listingLoaded = false;
@@ -182,6 +184,7 @@ namespace StashNet.UI
             isOpen = false;
             if (Current == this) Current = null;
             if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = false;
+            Crafting.CraftingNetwork.CloseRepair();
             RefreshBackpackButtons();
         }
 
