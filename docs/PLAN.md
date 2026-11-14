@@ -61,11 +61,13 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 
 | Drive | Stacks | Heat weight | Tier |
 |---|---|---|---|
-| Basic | 24 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
-| Standard | 72 | 2 | Mid (workbench: 2 empty Basic Drives, forged iron, electrical + mechanical parts) |
-| High-Density | 216 | 4 | Late (workbench: 2 empty Standard Drives, forged steel, electrical + mechanical parts) |
+| 1K (`stashnetDriveBasic`) | 48 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
+| 4K (`stashnetDriveStandard`) | 192 | 2 | Mid (workbench: 3 empty 1K, forged iron, electrical + mechanical parts) |
+| 16K (`stashnetDriveHighDensity`) | 576 | 4 | Late (workbench: 3 empty 4K, forged steel, electrical + mechanical parts) |
+| 64K (`stashnetDrive64K`) | 1,728 | 6 | Late (workbench: 3 empty 16K, forged steel, electrical + mechanical parts) |
+| 256K (`stashnetDrive256K`) | 5,184 | 8 | End game (workbench: 3 empty 64K, forged steel, electrical + mechanical parts) |
 
-  For scale: a vanilla wooden crate holds 48 stacks, so a Drive Bay of 4 Basic Drives (96 stacks) is about two crates.
+  For scale: a vanilla wooden crate holds 48 stacks, so a 1K Drive is one crate. Tiers (owner, 2026-11-14): AE-style names, each tier crafted from 3 empty drives of the tier below; the 256K costs 81 1K drives' worth of parts, which is the gate.
 
 - **A drive is only readable inside a network.** In a backpack it's a sealed object, not a pocket inventory.
 - A destroyed Drive Bay **drops its drives in a loot bag, contents intact.**
