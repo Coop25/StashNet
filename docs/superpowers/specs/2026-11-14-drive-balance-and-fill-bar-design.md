@@ -43,3 +43,12 @@ The exact Harmony targets for ingredient counting and removal, where the live in
 
 ## Test notes
 If the owner's test world has a High-Density Drive holding more than 216 stacks, it becomes over-full, which is a good test of the over-full rule. If not, fill one with `sn` dev commands before deploying.
+
+## Revision 1 (2026-11-14, owner): five AE-style tiers
+Replaces Goals 1-2. The fill bar, percentage, description line and empty-only ingredient guard stay as built (v0.11.0).
+
+- **Tiers** (owner picked option "E" shape, ×4 then ×3, starting at 48): 1K 48 / 4K 192 / 16K 576 / 64K 1,728 / 256K 5,184 stacks. Each tier = **3 empty drives of the tier below** + parts. Gating comes from cost: a 256K is 81 1K drives' worth.
+- **Recipes** ("cost what we were going to make it cost"): 1K = today's Basic recipe (backpack). 4K = 3×1K + 5 forged iron, 8 electrical, 2 mechanical. 16K = 3×4K + 5 forged steel, 15 electrical, 4 mechanical. 64K = 3×16K + 10 forged steel, 25 electrical, 8 mechanical. 256K = 3×64K + 20 forged steel, 40 electrical, 12 mechanical. All but 1K at a workbench. (64K/256K parts are Claude's proposal, tunable.)
+- **Names** (owner): display names "1K Drive" … "256K Drive". Claude's call: internal item IDs stay (`stashnetDriveBasic`/`Standard`/`HighDensity` = 1K/4K/16K) so existing drives in saves keep working; new IDs `stashnetDrive64K`, `stashnetDrive256K`. Every tier grows, so no existing drive becomes over-full.
+- **Heat weights** 1/2/4/6/8 (Claude's call). Scrap `Weight` 2/4/8/16/32, EconomicValue 60/240/600/1500/4000.
+- **Icons** (owner): five new worn 3D drive icons from `tools/icons/draw-drive-icons.ps1`. The label shows the tier ("1K" … "256K") instead of the stack count, each tier has its own tape color, and the face gets heavier plating as tiers rise (64K and 256K get new treatments).
