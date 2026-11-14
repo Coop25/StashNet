@@ -27,13 +27,13 @@ namespace StashNet.UI
             if (shownActive == CraftingNetwork.Active && shownOn == CraftingNetwork.OutputOn) return;
             shownActive = CraftingNetwork.Active;
             shownOn = CraftingNetwork.OutputOn;
-            RefreshBindings();
+            RefreshBindingsSelfAndChildren(); // each button has its own bindings
         }
 
         public override void OnOpen()
         {
             base.OnOpen();
-            RefreshBindings();
+            RefreshBindingsSelfAndChildren(); // each button has its own bindings
         }
 
         public override bool GetBindingValueInternal(ref string value, string bindingName)
