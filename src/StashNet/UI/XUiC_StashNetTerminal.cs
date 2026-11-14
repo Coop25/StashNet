@@ -23,6 +23,12 @@ namespace StashNet.UI
         private static Vector3i pendingPos;
         /// <summary>Remembered while the game runs. Default: highest count first.</summary>
         private static bool sortByName;
+        /// <summary>Selected category tab, remembered while the game runs. "" = All.</summary>
+        private static string category = "";
+
+        private XUiC_CategoryList categories;
+        private bool categoriesFilled;
+        private readonly Dictionary<string, string[]> groupsByName = new Dictionary<string, string[]>();
 
         private XUiC_StashNetEntry[] entries = new XUiC_StashNetEntry[0];
         private readonly List<ItemAmount> listing = new List<ItemAmount>();
@@ -62,6 +68,13 @@ namespace StashNet.UI
             Hook("btnNext", () => ChangePage(1));
             Hook("btnDepositAll", DepositAll);
             Hook("btnSort", ToggleSort);
+            categories = GetChildByType<XUiC_CategoryList>();
+            if (categories != null) categories.CategoryChanged += entry =>
+            {
+                category = entry?.CategoryName ?? "";
+                page = 0;
+                Render();
+            };
             searchInput = GetChildById("searchInput") as XUiC_TextInput;
             if (searchInput != null) searchInput.OnChangeHandler += (_sender, text, _fromCode) =>
             {
@@ -82,9 +95,56 @@ namespace StashNet.UI
             usage = "";
             status = Localization.Get("stashnetLoading");
             hoverName = "";
+            SetupCategories();
             Render();
             RequestListing();
             RefreshBackpackButtons();
+        }
+
+        /// <summary>
+        /// Tabs: "All", then the game's own item categories in the order the backpack filter uses
+        /// (ui_display.xml trader_category_display), so new or modded categories show up too.
+        /// </summary>
+        private void SetupCategories()
+        {
+            if (categories == null) return;
+            if (!categoriesFilled)
+            {
+                int slots = categories.MaxCategories;
+                int n = 0;
+                if (slots > 0) categories.SetCategoryEntry(n++, "", "ui_game_symbol_loot_sack", Localization.Get("lblAll"));
+                foreach (CraftingCategoryDisplayEntry c in UIDisplayInfoManager.Current.GetTraderCategoryDisplayList())
+                {
+                    if (c == null || n >= slots) continue;
+                    categories.SetCategoryEntry(n++, c.Name, c.Icon, c.DisplayName);
+                }
+                for (int i = n; i < slots; i++) categories.SetCategoryEmpty(i);
+                categoriesFilled = true;
+            }
+            XUiC_CategoryEntry selected = null;
+            foreach (XUiC_CategoryEntry e in categories.CategoryButtons)
+            {
+                if (e.SpriteName != "" && e.CategoryName == category) { selected = e; break; }
+            }
+            if (selected == null) { selected = categories.GetCategoryByIndex(0); category = ""; }
+            categories.CurrentCategory = selected;
+        }
+
+        /// <summary>Same rule as the backpack filter: the item's (or block's) group names.</summary>
+        private bool InCategory(string itemName)
+        {
+            if (category.Length == 0) return true;
+            if (!groupsByName.TryGetValue(itemName, out string[] groups))
+            {
+                ItemClass ic = ItemClass.GetItemClass(itemName);
+                groups = ic == null ? new string[0] : ic.IsBlock() ? (Block.list[ic.Id]?.GroupNames ?? new string[0]) : (ic.Groups ?? new string[0]);
+                groupsByName[itemName] = groups;
+            }
+            foreach (string g in groups)
+            {
+                if (g != null && g.EqualsCaseInsensitive(category)) return true;
+            }
+            return false;
         }
 
         public override void OnClose()
@@ -300,7 +360,7 @@ namespace StashNet.UI
 
         private void Render()
         {
-            IEnumerable<ItemAmount> items = listing;
+            IEnumerable<ItemAmount> items = listing.Where(i => InCategory(i.Name));
             if (search.Length > 0)
             {
                 items = items.Where(i => DisplayName(i.Name).IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0);

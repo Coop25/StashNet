@@ -1,4 +1,4 @@
-# Drive tiers + fill bar: in-game checklist (v0.13.0)
+# Drive tiers + fill bar: in-game checklist (v0.14.0)
 
 Use the StashNet test world. Creative menu or `sn` commands are fine for getting drives and materials.
 
@@ -14,7 +14,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
 6. **Higher tiers.** The 576-stack, 1728-stack and 5184-stack recipes each ask for 3 drives of the tier below (creative-spawn the drives to check quickly).
 7. **Sizes.** Each drive's description line shows its max: 48 / 192 / 576 / 1,728 / 5,184.
 8. **Other slots.** Drives in a Drive Bay, and in a loot bag (drop one), show the same bar and number.
-9. **Log.** The newest log shows `Loaded v0.13.0 (32 methods patched)` and no StashNet errors.
+9. **Log.** The newest log shows `Loaded v0.14.0 (32 methods patched)` and no StashNet errors.
 10. **Taller terminal.** The Storage Terminal window now reaches the bottom of the backpack window and shows 11 rows of items (88 per page). Send a screenshot so we can line it up exactly.
 11. **Mouse wheel.** Scrolling over the item slots turns the pages (wheel down = next page, up = previous). Also check every slot still highlights on hover and withdraws on click.
 12. **Backpack move buttons.** With a terminal open, the backpack's two move buttons (top right of the backpack, next to sort) are enabled:
@@ -22,3 +22,8 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
     - "fill and smart" stores only items the network already holds;
     - locked backpack slots stay put; drives stay in the backpack (shift-click still unloads them).
     With a normal loot container open instead, both buttons work like vanilla.
+13. **Category tabs.** Under the search box there's a row of icons: All, then Reading, Resources, Ammo/Weapons, Tools/Traps, Science, Mods, Food/Cooking, Decor/Misc, Medical, Armor (hover shows the name).
+    - Clicking one shows only that kind of item and goes back to page 1; All shows everything.
+    - It works together with the search box and the sort button.
+    - Close and reopen the terminal: the same tab is still selected.
+    - Every item slot still highlights and withdraws normally.

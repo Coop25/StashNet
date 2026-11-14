@@ -1,7 +1,7 @@
 <configs>
 	<append xpath="/windows">
 
-		<!-- Storage Terminal: search + sort row, 8x11 grid of network items, paged (mouse wheel or arrows). Height 874 = item info panel 392 + panel gap 9 + backpack content bottom 473, so it reaches the bottom of the inventory.
+		<!-- Storage Terminal: search + sort row, category tabs, 8x11 grid of network items, paged (mouse wheel or arrows). Height 874 = item info panel 392 + panel gap 9 + backpack content bottom 473, so it reaches the bottom of the inventory.
 		     Controller: src/StashNet/UI/XUiC_StashNetTerminal.cs -->
 		<window name="stashnetTerminalWindow" width="486" height="874" panel="Left" cursor_area="true" controller="StashNet.UI.XUiC_StashNetTerminal, StashNet">
 			<sprite depth="0" name="background" sprite="menu_empty" color="[darkGrey]" type="sliced" />
@@ -22,9 +22,14 @@
 				<label depth="4" name="sortLabel" pos="0,-4" width="176" height="24" font_size="20" justify="center" text="{stashnet_sort}" />
 			</rect>
 
-			<label depth="2" name="usage" pos="10,-82" width="466" height="24" font_size="20" text="{stashnet_usage}" />
+			<!-- Category tabs (All + the game's own item categories, as in the backpack filter). Filled in code. -->
+			<grid depth="3" name="categories" pos="24,-99" rows="1" cols="11" cell_width="42" cell_height="34" repeat_content="true" controller="CategoryList" allow_key_paging="false" hide_gamepad_callouts="true">
+				<category_icon size="30" collider_scale="1" />
+			</grid>
 
-			<grid depth="3" name="entries" pos="3,-108" rows="11" cols="8" cell_width="60" cell_height="60" repeat_content="true">
+			<label depth="2" name="usage" pos="10,-116" width="466" height="24" font_size="20" text="{stashnet_usage}" />
+
+			<grid depth="3" name="entries" pos="3,-142" rows="11" cols="8" cell_width="60" cell_height="60" repeat_content="true">
 				<rect controller="StashNet.UI.XUiC_StashNetEntry, StashNet" width="58" height="58">
 					<button depth="2" name="clickable" width="58" height="58" on_scroll="true" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
 					<sprite depth="4" name="icon" atlas="ItemIconAtlas" sprite="{stashnet_icon}" color="{stashnet_iconcolor}" pos="29,-27" pivot="center" width="46" height="46" visible="{stashnet_hasitem}" foregroundlayer="true" />
