@@ -90,6 +90,9 @@ namespace StashNet.UI
             terminalPos = pendingPos;
             Current = this;
             isOpen = true;
+            // Vanilla menus (inventory tabs, the loot/workstation header) set this. Without it the
+            // drag-and-drop window puts a dragged item straight back every frame, so dragging fails.
+            if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = true;
             page = 0;
             listing.Clear();
             usage = "";
@@ -152,6 +155,7 @@ namespace StashNet.UI
             base.OnClose();
             isOpen = false;
             if (Current == this) Current = null;
+            if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = false;
             RefreshBackpackButtons();
         }
 
