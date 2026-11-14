@@ -279,6 +279,7 @@ namespace StashNet.UI
             {
                 amountCounter.MaxCount = Math.Max(1, group.Count);
                 amountCounter.Count = 1;
+                amountCounter.ForceTextRefresh(); // otherwise the box stays blank until an arrow is pressed
             }
             ShowInfo(entry, group);
             RefreshBindingsSelfAndChildren();
@@ -318,6 +319,7 @@ namespace StashNet.UI
                 {
                     amountCounter.MaxCount = Math.Max(1, selected.Count);
                     amountCounter.Count = TakeAmount.Clamp(amountCounter.Count, selected.Count);
+                    amountCounter.ForceTextRefresh();
                 }
                 return;
             }

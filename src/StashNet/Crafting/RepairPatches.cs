@@ -42,6 +42,9 @@ namespace StashNet.Crafting
             if (want <= 0) return true; // enough in the backpack, or storage has none: plain vanilla
 
             if (CraftingNetwork.TryFetchForRepair(xui.PlayerInventory, kit, want)) return true;
+            // Host/single-player: the withdraw already happened. If the backpack couldn't hold all of
+            // it, repair with what is really carried now instead of asking for another click forever.
+            if (SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer) return true;
 
             // Joined player: the kits are on their way. Ask for another click; nothing was repaired.
             EntityPlayerLocal player = xui.playerUI?.entityPlayer;

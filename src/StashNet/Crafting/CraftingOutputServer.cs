@@ -26,11 +26,11 @@ namespace StashNet.Crafting
 
             Vector3i pos = te.ToWorldPos();
             if (!CraftingNetwork.IsCraftingTerminal(world.GetBlock(pos).Block)) return;
-            if (!StationOutputStore.IsOn(pos)) return; // owner switched this station's output off
 
             float now = UnityEngine.Time.time;
             if (nextTry.TryGetValue(pos, out float t) && now < t) return;
             nextTry[pos] = now + RetrySeconds;
+            if (!StationOutputStore.IsOn(pos)) return; // switched off: leave finished items in the station
 
             if (!StashNetNetwork.TryOpen(world, pos, out StashNetNetwork net, out _)) return;
 

@@ -181,6 +181,13 @@ namespace StashNet.Crafting
         public static void OnResponse(TerminalResponse response)
         {
             // Replies to requests sent before a toggle still carry the old setting: skip those.
+            // A refused toggle (too far, locked, no network) comes back without the setting: undo the flip.
+            if (Active && response.RequestId == toggleRequestId && response.StationOutput == StationOutputState.NotAStation)
+            {
+                OutputOn = !OutputOn;
+                toggleRequestId = -1;
+                RefreshUi();
+            }
             if (Active && response.StationOutput != StationOutputState.NotAStation && response.RequestId >= toggleRequestId)
             {
                 outputKnown = true;
