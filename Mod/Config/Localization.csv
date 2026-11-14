@@ -24,6 +24,7 @@ stashnetBackpackFull,UI,XUi,,,Backpack full - the rest stayed in storage.
 stashnetNetworkFull,UI,XUi,,,Storage full - some items stayed in your backpack.
 stashnetNothingDeposited,UI,XUi,,,Nothing deposited (storage full or nothing storable).
 stashnetCantStore,UI,XUi,,,That can't be stored on a drive.
+stashnetDropDrive,UI,XUi,,,Drives can't be dropped in. Put it back in your backpack and shift-click it to unload it.
 stashnetLoading,UI,XUi,,,Connecting to storage...
 stashnetTooFar,UI,XUi,,,You're too far from the terminal.
 stashnetSortCount,UI,XUi,,,Sort: Most first

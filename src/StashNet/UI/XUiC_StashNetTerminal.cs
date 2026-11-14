@@ -230,6 +230,37 @@ namespace StashNet.UI
             Send(TerminalOp.Withdraw, new ItemAmount(item.Name, item.Variant, count));
         }
 
+        /// <summary>
+        /// Clicking the item grid while holding a picked-up stack on the cursor deposits it (owner,
+        /// 2026-11-14): left click = the whole held stack, right click = one item. Returns false when
+        /// nothing is held, so the click falls through to a normal withdraw. Leftovers the network
+        /// can't take come back to the backpack, as with shift-click deposits.
+        /// </summary>
+        public bool TryDepositHeld(bool single)
+        {
+            XUiC_DragAndDropWindow drag = xui.DragAndDropWindow;
+            if (drag == null || drag.IsEmpty()) return false;
+            ItemStack held = drag.CurrentStack;
+            if (DriveRules.IsDrive(held.itemValue))
+            {
+                status = Localization.Get("stashnetDropDrive");
+                RefreshBindings();
+                return true;
+            }
+            if (!Depositable(held))
+            {
+                status = Localization.Get("stashnetCantStore");
+                RefreshBindings();
+                return true;
+            }
+            int count = single ? 1 : held.count;
+            ItemAmount amount = ToAmount(held);
+            amount = new ItemAmount(amount.Name, amount.Variant, count);
+            drag.SetCurrentStack(held.count > count ? new ItemStack(held.itemValue.Clone(), held.count - count) : ItemStack.Empty.Clone(), false);
+            Send(TerminalOp.Deposit, amount);
+            return true;
+        }
+
         /// <summary>Shift-click on a backpack/toolbelt slot: remove it from the slot, then send it.</summary>
         public void DepositFromSlot(XUiC_ItemStack slot)
         {

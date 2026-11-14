@@ -39,7 +39,7 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 1. **Craft** (from your backpack): a **Scrap Storage Core**, a **Drive Bay**, a few **48-Stack Drives**, and a **Storage Terminal**.
 2. **Place the Core**, then place the Drive Bay and the Terminal **within 6 blocks** of it.
 3. **Put drives in the Drive Bay.** A bay only accepts drives.
-4. **Use the Terminal**: click an item to take one (shift-click for a full stack), shift-click items in your backpack to store them, or use the backpack's "move all" button to store everything. Tabs under the search box show one kind of item at a time; only kinds you have get a tab.
+4. **Use the Terminal**: click an item to take one (shift-click for a full stack), shift-click items in your backpack to store them (or pick a stack up and click it onto the terminal's items; right-click drops in just one), or use the backpack's "move all" button to store everything. Tabs under the search box show one kind of item at a time; only kinds you have get a tab.
 5. **Lock it**: hold E on the Core and set a code. Everyone else needs the code to open your bays and terminals. The Core's owner always gets in.
 
 ### Crafting from storage

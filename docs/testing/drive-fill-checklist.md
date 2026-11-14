@@ -1,4 +1,4 @@
-# Drive tiers + fill bar: in-game checklist (v0.15.0)
+# Drive tiers + fill bar: in-game checklist (v0.16.0)
 
 Use the StashNet test world. Creative menu or `sn` commands are fine for getting drives and materials.
 
@@ -14,7 +14,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
 6. **Higher tiers.** The 576-stack, 1728-stack and 5184-stack recipes each ask for 3 drives of the tier below (creative-spawn the drives to check quickly).
 7. **Sizes.** Each drive's description line shows its max: 48 / 192 / 576 / 1,728 / 5,184.
 8. **Other slots.** Drives in a Drive Bay, and in a loot bag (drop one), show the same bar and number.
-9. **Log.** The newest log shows `Loaded v0.15.0 (32 methods patched)` and no StashNet errors.
+9. **Log.** The newest log shows `Loaded v0.16.0 (32 methods patched)` and no StashNet errors.
 10. **Taller terminal.** The Storage Terminal window now reaches the bottom of the backpack window and shows 11 rows of items (88 per page). Send a screenshot so we can line it up exactly.
 11. **Mouse wheel.** Scrolling over the item slots turns the pages (wheel down = next page, up = previous). Also check every slot still highlights on hover and withdraws on click.
 12. **Backpack move buttons.** With a terminal open, the backpack's two move buttons (top right of the backpack, next to sort) are enabled:
@@ -31,3 +31,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
 15. **No header button.** The terminal's top-right "deposit all" icon is gone; the backpack's move-all button does that job.
 16. **Tabs only when used.** Only All plus categories that hold at least one stored item show a tab. Store something from a new category: its tab appears within ~2 seconds. Take the last of a category out: its tab disappears (and if it was selected, you're back on All).
 17. **Click = one, shift-click = stack.** Clicking a stored item takes 1. Shift-clicking takes a full stack (or everything, if less than a stack is stored). Right-click also takes 1.
+18. **Drop items onto the terminal.** Pick up a stack from your backpack (click it so it sticks to the cursor, or drag it), move it over the terminal's item grid and click: the whole stack is stored and your cursor is empty. Right-click instead stores just one and keeps the rest on the cursor. With nothing held, clicks withdraw as before.
+    - A drive held on the cursor is refused with a message (put it back and shift-click it to unload).
+    - Something that can't be stored is refused with a message and stays on the cursor.
+    - If storage is full, what doesn't fit comes back to your backpack.

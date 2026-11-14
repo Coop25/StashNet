@@ -17,9 +17,18 @@ namespace StashNet.UI
             base.Init();
             XUiController button = GetChildById("clickable");
             if (button == null) return;
-            // Click takes one item; shift-click takes a full stack (owner, 2026-11-14). Right-click also takes one.
-            button.OnPress += (_sender, _mouseButton) => { if (item.HasValue) Owner?.Withdraw(item.Value, !InputUtils.ShiftKeyPressed); };
-            button.OnRightPress += (_sender, _mouseButton) => { if (item.HasValue) Owner?.Withdraw(item.Value, true); };
+            // Holding a picked-up stack: click deposits it (right-click deposits one), on any cell.
+            // Otherwise click takes one item, shift-click a full stack (owner, 2026-11-14); right-click takes one.
+            button.OnPress += (_sender, _mouseButton) =>
+            {
+                if (Owner == null || Owner.TryDepositHeld(false)) return;
+                if (item.HasValue) Owner.Withdraw(item.Value, !InputUtils.ShiftKeyPressed);
+            };
+            button.OnRightPress += (_sender, _mouseButton) =>
+            {
+                if (Owner == null || Owner.TryDepositHeld(true)) return;
+                if (item.HasValue) Owner.Withdraw(item.Value, true);
+            };
             button.OnHover += (_sender, isOver) => Owner?.SetHover(isOver ? item : null);
         }
 
