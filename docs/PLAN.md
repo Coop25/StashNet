@@ -62,8 +62,8 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 | Drive | Stacks | Heat weight | Tier |
 |---|---|---|---|
 | Basic | 24 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
-| Standard | 96 | 2 | Mid (workbench: forged iron, electrical + mechanical parts) |
-| High-Density | 384 | 4 | Late (workbench: forged steel, electrical + mechanical parts) |
+| Standard | 72 | 2 | Mid (workbench: 2 empty Basic Drives, forged iron, electrical + mechanical parts) |
+| High-Density | 216 | 4 | Late (workbench: 2 empty Standard Drives, forged steel, electrical + mechanical parts) |
 
   For scale: a vanilla wooden crate holds 48 stacks, so a Drive Bay of 4 Basic Drives (96 stacks) is about two crates.
 

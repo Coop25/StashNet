@@ -36,12 +36,14 @@
 		<!-- M8 Progression: mid/late-game tiers, crafted at a workbench. The bay and Core tiers are also
 		     the hammer-upgrade item for the tier below (the old block is used up). Placeholders. -->
 		<recipe name="stashnetDriveStandard" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="stashnetDriveBasic" count="2" />
 			<ingredient name="resourceForgedIron" count="5" />
 			<ingredient name="resourceElectricParts" count="8" />
 			<ingredient name="resourceMechanicalParts" count="2" />
 		</recipe>
 
 		<recipe name="stashnetDriveHighDensity" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="stashnetDriveStandard" count="2" />
 			<ingredient name="resourceForgedSteel" count="5" />
 			<ingredient name="resourceElectricParts" count="15" />
 			<ingredient name="resourceMechanicalParts" count="4" />

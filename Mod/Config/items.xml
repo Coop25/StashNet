@@ -6,8 +6,8 @@
 		     stacks, like chest slots; no separate type limit).
 		     StashNetHeatWeight = how much the drive counts toward its network's heat (M8: bigger
 		     drives run hotter). Weight = what scrapping an EMPTY drive gives back (electrical parts).
-		     Tiers (M8): Basic 24 / weight 1, Standard 96 / 2, High-Density 384 / 4.
-		     To move up a tier: craft the bigger drive, shift-click the old one in a terminal, scrap it.
+		     Tiers: Basic 24 / weight 1, Standard 72 / 2, High-Density 216 / 4 (2026-11-14: 3x steps).
+		     To move up a tier: unload two drives (shift-click in a terminal), then craft them into the next tier (only EMPTY drives count as ingredients).
 		     Icons: no CustomIcon, so the game uses Mod/UIAtlases/ItemIconAtlas/<item name>.png (drawn by
 		     tools/icons/draw-drive-icons.ps1). -->
 		<item name="stashnetDriveBasic">
@@ -31,7 +31,7 @@
 		<!-- Standard Drive (M8): mid-game, crafted at a workbench. -->
 		<item name="stashnetDriveStandard">
 			<property name="Tags" value="stashnetDrive" />
-			<property name="StashNetMaxStacks" value="96" />
+			<property name="StashNetMaxStacks" value="72" />
 			<property name="StashNetHeatWeight" value="2" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
@@ -50,7 +50,7 @@
 		<!-- High-Density Drive (M8): late-game, crafted at a workbench. -->
 		<item name="stashnetDriveHighDensity">
 			<property name="Tags" value="stashnetDrive" />
-			<property name="StashNetMaxStacks" value="384" />
+			<property name="StashNetMaxStacks" value="216" />
 			<property name="StashNetHeatWeight" value="4" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
