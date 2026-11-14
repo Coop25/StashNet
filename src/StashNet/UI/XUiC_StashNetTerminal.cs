@@ -12,7 +12,7 @@ namespace StashNet.UI
     /// <summary>
     /// The Storage Terminal window (Mod/Config/XUi_InGame/windows.xml "stashnetTerminalWindow").
     /// Renders the last listing the server sent; every action is a request via TerminalClient.
-    /// Click = withdraw one, shift-click = a stack, right-click = one; look-alike items (same but for
+    /// Click = select + show in the info panel (again = take one), shift-click = a stack, right-click = one; look-alike items (same but for
     /// the hidden seed, no quality) share a cell. Search filters by name; sort = count (default) or name.
     /// </summary>
     public class XUiC_StashNetTerminal : XUiController
@@ -76,6 +76,7 @@ namespace StashNet.UI
                 page = 0;
                 Render();
             };
+            amountCounter = GetChildById("amount") as XUiC_Counter;
             searchInput = GetChildById("searchInput") as XUiC_TextInput;
             if (searchInput != null) searchInput.OnChangeHandler += (_sender, text, _fromCode) =>
             {
@@ -103,6 +104,11 @@ namespace StashNet.UI
             usage = "";
             status = Localization.Get("stashnetLoading");
             hoverName = "";
+            selectedName = null;
+            selectedKey = null;
+            selected = null;
+            infoShown = false;
+            if (amountCounter != null) { amountCounter.MaxCount = 1; amountCounter.Count = 1; }
             SetupCategories();
             Render();
             RequestListing();
@@ -185,6 +191,7 @@ namespace StashNet.UI
             if (Current == this) Current = null;
             if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = false;
             Crafting.CraftingNetwork.CloseRepair();
+            ClearSelection();
             RefreshBackpackButtons();
         }
 
@@ -228,12 +235,106 @@ namespace StashNet.UI
         }
 
         /// <summary>Takes 1 (single) or one stack from a cell, split across the cell's stored members in order.</summary>
-        public void Withdraw(ItemGroup group, bool single)
+        public void Withdraw(ItemGroup group, bool single) =>
+            Withdraw(group, single ? 1 : TakeAmount.Stack(group.Count, StackSize(group.Name)));
+
+        private void Withdraw(ItemGroup group, int count)
         {
-            int count = single ? 1 : Math.Min(group.Count, StackSize(group.Name));
+            if (group == null || count <= 0) return;
             TerminalRequest request = NewRequest(TerminalOp.Withdraw);
             request.Items.AddRange(ListingGroups.Split(group.Members, count));
             if (request.Items.Count > 0) SendAction(request);
+        }
+
+        // ---- Selection + info panel (v0.19.0, owner 2026-11-14) ----
+        // Click a cell: it's selected and the game's own item info panel shows it, with Take (the
+        // amount in the footer box) and Take stack. Click the selected cell again: take one.
+
+        private string selectedName;
+        private string selectedKey;
+        private ItemGroup selected;
+        private bool infoShown;
+        private XUiC_Counter amountCounter;
+
+        public bool IsSelected(ItemGroup group) =>
+            group != null && selectedName != null && group.Name == selectedName && GroupKeyOf(group) == selectedKey;
+
+        /// <summary>A second click on the selected cell takes one, but only while the info panel still shows it.</summary>
+        public bool ShowingSelected(ItemGroup group)
+        {
+            if (!IsSelected(group) || !infoShown) return false;
+            XUiC_ItemInfoWindow info = xui.GetChildByType<XUiC_ItemInfoWindow>();
+            return info != null && info.ViewComponent.IsVisible && info.selectedItemStack == null && info.selectedEquipmentStack == null && info.selectedPartStack == null;
+        }
+
+        private static string GroupKeyOf(ItemGroup group) => ItemCodec.GroupKey(group.Name, group.Display.Variant);
+
+        public void Select(XUiC_StashNetEntry entry, ItemGroup group)
+        {
+            if (group == null) return;
+            selectedName = group.Name;
+            selectedKey = GroupKeyOf(group);
+            selected = group;
+            if (amountCounter != null)
+            {
+                amountCounter.MaxCount = Math.Max(1, group.Count);
+                amountCounter.Count = 1;
+            }
+            ShowInfo(entry, group);
+            RefreshBindingsSelfAndChildren();
+        }
+
+        /// <summary>Take button in the info panel: the footer amount (or one stack).</summary>
+        public void TakeSelected(bool stack)
+        {
+            if (selected == null) return;
+            int count = stack
+                ? TakeAmount.Stack(selected.Count, StackSize(selected.Name))
+                : TakeAmount.Clamp(amountCounter?.Count ?? 1, selected.Count);
+            Withdraw(selected, count);
+        }
+
+        private void ShowInfo(XUiC_StashNetEntry entry, ItemGroup group)
+        {
+            XUiC_ItemInfoWindow info = xui.GetChildByType<XUiC_ItemInfoWindow>();
+            if (info == null || !ItemCodec.TryDecode(group.Name, group.Display.Variant, out ItemValue iv, out _)) return;
+            info.ClearSelectedStacks();
+            info.makeVisible(true);
+            info.SetInfo(new ItemStack(iv, Math.Max(1, group.Count)), entry, XUiC_ItemActionList.ItemActionListTypes.None);
+            info.mainActionItemList.AddActionListEntry(new StashNetTakeAction(entry, false));
+            info.mainActionItemList.AddActionListEntry(new StashNetTakeAction(entry, true));
+            info.mainActionItemList.RefreshActionList();
+            infoShown = true;
+        }
+
+        /// <summary>After each listing: follow the selected item, or drop the selection when it's gone.</summary>
+        private void RefreshSelection(List<ItemGroup> all)
+        {
+            if (selectedName == null) return;
+            selected = all.FirstOrDefault(g => g.Name == selectedName && GroupKeyOf(g) == selectedKey);
+            if (selected != null)
+            {
+                if (amountCounter != null && amountCounter.MaxCount != selected.Count)
+                {
+                    amountCounter.MaxCount = Math.Max(1, selected.Count);
+                    amountCounter.Count = TakeAmount.Clamp(amountCounter.Count, selected.Count);
+                }
+                return;
+            }
+            ClearSelection();
+        }
+
+        private void ClearSelection()
+        {
+            selectedName = null;
+            selectedKey = null;
+            selected = null;
+            if (!infoShown) return;
+            infoShown = false;
+            // Only clear the panel while it still shows our item (not a backpack item clicked since).
+            XUiC_ItemInfoWindow info = xui.GetChildByType<XUiC_ItemInfoWindow>();
+            if (info != null && info.selectedItemStack == null && info.selectedEquipmentStack == null && info.selectedPartStack == null)
+                info.SetItemStack((XUiC_ItemStack)null);
         }
 
         /// <summary>
@@ -349,7 +450,7 @@ namespace StashNet.UI
             {
                 case "stashnet_usage": value = usage; return true;
                 case "stashnet_status": value = status; return true;
-                case "stashnet_hover": value = hoverName; return true;
+                case "stashnet_hover": value = hoverName.Length > 0 || selected == null ? hoverName : HoverText(selected.Display); return true;
                 case "stashnet_page": value = $"{page + 1}/{PageCount}"; return true;
                 case "stashnet_sort": value = Localization.Get(sortByName ? "stashnetSortName" : "stashnetSortCount"); return true;
                 default: return base.GetBindingValueInternal(ref value, bindingName);
@@ -429,7 +530,9 @@ namespace StashNet.UI
 
         private void Render()
         {
-            IEnumerable<ItemGroup> items = ListingGroups.Fold(listing, i => ItemCodec.GroupKey(i.Name, i.Variant)).Where(i => InCategory(i.Name, category));
+            List<ItemGroup> all = ListingGroups.Fold(listing, i => ItemCodec.GroupKey(i.Name, i.Variant));
+            if (listingLoaded) RefreshSelection(all);
+            IEnumerable<ItemGroup> items = all.Where(i => InCategory(i.Name, category));
             if (search.Length > 0)
             {
                 items = items.Where(i => DisplayName(i.Name).IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0);

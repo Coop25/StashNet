@@ -16,6 +16,7 @@ stashnetCampfireDesc,blocks,Block,,,"A campfire wired into your storage network.
 stashnetCementMixer,blocks,Block,,,Network Cement Mixer
 stashnetCementMixerDesc,blocks,Block,,,"A cement mixer wired into your storage network. Same recipes as a normal one, but it can use ingredients stored on the network's drives. Place it within reach of a Storage Core."
 stashnetFetchingIngredients,UI,XUi,,,Fetching ingredients from storage... click Craft again.
+stashnetTakeStack,UI,XUi,,,Take stack
 stashnetFetchingRepair,UI,XUi,,,Fetching repair kits from storage... click Repair again.
 stashnetOutputOnTip,UI,XUi,,,"Finished items go into storage (click to keep them here instead)"
 stashnetOutputOffTip,UI,XUi,,,"Finished items stay here (click to send them into storage)"

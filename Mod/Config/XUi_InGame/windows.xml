@@ -31,6 +31,7 @@
 			<grid depth="3" name="entries" pos="3,-142" rows="11" cols="8" cell_width="60" cell_height="60" repeat_content="true">
 				<rect controller="StashNet.UI.XUiC_StashNetEntry, StashNet" width="58" height="58">
 					<button depth="2" name="clickable" width="58" height="58" on_scroll="true" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
+					<sprite depth="3" name="selectedBorder" sprite="menu_empty3px" color="[white]" type="sliced" fillcenter="false" width="58" height="58" visible="{stashnet_selected}" />
 					<sprite depth="4" name="icon" atlas="ItemIconAtlas" sprite="{stashnet_icon}" color="{stashnet_iconcolor}" pos="29,-27" pivot="center" width="46" height="46" visible="{stashnet_hasitem}" foregroundlayer="true" />
 					<!-- Count: bottom-right normally; top-right when the durability bar takes the bottom. -->
 					<label depth="5" name="count" pos="2,-40" width="54" height="18" font_size="16" justify="right" effect="outline" text="{stashnet_count}" visible="{stashnet_nodurability}" />
@@ -43,7 +44,14 @@
 				</rect>
 			</grid>
 
-			<label depth="2" name="hover" pos="10,-810" width="300" height="26" font_size="20" text="{stashnet_hover}" />
+			<label depth="2" name="hover" pos="10,-810" width="172" height="26" font_size="20" text="{stashnet_hover}" />
+			<!-- Amount for the info panel's Take button (vanilla Counter, like the trader's buy count): arrows (hold to repeat), typing, max. -->
+			<rect name="amount" depth="3" pos="200,-810" width="120" height="30" controller="Counter">
+				<button depth="3" name="countDown" style="icon30px, press, held" pos="0,-13" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" />
+				<textfield name="count_input" depth="3" pos="16,0" width="50" height="28" character_limit="6" validation="integer" virtual_keyboard_prompt="vkPromptCount" />
+				<button depth="3" name="countUp" style="icon30px, press, held" pos="80,-13" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" />
+				<button depth="3" name="countMax" style="icon30px, press" pos="108,-13" sprite="ui_game_symbol_arrow_max" pivot="center" sound="[paging_click]" />
+			</rect>
 			<button depth="3" name="btnPrev" pos="345,-823" width="32" height="28" pivot="center" sprite="ui_game_symbol_arrow_left" style="press, hover" sound="[paging_click]" />
 			<label depth="2" name="page" pos="365,-811" width="60" height="26" font_size="20" justify="center" text="{stashnet_page}" />
 			<button depth="3" name="btnNext" pos="445,-823" width="32" height="28" pivot="center" sprite="ui_game_symbol_arrow_right" style="press, hover" sound="[paging_click]" />
