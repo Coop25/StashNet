@@ -52,7 +52,7 @@ Craft a **Crafting Terminal** (it needs a workbench and a Storage Terminal) and 
 | Standard Drive | 72 stacks | workbench (2 empty Basic Drives + forged iron) |
 | High-Density Drive | 216 stacks | workbench (2 empty Standard Drives + forged steel) |
 
-To move up a size: craft the new drive and put it in a bay. Then open a Terminal, **shift-click the old drive** in your backpack to empty it into the network, and scrap the empty drive. A drive that still holds items can't be scrapped, so nothing gets thrown away by accident.
+To move up a size: open a Terminal and **shift-click two drives** of the smaller size in your backpack to empty them into the network. Then craft them into one drive of the next size at a workbench. Only empty drives count as ingredients, and a drive that still holds items can't be scrapped either, so nothing gets thrown away by accident.
 
 ### Tougher bays, farther-reaching Cores
 | Block | Holds / reaches | Toughness |
