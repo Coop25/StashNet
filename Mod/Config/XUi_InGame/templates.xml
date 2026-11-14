@@ -1,0 +1,13 @@
+<configs>
+	<!-- Drive fill (2026-11-14): every item slot gets a fill bar (same size and spot as the vanilla wear
+	     bar) and a centered percent, both shown only for drives that hold items. Bindings come from
+	     src/StashNet/Patches/DriveSlotFillPatch.cs; other items leave them hidden and empty. -->
+	<insertAfter xpath="/templates/item_stack/rect/filledsprite[@name='durability']">
+		<sprite depth="4" name="stashnetFillBack" sprite="menu_empty2px" color="[darkGrey]" type="sliced" globalopacitymod="0" visible="{stashnethasfill}"
+			width="${-5+cell_size}" height="10" pos="1,${-Floor(4*cell_size/5)}" />
+		<filledsprite depth="5" name="stashnetFill" sprite="menu_empty2px" color="{stashnetfillcolor}" fill="{stashnetfill}" type="filled" globalopacitymod="0" visible="{stashnethasfill}"
+			width="${-5+cell_size}" height="10" pos="1,${-Floor(4*cell_size/5)}" />
+		<label depth="8" name="stashnetFillText" height="22" text="{stashnetfilltext}" font_size="20" justify="center" pivot="center" color="[white]" effect="outline"
+			pos="${Floor(cell_size/2)},${-Floor(cell_size/2)}" width="${-5+cell_size}" effect_distance="1,1" effect_color="0,0,0,255" />
+	</insertAfter>
+</configs>
