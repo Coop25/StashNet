@@ -54,3 +54,6 @@ stashnetCoreTooClose,UI,XUi,,,"Another Storage Core is only {0} blocks away. Cor
 blockcommand_show_area,UI,Radial blockcommand,,,Show Area
 blockcommand_hide_area,UI,Radial blockcommand,,,Hide Area
 stashnetBayNotEmpty,UI,XUi,,,Take the drives out of this bay first.
+stashnetDriveFillLine,UI,XUi,,,{0} / {1} stacks used ({2}) · {3} different items
+stashnetDriveFillEmpty,UI,XUi,,,Empty.
+stashnetDriveFillUnreadable,UI,XUi,,,This drive's data can't be read.
