@@ -179,7 +179,7 @@ Each milestone ends with something you can load and try in-game. A detailed step
 - **Autocrafting** — recipe cartridges, crafting queue, sub-recipes.
 - **Custom 3D models and textures.**
 - **Running cost (balance lever).** Decide after playtesting M8 whether the network needs an ongoing cost to stay balanced: fuel the Core burns while the network is used, or electricity (generator/solar). Raised by the owner 2026-11-13; parked so M8 could ship with prices and heat first.
-- **Selling a full drive to a trader** destroys its contents (deliberate player action, no guard yet). Revisit in M9.
+- ~~**Selling a full drive to a trader** destroys its contents.~~ Guarded in v0.17.0: a drive that holds items can't be sold to a trader (unload it first). Stocking your own vending machine still works and keeps the contents.
 
 ---
 

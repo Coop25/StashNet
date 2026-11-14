@@ -1,4 +1,4 @@
-# Drive tiers + fill bar: in-game checklist (v0.16.0)
+# Drive tiers + fill bar: in-game checklist (v0.17.0)
 
 Use the StashNet test world. Creative menu or `sn` commands are fine for getting drives and materials.
 
@@ -14,7 +14,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
 6. **Higher tiers.** The 576-stack, 1728-stack and 5184-stack recipes each ask for 3 drives of the tier below (creative-spawn the drives to check quickly).
 7. **Sizes.** Each drive's description line shows its max: 48 / 192 / 576 / 1,728 / 5,184.
 8. **Other slots.** Drives in a Drive Bay, and in a loot bag (drop one), show the same bar and number.
-9. **Log.** The newest log shows `Loaded v0.16.0 (32 methods patched)` and no StashNet errors.
+9. **Log.** The newest log shows `Loaded v0.17.0 (33 methods patched)` and no StashNet errors.
 10. **Taller terminal.** The Storage Terminal window now reaches the bottom of the backpack window and shows 11 rows of items (88 per page). Send a screenshot so we can line it up exactly.
 11. **Mouse wheel.** Scrolling over the item slots turns the pages (wheel down = next page, up = previous). Also check every slot still highlights on hover and withdraws on click.
 12. **Backpack move buttons.** With a terminal open, the backpack's two move buttons (top right of the backpack, next to sort) are enabled:
@@ -35,3 +35,4 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
     - A drive held on the cursor is refused with a message (put it back and shift-click it to unload).
     - Something that can't be stored is refused with a message and stays on the cursor.
     - If storage is full, what doesn't fit comes back to your backpack.
+19. **Trader won't take a full drive.** At a trader, try to sell a drive with items on it: refused with "unload it first". An empty drive sells normally (for little: drives are worth far less than their parts).

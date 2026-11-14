@@ -37,6 +37,7 @@ stashnetNetworkLocked,UI,XUi,,,This storage network is locked. Enter the code se
 stashnetBayLocked,UI,HUD,,,"{1}\nNetwork locked - press {0} to enter the code"
 stashnetTerminalLocked,UI,HUD,,,Network locked - press {0} to enter the code
 stashnetUnloadBeforeScrap,UI,XUi,,,Unload this drive first: shift-click it in a Storage Terminal.
+stashnetUnloadBeforeSell,UI,XUi,,,This drive still holds items. Unload it in a Storage Terminal (shift-click) before selling it.
 stashnetDriveStandard,items,Item,,,192-Stack Drive
 stashnetDriveStandardDesc,items,Item,,,"Holds 192 stacks, about four crates. Crafted from three empty 48-Stack Drives. Runs hotter than a 48-Stack Drive. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network. The bar under the drive shows how full it is, and the number in the middle is the percent used."
 stashnetDriveHighDensity,items,Item,,,576-Stack Drive
