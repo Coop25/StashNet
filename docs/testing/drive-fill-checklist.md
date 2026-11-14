@@ -16,7 +16,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
 8. **Other slots.** Drives in a Drive Bay, and in a loot bag (drop one), show the same bar and number.
 9. **Log.** The newest log shows `Loaded v0.13.0 (32 methods patched)` and no StashNet errors.
 10. **Taller terminal.** The Storage Terminal window now reaches the bottom of the backpack window and shows 11 rows of items (88 per page). Send a screenshot so we can line it up exactly.
-11. **Mouse wheel.** Scrolling over the terminal's item grid turns the pages (wheel down = next page, up = previous).
+11. **Mouse wheel.** Scrolling over the item slots turns the pages (wheel down = next page, up = previous). Also check every slot still highlights on hover and withdraws on click.
 12. **Backpack move buttons.** With a terminal open, the backpack's two move buttons (top right of the backpack, next to sort) are enabled:
     - "move all" stores every unlocked backpack stack in the network;
     - "fill and smart" stores only items the network already holds;

@@ -11,7 +11,7 @@ namespace StashNet.Patches
     internal static class BackpackMoveTarget
     {
         internal static XUiC_StashNetTerminal Terminal(XUi xui) =>
-            xui != null && xui.LootContainer == null ? XUiC_StashNetTerminal.Current : null;
+            xui != null && xui.LootContainer == null && xui.AssembleItem?.CurrentItem == null ? XUiC_StashNetTerminal.Current : null;
 
         internal static bool IsBackpackControls(XUiC_ContainerStandardControls controls) =>
             controls.GetParentByType<XUiC_BackpackWindow>() != null;

@@ -1,9 +1,9 @@
 <configs>
 	<append xpath="/windows">
 
-		<!-- Storage Terminal: search + sort row, 8x11 grid of network items, paged (mouse wheel or arrows). Height 868 = the item info panel (392) + the backpack window (about 476), so it reaches the bottom of the inventory.
+		<!-- Storage Terminal: search + sort row, 8x11 grid of network items, paged (mouse wheel or arrows). Height 874 = item info panel 392 + panel gap 9 + backpack content bottom 473, so it reaches the bottom of the inventory.
 		     Controller: src/StashNet/UI/XUiC_StashNetTerminal.cs -->
-		<window name="stashnetTerminalWindow" width="486" height="868" panel="Left" cursor_area="true" controller="StashNet.UI.XUiC_StashNetTerminal, StashNet">
+		<window name="stashnetTerminalWindow" width="486" height="874" panel="Left" cursor_area="true" controller="StashNet.UI.XUiC_StashNetTerminal, StashNet">
 			<sprite depth="0" name="background" sprite="menu_empty" color="[darkGrey]" type="sliced" />
 			<sprite depth="1" name="border" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" />
 
@@ -24,7 +24,7 @@
 
 			<label depth="2" name="usage" pos="10,-82" width="466" height="24" font_size="20" text="{stashnet_usage}" />
 
-			<grid depth="3" name="entries" on_scroll="true" pos="3,-108" rows="11" cols="8" cell_width="60" cell_height="60" repeat_content="true">
+			<grid depth="3" name="entries" pos="3,-108" rows="11" cols="8" cell_width="60" cell_height="60" repeat_content="true">
 				<rect controller="StashNet.UI.XUiC_StashNetEntry, StashNet" width="58" height="58">
 					<button depth="2" name="clickable" width="58" height="58" on_scroll="true" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
 					<sprite depth="4" name="icon" atlas="ItemIconAtlas" sprite="{stashnet_icon}" color="{stashnet_iconcolor}" pos="29,-27" pivot="center" width="46" height="46" visible="{stashnet_hasitem}" foregroundlayer="true" />
@@ -37,12 +37,12 @@
 				</rect>
 			</grid>
 
-			<label depth="2" name="hover" pos="10,-804" width="300" height="26" font_size="20" text="{stashnet_hover}" />
-			<button depth="3" name="btnPrev" pos="345,-817" width="32" height="28" pivot="center" sprite="ui_game_symbol_arrow_left" style="press, hover" sound="[paging_click]" />
-			<label depth="2" name="page" pos="365,-805" width="60" height="26" font_size="20" justify="center" text="{stashnet_page}" />
-			<button depth="3" name="btnNext" pos="445,-817" width="32" height="28" pivot="center" sprite="ui_game_symbol_arrow_right" style="press, hover" sound="[paging_click]" />
+			<label depth="2" name="hover" pos="10,-810" width="300" height="26" font_size="20" text="{stashnet_hover}" />
+			<button depth="3" name="btnPrev" pos="345,-823" width="32" height="28" pivot="center" sprite="ui_game_symbol_arrow_left" style="press, hover" sound="[paging_click]" />
+			<label depth="2" name="page" pos="365,-811" width="60" height="26" font_size="20" justify="center" text="{stashnet_page}" />
+			<button depth="3" name="btnNext" pos="445,-823" width="32" height="28" pivot="center" sprite="ui_game_symbol_arrow_right" style="press, hover" sound="[paging_click]" />
 
-			<label depth="2" name="status" pos="10,-836" width="466" height="26" font_size="18" color="[lightGrey]" text="{stashnet_status}" />
+			<label depth="2" name="status" pos="10,-842" width="466" height="26" font_size="18" color="[lightGrey]" text="{stashnet_status}" />
 		</window>
 
 	</append>

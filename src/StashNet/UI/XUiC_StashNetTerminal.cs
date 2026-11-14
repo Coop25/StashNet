@@ -57,8 +57,7 @@ namespace StashNet.UI
                 XUiController button = e.GetChildById("clickable");
                 if (button != null) button.OnScroll += (_sender, delta) => Scroll(delta);
             }
-            XUiController grid = GetChildById("entries");
-            if (grid != null) grid.OnScroll += (_sender, delta) => Scroll(delta);
+            // Not on the grid itself: a grid collider would tie with the cell buttons and could steal their clicks.
             Hook("btnPrev", () => ChangePage(-1));
             Hook("btnNext", () => ChangePage(1));
             Hook("btnDepositAll", DepositAll);
