@@ -6,8 +6,8 @@
 		     stacks, like chest slots; no separate type limit).
 		     StashNetHeatWeight = how much the drive counts toward its network's heat (M8: bigger
 		     drives run hotter). Weight = what scrapping an EMPTY drive gives back (electrical parts).
-		     Tiers (2026-11-14): 1K 48 / weight 1, 4K 192 / 2, 16K 576 / 4, 64K 1728 / 6, 256K 5184 / 8.
-		     1K/4K/16K keep the old stashnetDriveBasic/Standard/HighDensity IDs so saved drives still load.
+		     Tiers (2026-11-14), named by stack count: 48 / weight 1, 192 / 2, 576 / 4, 1728 / 6, 5184 / 8.
+		     The 48/192/576 drives keep the old stashnetDriveBasic/Standard/HighDensity IDs so saved drives still load.
 		     To move up a tier: unload three drives (shift-click in a terminal), then craft them into the next tier (only EMPTY drives count as ingredients).
 		     Icons: no CustomIcon, so the game uses Mod/UIAtlases/ItemIconAtlas/<item name>.png (drawn by
 		     tools/icons/draw-drive-icons.ps1). -->
@@ -29,7 +29,7 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
-		<!-- 4K Drive (ID kept from the old Standard Drive): crafted from three empty 1K Drives. -->
+		<!-- 192-Stack Drive (ID kept from the old Standard Drive): crafted from three empty 48-Stack Drives. -->
 		<item name="stashnetDriveStandard">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="192" />
@@ -48,7 +48,7 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
-		<!-- 16K Drive (ID kept from the old High-Density Drive): crafted from three empty 4K Drives. -->
+		<!-- 576-Stack Drive (ID kept from the old High-Density Drive): crafted from three empty 192-Stack Drives. -->
 		<item name="stashnetDriveHighDensity">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="576" />
@@ -67,7 +67,7 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
-		<!-- 64K Drive: crafted from three empty 16K Drives. -->
+		<!-- 1728-Stack Drive: crafted from three empty 576-Stack Drives. -->
 		<item name="stashnetDrive64K">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="1728" />
@@ -86,7 +86,7 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
-		<!-- 256K Drive: crafted from three empty 64K Drives. -->
+		<!-- 5184-Stack Drive: crafted from three empty 1728-Stack Drives. -->
 		<item name="stashnetDrive256K">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="5184" />

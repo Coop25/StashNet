@@ -7,7 +7,7 @@ namespace StashNet.Core.Heat
     {
         /// <summary>
         /// totalWeight × heatPerDrive, capped. totalWeight is the sum of every drive's heat weight
-        /// (1K 1, 4K 2, 16K 4, 64K 6, 256K 8, from items.xml), so bigger drives run hotter (M8).
+        /// (48-stack 1, 192-stack 2, 576-stack 4, 1728-stack 6, 5184-stack 8, from items.xml), so bigger drives run hotter (M8).
         /// Bad (negative) inputs count as 0, so a bad config never crashes.
         /// </summary>
         public static float PerReport(float totalWeight, float heatPerDrive, float cap)

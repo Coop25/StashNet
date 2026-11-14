@@ -61,13 +61,13 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 
 | Drive | Stacks | Heat weight | Tier |
 |---|---|---|---|
-| 1K (`stashnetDriveBasic`) | 48 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
-| 4K (`stashnetDriveStandard`) | 192 | 2 | Mid (workbench: 3 empty 1K, forged iron, electrical + mechanical parts) |
-| 16K (`stashnetDriveHighDensity`) | 576 | 4 | Late (workbench: 3 empty 4K, forged steel, electrical + mechanical parts) |
-| 64K (`stashnetDrive64K`) | 1,728 | 6 | Late (workbench: 3 empty 16K, forged steel, electrical + mechanical parts) |
-| 256K (`stashnetDrive256K`) | 5,184 | 8 | End game (workbench: 3 empty 64K, forged steel, electrical + mechanical parts) |
+| 48-stack (`stashnetDriveBasic`) | 48 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
+| 192-stack (`stashnetDriveStandard`) | 192 | 2 | Mid (workbench: 3 empty 48-stack, forged iron, electrical + mechanical parts) |
+| 576-stack (`stashnetDriveHighDensity`) | 576 | 4 | Late (workbench: 3 empty 192-stack, forged steel, electrical + mechanical parts) |
+| 1728-stack (`stashnetDrive64K`) | 1,728 | 6 | Late (workbench: 3 empty 576-stack, forged steel, electrical + mechanical parts) |
+| 5184-stack (`stashnetDrive256K`) | 5,184 | 8 | End game (workbench: 3 empty 1728-stack, forged steel, electrical + mechanical parts) |
 
-  For scale: a vanilla wooden crate holds 48 stacks, so a 1K Drive is one crate. Tiers (owner, 2026-11-14): AE-style names, each tier crafted from 3 empty drives of the tier below; the 256K costs 81 1K drives' worth of parts, which is the gate.
+  For scale: a vanilla wooden crate holds 48 stacks, so a 48-Stack Drive is one crate. Tiers (owner, 2026-11-14): drives are named by stack count (e.g. "48-Stack Drive"), each tier crafted from 3 empty drives of the tier below; the 5184-stack costs 81 48-stack drives' worth of parts, which is the gate.
 
 - **A drive is only readable inside a network.** In a backpack it's a sealed object, not a pocket inventory.
 - A destroyed Drive Bay **drops its drives in a loot bag, contents intact.**
