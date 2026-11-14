@@ -51,7 +51,14 @@ namespace StashNet.UI
         {
             base.Init();
             entries = GetChildrenByType<XUiC_StashNetEntry>();
-            foreach (XUiC_StashNetEntry e in entries) e.Owner = this;
+            foreach (XUiC_StashNetEntry e in entries)
+            {
+                e.Owner = this;
+                XUiController button = e.GetChildById("clickable");
+                if (button != null) button.OnScroll += (_sender, delta) => Scroll(delta);
+            }
+            XUiController grid = GetChildById("entries");
+            if (grid != null) grid.OnScroll += (_sender, delta) => Scroll(delta);
             Hook("btnPrev", () => ChangePage(-1));
             Hook("btnNext", () => ChangePage(1));
             Hook("btnDepositAll", DepositAll);
@@ -78,6 +85,7 @@ namespace StashNet.UI
             hoverName = "";
             Render();
             RequestListing();
+            RefreshBackpackButtons();
         }
 
         public override void OnClose()
@@ -85,6 +93,20 @@ namespace StashNet.UI
             base.OnClose();
             isOpen = false;
             if (Current == this) Current = null;
+            RefreshBackpackButtons();
+        }
+
+        /// <summary>The backpack's move buttons are enabled only while there's somewhere to move to (see BackpackMovePatches).</summary>
+        private void RefreshBackpackButtons()
+        {
+            xui.FindWindowGroupByName("backpack")?.GetChildByType<XUiC_BackpackWindow>()?.RefreshBindingsSelfAndChildren();
+        }
+
+        /// <summary>Mouse wheel over the item grid: wheel up = previous page, down = next.</summary>
+        public void Scroll(float delta)
+        {
+            if (delta > 0f) ChangePage(-1);
+            else if (delta < 0f) ChangePage(1);
         }
 
         public override void Update(float _dt)
@@ -208,16 +230,24 @@ namespace StashNet.UI
 
         private int PageCount => Math.Max(1, (shown.Count + entries.Length - 1) / Math.Max(1, entries.Length));
 
-        private void DepositAll()
+        /// <summary>Header button, and the backpack's "move all" button while a terminal is open.</summary>
+        public void DepositAll() => DepositBackpack(false);
+
+        /// <summary>The backpack's "fill and smart" button: only items the network already holds.</summary>
+        public void DepositMatching() => DepositBackpack(true);
+
+        private void DepositBackpack(bool onlyMatching)
         {
             Bag bag = xui.playerUI.entityPlayer.bag;
             PackedBoolArray locked = bag.LockedSlots;
+            HashSet<string> stored = onlyMatching ? new HashSet<string>(listing.Select(i => i.Name)) : null;
             var request = NewRequest(TerminalOp.Deposit);
             for (int i = 0; i < bag.SlotCount; i++)
             {
                 ItemStack stack = bag.ItemGrid[i];
                 if (locked != null && i < locked.Length && locked[i]) continue;
                 if (!Depositable(stack)) continue;
+                if (stored != null && !stored.Contains(ItemCodec.NameOf(stack.itemValue))) continue;
                 request.Items.Add(ToAmount(stack));
                 bag.SetSlot(i, ItemStack.Empty.Clone());
             }

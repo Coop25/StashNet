@@ -1,4 +1,4 @@
-# Draws the five StashNet drive icons (1K-256K) (160x160 transparent PNGs) in a worn 7 Days to Die style: the front
+# Draws the five StashNet drive icons (48 to 5184 stacks) (160x160 transparent PNGs) in a worn 7 Days to Die style: the front
 # art is drawn flat, then mapped onto the front of a box seen from the front-right and slightly above, with
 # a shaded top and right side. Regenerate the mod icons with:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File tools/icons/draw-drive-icons.ps1 -OutDir Mod/UIAtlases/ItemIconAtlas
@@ -80,19 +80,19 @@ function FaceArt([string]$tierName, [string]$label, $tape, [int]$seed) {
       $g.DrawLine((Pen (C 120 190 180 160) 0.8), $x*$S, $y*$S, ($x+$sx*24)*$S, $y*$S)
       Rivet $g ($x+$sx*4) ($y+$sy*16) 2.4; Rivet $g ($x+$sx*16) ($y+$sy*4) 2.4 }
   } else {
-    # 16K and up: hazard band on top + steel corner brackets. 64K adds side straps; 256K adds a gold rim and gold brackets.
+    # 576 and up: hazard band on top + steel corner brackets. 1728 adds side straps; 5184 adds a gold rim and gold brackets.
     $hz = RR 45 11 60 8 1.5; $g.FillPath((Brush (C 255 200 160 40)), $hz)
     $old = $g.Clip; $g.SetClip($hz)
     for ($i=0; $i -lt 14; $i++) { Poly $g (Brush (C 255 30 28 26)) @(@((40+$i*7),19),@((45+$i*7),11),@((48.5+$i*7),11),@((43.5+$i*7),19)) }
     $g.Clip = $old; $g.DrawPath((Pen (C 255 30 28 26) 1.2), $hz)
-    if ($tierName -eq '64k' -or $tierName -eq '256k') {
+    if ($tierName -eq 't1728' -or $tierName -eq 't5184') {
       foreach ($sx in 23, 121) {
         $strap = RR $sx 24 6 96 1; $g.FillPath((Brush (C 255 96 100 102)), $strap); $g.DrawPath((Pen (C 255 40 40 38) 0.8), $strap)
         $g.DrawLine((Pen (C 110 210 206 190) 0.6), ($sx+1)*$S, 25*$S, ($sx+1)*$S, 119*$S)
         foreach ($ry in 34, 58, 82, 106) { Rivet $g ($sx+3) $ry 2.2 } }
     }
-    $bracket = if ($tierName -eq '256k') { C 255 196 158 62 } else { C 255 120 124 126 }
-    if ($tierName -eq '256k') { $g.DrawPath((Pen (C 255 176 140 52) 2.2), (RR 23.5 11.5 103 133 2.5)); $g.DrawPath((Pen (C 120 250 220 140) 0.7), (RR 25.5 13.5 99 129 2)) }
+    $bracket = if ($tierName -eq 't5184') { C 255 196 158 62 } else { C 255 120 124 126 }
+    if ($tierName -eq 't5184') { $g.DrawPath((Pen (C 255 176 140 52) 2.2), (RR 23.5 11.5 103 133 2.5)); $g.DrawPath((Pen (C 120 250 220 140) 0.7), (RR 25.5 13.5 99 129 2)) }
     foreach ($c in @(@(22,10,1,1),@(128,10,-1,1),@(22,146,1,-1),@(128,146,-1,-1))) {
       $x=$c[0]; $y=$c[1]; $sx=$c[2]; $sy=$c[3]
       Poly $g (Brush $bracket) @(@($x,$y),@(($x+$sx*20),$y),@(($x+$sx*20),($y+$sy*6)),@(($x+$sx*6),($y+$sy*6)),@(($x+$sx*6),($y+$sy*20)),@($x,($y+$sy*20)))
@@ -184,5 +184,5 @@ function Blotch2($g, [float]$cx,[float]$cy,[float]$rx,[float]$ry, $color) {
 Drive3D 'stashnetDriveBasic'       'basic'    '48'   (C 255 70 112 168) 11
 Drive3D 'stashnetDriveStandard'    'standard' '192'  (C 255 84 138 70)  23
 Drive3D 'stashnetDriveHighDensity' 'hd'       '576'  (C 255 128 84 150) 37
-Drive3D 'stashnetDrive64K'         '64k'      '1728' (C 255 196 112 40) 53
-Drive3D 'stashnetDrive256K'        '256k'     '5184' (C 255 168 40 40)  71
+Drive3D 'stashnetDrive1728'         't1728'    '1728' (C 255 196 112 40) 53
+Drive3D 'stashnetDrive5184'        't5184'    '5184' (C 255 168 40 40)  71

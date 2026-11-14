@@ -68,7 +68,7 @@
 		</item>
 
 		<!-- 1728-Stack Drive: crafted from three empty 576-Stack Drives. -->
-		<item name="stashnetDrive64K">
+		<item name="stashnetDrive1728">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="1728" />
 			<property name="StashNetHeatWeight" value="6" />
@@ -81,13 +81,13 @@
 			<property name="Stacknumber" value="1" />
 			<property name="EconomicValue" value="1500" />
 			<property name="Group" value="Resources" />
-			<property name="DescriptionKey" value="stashnetDrive64KDesc" />
+			<property name="DescriptionKey" value="stashnetDrive1728Desc" />
 			<property name="SoundPickup" value="parts_grab" />
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
 		<!-- 5184-Stack Drive: crafted from three empty 1728-Stack Drives. -->
-		<item name="stashnetDrive256K">
+		<item name="stashnetDrive5184">
 			<property name="Tags" value="stashnetDrive" />
 			<property name="StashNetMaxStacks" value="5184" />
 			<property name="StashNetHeatWeight" value="8" />
@@ -100,7 +100,7 @@
 			<property name="Stacknumber" value="1" />
 			<property name="EconomicValue" value="4000" />
 			<property name="Group" value="Resources" />
-			<property name="DescriptionKey" value="stashnetDrive256KDesc" />
+			<property name="DescriptionKey" value="stashnetDrive5184Desc" />
 			<property name="SoundPickup" value="parts_grab" />
 			<property name="SoundPlace" value="parts_place" />
 		</item>

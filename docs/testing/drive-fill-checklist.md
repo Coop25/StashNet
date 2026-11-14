@@ -1,8 +1,8 @@
-# Drive tiers + fill bar: in-game checklist (v0.12.0)
+# Drive tiers + fill bar: in-game checklist (v0.13.0)
 
 Use the StashNet test world. Creative menu or `sn` commands are fine for getting drives and materials.
 
-1. **Names and icons.** The creative menu (search "Drive") shows five drives: 48-stack, 192-stack, 576-stack, 1728-stack, 5184-stack. Each has its own icon, with its stack count (48, 192, 576, 1728, 5184) written on the label. Drives you already had are now 48-stack / 192-stack / 576-stack and still hold their items.
+1. **Names and icons.** The creative menu (search "Drive") shows five drives: 48-Stack, 192-Stack, 576-Stack, 1728-Stack and 5184-Stack Drive. Nothing anywhere says "1K", "4K" etc. Each has its own icon, with its stack count (48, 192, 576, 1728, 5184) written on the label. Drives you already had are now 48-stack / 192-stack / 576-stack and still hold their items.
 2. **Fill bar and percent.** Put drives in your backpack:
    - an empty drive shows no bar and no number;
    - a partly filled drive shows a green bar and a number in the middle, e.g. "12%";
@@ -14,4 +14,11 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
 6. **Higher tiers.** The 576-stack, 1728-stack and 5184-stack recipes each ask for 3 drives of the tier below (creative-spawn the drives to check quickly).
 7. **Sizes.** Each drive's description line shows its max: 48 / 192 / 576 / 1,728 / 5,184.
 8. **Other slots.** Drives in a Drive Bay, and in a loot bag (drop one), show the same bar and number.
-9. **Log.** The newest log shows `Loaded v0.12.0 (27 methods patched)` and no StashNet errors.
+9. **Log.** The newest log shows `Loaded v0.13.0 (32 methods patched)` and no StashNet errors.
+10. **Taller terminal.** The Storage Terminal window now reaches the bottom of the backpack window and shows 11 rows of items (88 per page). Send a screenshot so we can line it up exactly.
+11. **Mouse wheel.** Scrolling over the terminal's item grid turns the pages (wheel down = next page, up = previous).
+12. **Backpack move buttons.** With a terminal open, the backpack's two move buttons (top right of the backpack, next to sort) are enabled:
+    - "move all" stores every unlocked backpack stack in the network;
+    - "fill and smart" stores only items the network already holds;
+    - locked backpack slots stay put; drives stay in the backpack (shift-click still unloads them).
+    With a normal loot container open instead, both buttons work like vanilla.

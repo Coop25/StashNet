@@ -49,15 +49,15 @@
 			<ingredient name="resourceMechanicalParts" count="4" />
 		</recipe>
 
-		<recipe name="stashnetDrive64K" count="1" craft_area="workbench" tags="workbenchCrafting">
+		<recipe name="stashnetDrive1728" count="1" craft_area="workbench" tags="workbenchCrafting">
 			<ingredient name="stashnetDriveHighDensity" count="3" />
 			<ingredient name="resourceForgedSteel" count="10" />
 			<ingredient name="resourceElectricParts" count="25" />
 			<ingredient name="resourceMechanicalParts" count="8" />
 		</recipe>
 
-		<recipe name="stashnetDrive256K" count="1" craft_area="workbench" tags="workbenchCrafting">
-			<ingredient name="stashnetDrive64K" count="3" />
+		<recipe name="stashnetDrive5184" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="stashnetDrive1728" count="3" />
 			<ingredient name="resourceForgedSteel" count="20" />
 			<ingredient name="resourceElectricParts" count="40" />
 			<ingredient name="resourceMechanicalParts" count="12" />

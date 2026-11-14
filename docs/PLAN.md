@@ -64,8 +64,8 @@ DLL mods require running the game **without EasyAntiCheat** (the launcher has an
 | 48-stack (`stashnetDriveBasic`) | 48 | 1 | Early (backpack: electrical parts, polymers, duct tape) |
 | 192-stack (`stashnetDriveStandard`) | 192 | 2 | Mid (workbench: 3 empty 48-stack, forged iron, electrical + mechanical parts) |
 | 576-stack (`stashnetDriveHighDensity`) | 576 | 4 | Late (workbench: 3 empty 192-stack, forged steel, electrical + mechanical parts) |
-| 1728-stack (`stashnetDrive64K`) | 1,728 | 6 | Late (workbench: 3 empty 576-stack, forged steel, electrical + mechanical parts) |
-| 5184-stack (`stashnetDrive256K`) | 5,184 | 8 | End game (workbench: 3 empty 1728-stack, forged steel, electrical + mechanical parts) |
+| 1728-stack (`stashnetDrive1728`) | 1,728 | 6 | Late (workbench: 3 empty 576-stack, forged steel, electrical + mechanical parts) |
+| 5184-stack (`stashnetDrive5184`) | 5,184 | 8 | End game (workbench: 3 empty 1728-stack, forged steel, electrical + mechanical parts) |
 
   For scale: a vanilla wooden crate holds 48 stacks, so a 48-Stack Drive is one crate. Tiers (owner, 2026-11-14): drives are named by stack count (e.g. "48-Stack Drive"), each tier crafted from 3 empty drives of the tier below; the 5184-stack costs 81 48-stack drives' worth of parts, which is the gate.
 
