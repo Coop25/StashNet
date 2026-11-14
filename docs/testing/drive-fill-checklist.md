@@ -2,7 +2,7 @@
 
 Use the StashNet test world. Creative menu or `sn` commands are fine for getting drives and materials.
 
-1. **Names and icons.** The creative menu (search "Drive") shows five drives: 1K, 4K, 16K, 64K, 256K. Each has its own icon with its tier written on the label. Drives you already had are now 1K / 4K / 16K and still hold their items.
+1. **Names and icons.** The creative menu (search "Drive") shows five drives: 1K, 4K, 16K, 64K, 256K. Each has its own icon, with its stack count (48, 192, 576, 1728, 5184) written on the label. Drives you already had are now 1K / 4K / 16K and still hold their items.
 2. **Fill bar and percent.** Put drives in your backpack:
    - an empty drive shows no bar and no number;
    - a partly filled drive shows a green bar and a number in the middle, e.g. "12%";

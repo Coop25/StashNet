@@ -181,8 +181,8 @@ function Blotch2($g, [float]$cx,[float]$cy,[float]$rx,[float]$ry, $color) {
   $b = New-Object System.Drawing.Drawing2D.PathGradientBrush $p; $b.CenterColor = $color; $b.SurroundColors = @([System.Drawing.Color]::FromArgb(0, $color.R, $color.G, $color.B))
   $g.FillPath($b, $p) }
 
-Drive3D 'stashnetDriveBasic'       'basic'    '1K'   (C 255 70 112 168) 11
-Drive3D 'stashnetDriveStandard'    'standard' '4K'   (C 255 84 138 70)  23
-Drive3D 'stashnetDriveHighDensity' 'hd'       '16K'  (C 255 128 84 150) 37
-Drive3D 'stashnetDrive64K'         '64k'      '64K'  (C 255 196 112 40) 53
-Drive3D 'stashnetDrive256K'        '256k'     '256K' (C 255 168 40 40)  71
+Drive3D 'stashnetDriveBasic'       'basic'    '48'   (C 255 70 112 168) 11
+Drive3D 'stashnetDriveStandard'    'standard' '192'  (C 255 84 138 70)  23
+Drive3D 'stashnetDriveHighDensity' 'hd'       '576'  (C 255 128 84 150) 37
+Drive3D 'stashnetDrive64K'         '64k'      '1728' (C 255 196 112 40) 53
+Drive3D 'stashnetDrive256K'        '256k'     '5184' (C 255 168 40 40)  71
