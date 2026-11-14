@@ -17,6 +17,17 @@ namespace StashNet.Core.Protocol
         Return = 4,
         /// <summary>I emptied a drive in my backpack; store its contents, send leftovers back in ReturnToDrive.</summary>
         DriveUnload = 5,
+        /// <summary>Turn "finished items go into storage" on (Flag = true) or off for the StashNet station at X,Y,Z.</summary>
+        SetStationOutput = 6,
+    }
+
+    /// <summary>Whether a StashNet station sends finished items into storage (sent with every response).</summary>
+    public enum StationOutputState : byte
+    {
+        /// <summary>The request didn't come from a StashNet station (Storage Terminal).</summary>
+        NotAStation = 0,
+        On = 1,
+        Off = 2,
     }
 
     /// <summary>An item (by name + variant, see ItemCodec) and an amount.</summary>
@@ -63,6 +74,8 @@ namespace StashNet.Core.Protocol
         public int RequestId;
         /// <summary>Withdraw: the items to take (count = how many of each). Deposit/Return: the items. List: empty.</summary>
         public List<ItemAmount> Items = new List<ItemAmount>();
+        /// <summary>SetStationOutput: on (true) or off.</summary>
+        public bool Flag;
     }
 
     public sealed class TerminalResponse
@@ -76,6 +89,8 @@ namespace StashNet.Core.Protocol
         public List<ItemAmount> Give = new List<ItemAmount>();
         /// <summary>DriveUnload leftovers: the client puts these back onto the drive it emptied.</summary>
         public List<ItemAmount> ReturnToDrive = new List<ItemAmount>();
+        /// <summary>The station's output setting, when the request came from a StashNet station.</summary>
+        public StationOutputState StationOutput;
     }
 
     /// <summary>Binary encoding for terminal messages. Reading validates everything and throws FormatException on bad data.</summary>
@@ -92,12 +107,13 @@ namespace StashNet.Core.Protocol
             w.Write(r.Z);
             w.Write(r.RequestId);
             WriteItems(w, r.Items);
+            w.Write(r.Flag);
         }
 
         public static TerminalRequest ReadRequest(BinaryReader rd)
         {
             byte op = rd.ReadByte();
-            if (op < (byte)TerminalOp.List || op > (byte)TerminalOp.DriveUnload) throw new FormatException($"Unknown terminal op {op}.");
+            if (op < (byte)TerminalOp.List || op > (byte)TerminalOp.SetStationOutput) throw new FormatException($"Unknown terminal op {op}.");
             return new TerminalRequest
             {
                 Op = (TerminalOp)op,
@@ -106,6 +122,7 @@ namespace StashNet.Core.Protocol
                 Z = rd.ReadInt32(),
                 RequestId = rd.ReadInt32(),
                 Items = ReadItems(rd),
+                Flag = rd.ReadBoolean(),
             };
         }
 
@@ -129,6 +146,7 @@ namespace StashNet.Core.Protocol
             }
             WriteItems(w, r.Give);
             WriteItems(w, r.ReturnToDrive);
+            w.Write((byte)r.StationOutput);
         }
 
         public static TerminalResponse ReadResponse(BinaryReader rd)
@@ -146,6 +164,9 @@ namespace StashNet.Core.Protocol
             for (int i = 0; i < messages; i++) r.Messages.Add(new TerminalMessage(ReadString(rd), rd.ReadInt32()));
             r.Give = ReadItems(rd);
             r.ReturnToDrive = ReadItems(rd);
+            byte station = rd.ReadByte();
+            if (station > (byte)StationOutputState.Off) throw new FormatException($"Bad station output {station}.");
+            r.StationOutput = (StationOutputState)station;
             return r;
         }
 

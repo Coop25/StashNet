@@ -34,6 +34,12 @@ namespace StashNet.Crafting
         /// <summary>Set while vanilla cancels a queued craft (XUiC_RecipeStack.HandleOnPress): refunds go to the network.</summary>
         public static bool InCancel { get; set; }
 
+        /// <summary>The open station sends finished items (and cancel refunds) into storage. Server-held; on by default.</summary>
+        public static bool OutputOn { get; private set; } = true;
+        /// <summary>No reply from the server yet: send nothing to storage until we know the switch.</summary>
+        private static bool outputKnown;
+        private static int toggleRequestId = -1;
+
         private const float OutputMoveInterval = 0.5f;
         private static float outputTimer;
         /// <summary>Free stacks in the network per the last listing (minus what we've sent since).</summary>
@@ -50,6 +56,9 @@ namespace StashNet.Crafting
             stockByType.Clear();
             freeStacks = 0;
             outputTimer = 0f;
+            OutputOn = true;
+            outputKnown = false;
+            toggleRequestId = -1;
             RequestListing();
         }
 
@@ -80,6 +89,7 @@ namespace StashNet.Crafting
         /// </summary>
         private static void MoveOutputToNetwork()
         {
+            if (!outputKnown || !OutputOn) return;
             XUiC_WorkstationOutputGrid grid = windowGroup?.GetChildByType<XUiC_WorkstationOutputGrid>();
             if (grid == null) return;
             ItemStack[] slots = grid.GetSlots();
@@ -106,7 +116,7 @@ namespace StashNet.Crafting
         /// <summary>Cancelled-craft refund: send it to the network instead of the backpack.</summary>
         public static bool TryRefundToNetwork(ItemStack stack)
         {
-            if (!Active || stack == null || stack.IsEmpty() || !Storable(stack.itemValue)) return false;
+            if (!Active || !outputKnown || !OutputOn || stack == null || stack.IsEmpty() || !Storable(stack.itemValue)) return false;
             var request = NewRequest(TerminalOp.Deposit);
             request.Items.Add(new ItemAmount(Drives.ItemCodec.NameOf(stack.itemValue), Drives.ItemCodec.EncodeVariant(stack.itemValue), stack.count));
             TerminalClient.Send(request);
@@ -120,9 +130,28 @@ namespace StashNet.Crafting
         private static TerminalRequest NewRequest(TerminalOp op) =>
             new TerminalRequest { Op = op, X = stationPos.x, Y = stationPos.y, Z = stationPos.z };
 
+        /// <summary>Output switch button: flip it (shown at once; the server's reply confirms).</summary>
+        public static void ToggleOutput()
+        {
+            if (!Active) return;
+            OutputOn = !OutputOn;
+            toggleRequestId = TerminalClient.NextRequestId;
+            var request = NewRequest(TerminalOp.SetStationOutput);
+            request.Flag = OutputOn;
+            TerminalClient.Send(request);
+            RefreshUi();
+        }
+
         /// <summary>Called by TerminalClient for every response; uses listings that answer our requests.</summary>
         public static void OnResponse(TerminalResponse response)
         {
+            // Replies to requests sent before a toggle still carry the old setting: skip those.
+            if (Active && response.StationOutput != StationOutputState.NotAStation && response.RequestId >= toggleRequestId)
+            {
+                outputKnown = true;
+                bool on = response.StationOutput == StationOutputState.On;
+                if (on != OutputOn) { OutputOn = on; RefreshUi(); }
+            }
             if (!listRequests.Remove(response.RequestId) || !Active) return;
             stockByType.Clear();
             freeStacks = response.HasListing ? Math.Max(0, response.MaxStacks - response.UsedStacks) : 0;

@@ -82,10 +82,16 @@ namespace StashNet.Network
                 case TerminalOp.Return:
                     Return(net, player, req);
                     break;
+                case TerminalOp.SetStationOutput:
+                    if (Crafting.CraftingNetwork.IsCraftingTerminal(world.GetBlock(pos).Block)) StationOutputStore.Set(pos, req.Flag);
+                    break;
             }
 
             net.SaveDirty();
             FillListing(net, resp);
+            // StashNet stations (and the Crafting Terminal) learn their output switch from every reply.
+            if (Crafting.CraftingNetwork.IsCraftingTerminal(world.GetBlock(pos).Block))
+                resp.StationOutput = StationOutputStore.IsOn(pos) ? StationOutputState.On : StationOutputState.Off;
             return resp;
         }
 
