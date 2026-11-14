@@ -11,7 +11,7 @@ There are two parts:
 ## Setup (once)
 
 1. **Install the server.** In Steam: Library → change the filter from "Games" to "Tools" → install **7 Days to Die Dedicated Server** (free). It installs next to the game, in `steamapps\common\7 Days to Die Dedicated Server`.
-2. **Give it the same mods as your game.** Copy everything in your game's `Mods` folder into the server's `Mods` folder (including `StashNet`). Your game and the server must run the same mods, or joining fails or acts strangely.
+2. **Give it the same mods as your game.** Copy everything in your game's `Mods` folder into the server's `Mods` folder (including `StashNet`). Your game and the server must run the same mods, **and the exact same StashNet version**, or joining fails or acts strangely. Friends install StashNet from the release zip of that same version.
 3. **Edit the server's `serverconfig.xml`** (in the server folder) with Notepad:
    - `EACEnabled` → `false`
    - `ServerVisibility` → `0` (not listed publicly)
@@ -26,14 +26,21 @@ There are two parts:
 ## Part A: solo on your own server
 
 ### A0. Loads cleanly
-- [ ] The **server window** shows `[StashNet] Loaded v0.9.1 (20 methods patched)` and no red errors mentioning StashNet.
+- [ ] The **server window** shows `[StashNet] Loaded v<version> (33 methods patched)` (the version you installed; 33 as of v0.17.0) and no red errors mentioning StashNet.
 - [ ] Your **game** (F1) shows the same line.
 
 ### A1. Terminal as a joined player
-Build a small network: Scrap Core, a Drive Bay with a couple of Basic drives, a Storage Terminal.
-- [ ] Open the terminal. The list shows (no "not supported" message).
-- [ ] Withdraw one item (click) and a stack (shift-click). Shift-click in the backpack to deposit. Use the backpack's move-all button. All of it works.
+Build a small network: Scrap Core, a Drive Bay with a couple of 48-Stack drives, a Storage Terminal.
+- [ ] Open the terminal. The list shows (no "not supported" message). The window reaches the bottom of your backpack and shows 11 rows.
+- [ ] Withdraw one item (click) and a stack (shift-click). Right-click also takes one.
+- [ ] Shift-click a backpack stack to deposit it.
+- [ ] **Drop onto the terminal:** pick up a backpack stack so it's on your cursor, click it onto the terminal's items: the whole stack goes in. Right-click instead puts in just one and keeps the rest on your cursor.
+- [ ] **Backpack buttons:** "move all" (top right of the backpack) stores every unlocked stack; "fill and smart" stores only items storage already has. Locked slots and drives stay put.
+- [ ] **Dragging** a stack around your backpack with the terminal open works (it follows the cursor).
+- [ ] **Tabs:** only All plus categories you have stored show. Store something from a new category: its tab appears within ~2 s. Take the last of a category out: its tab goes away.
+- [ ] **Mouse wheel** over the items turns pages (store enough kinds of items to get 2 pages, or use a small search).
 - [ ] Fill your backpack, leaving 1 free slot, and withdraw something with several stacks. One slot fills, "Backpack full" shows, and the rest stays in storage. The numbers add up.
+- [ ] Storage nearly full: drop or move-all more than fits. What doesn't fit comes back to your backpack; nothing disappears.
 - [ ] (Optional) Keep the terminal open, walk more than ~8 blocks away, and click an item: "You're too far from the terminal", and nothing moves.
 
 ### A2. Code lock
@@ -43,11 +50,13 @@ Build a small network: Scrap Core, a Drive Bay with a couple of Basic drives, a 
 ### A3. Drive Bays
 - [ ] Put drives in and take them out of a bay. Only drives go in. Try putting wood in: it's refused.
 - [ ] The terminal shows the right items after moving drives around.
+- [ ] **Fill bars:** drives in the bay and in your backpack show a fill bar and a percent in the middle (green, yellow from 75%, red when full); empty drives show neither. Selecting a drive shows "N / M stacks used (P%) · T different items" in its description.
 
-### A4. Unload and scrap
+### A4. Unload, scrap and sell
 - [ ] Take out a drive with items on it. **Scrap** is refused with "Unload this drive first".
-- [ ] Open a terminal and shift-click that drive: its items move into the network, and the drive is now empty.
-- [ ] Scrap the empty drive: it works.
+- [ ] At a **trader**, try to sell that drive: refused with "unload it ... before selling it".
+- [ ] Open a terminal and shift-click that drive: its items move into the network, and the drive is now empty (its bar and percent disappear).
+- [ ] Scrap the empty drive: it works. (Or sell it: it sells.)
 
 ### A5. Crafting Terminal as a joined player
 Place a Crafting Terminal near the Core and put some ingredients in storage (not in your backpack).
@@ -61,9 +70,10 @@ Place a Crafting Terminal near the Core and put some ingredients in storage (not
 ### A6. Upgrades and tiers on the server
 - [ ] Hammer a Reinforced Drive Bay onto a bay with drives in it: the drives stay, and there are 8 slots.
 - [ ] With a code set, hammer a Storage Core onto the Scrap Core: the code stays, and the reach grows (a terminal 10 blocks away connects).
-- [ ] Craft a Standard drive at a workbench and put it in a bay: the stack total grows by 96.
-- [ ] **New looks:** a Drive Bay looks like a tall file cabinet, Reinforced like a server rack, Armored like a dark gun safe. A Scrap Core looks like an electrical box, a Storage Core like a transformer, an Advanced Core like a control panel. Each sits flat on the floor (not floating or sunk in), you can't walk through it, and upgrading swaps the look in place. Their icons match.
-- [ ] **Drive icons:** Basic, Standard and High-Density drives show the new worn hard-drive icons (blue / green / purple tape with 24 / 96 / 384) in your backpack, in a Drive Bay, and in the creative menu. None shows a blank or pink square.
+- [ ] **Drive upgrade:** with 3 empty 48-Stack drives and the parts in your backpack, craft a 192-Stack Drive at a workbench (or the Crafting Terminal): it works and uses exactly 3 drives. Put it in a bay: the stack total grows by 192.
+- [ ] With 1 full + 2 empty 48-Stack drives, the 192-Stack recipe isn't craftable and Craft is refused; the full drive keeps its items.
+- [ ] **New looks:** a Drive Bay looks like a tall file cabinet, Reinforced like a server rack, Armored like a dark gun safe. A Scrap Core looks like an electrical box, a Storage Core like a control panel with a sloped top, an Advanced Core like a control panel. Each sits flat on the floor (not floating or sunk in), you can't walk through it, and upgrading swaps the look in place. Their icons match.
+- [ ] **Drive names and icons:** five drives, 48-Stack to 5184-Stack Drive, each with its worn hard-drive icon (blue / green / purple / orange / red tape with 48 / 192 / 576 / 1728 / 5184) in your backpack, in a Drive Bay, and in the creative menu. None shows a blank or pink square, and nothing says "1K"/"4K".
 
 ### A7. Core spacing (passed in single-player; check it again as a joined player)
 - [ ] Try to place another Core **30 blocks** from yours: refused, with the "can't build" sound and "Another Storage Core is only 30 blocks away...".
@@ -101,6 +111,13 @@ Your friend needs the same mods, StashNet included, with EasyAntiCheat off. They
 
 ### B5. Spacing between two players
 - [ ] Your friend can't place a Core within 48 blocks of yours, and vice versa.
+
+### B6. Depositing at the same time
+- [ ] Storage nearly full (a few free stacks). You both press the backpack's "move all" (or drop stacks onto your terminals) at the same moment. Afterwards: storage is full, everything that didn't fit is back in your backpacks, and the totals add up (nothing duplicated, nothing gone).
+
+### B7. Your friend sees the same drives
+- [ ] Your friend opens your Drive Bay (with the code): the drives show the same fill bars and percents you see.
+- [ ] Your friend withdraws from your network while you watch your tabs: when they take the last item of a category, the tab disappears on your screen within ~2 s.
 
 ---
 
