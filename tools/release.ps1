@@ -3,9 +3,10 @@
   Cuts a StashNet release on this PC (the build needs the game's own DLLs, so it can't run on GitHub).
 
 .DESCRIPTION
-  Always: checks the working tree is clean, sets the version in Mod/ModInfo.xml and
+  Always: sets the version in Mod/ModInfo.xml and
   src/StashNet/StashNetMod.cs, runs the tests, builds, and writes dist/StashNet-v<version>.zip.
-  -Tag     also commits the version change (if any) and creates the git tag v<version>.
+  -Tag     also commits the version change (if any) and creates the git tag v<version>
+           (needs a clean working tree; a plain run allows uncommitted work, for mid-work bumps).
   -Publish also pushes the branch and tag to GitHub and creates a GitHub Release with the zip
            attached (implies -Tag). Releases cut from a branch other than master, or below 1.0.0,
            are marked as pre-releases.
@@ -36,8 +37,10 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') { Fail "version must look like 1.2.3 (
 $tagName = "v$Version"
 
 Step "Checking the working tree"
+# Local-only runs are the normal way to bump a version mid-work, so they allow uncommitted
+# changes. Tagging and publishing need a clean tree so the tag matches what was built.
 $dirty = git status --porcelain
-if ($dirty) { Fail "uncommitted changes; commit or stash them first:`n$dirty" }
+if ($dirty -and $Tag) { Fail "uncommitted changes; commit or stash them before -Tag/-Publish:`n$dirty" }
 $branch = (git rev-parse --abbrev-ref HEAD).Trim()
 if ($Tag -and (git tag --list $tagName)) { Fail "tag $tagName already exists" }
 

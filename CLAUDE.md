@@ -42,7 +42,7 @@
 - **Open items:**
   - ⚠️ Multiplayer has never been tested with a second player (M3b Part B, the M4 lockout, M6 client "click twice"). Must happen in M9.
   - Terminal window layout: no screenshot received yet.
-  - The owner's preferred workflow: build → ask "can I deploy? (game closed)" → deploy → the owner tests → check the log → record → commit.
+  - The owner's preferred workflow: build (version bump via `tools/release.ps1 -Version`, which also makes the zip) → ask "can I deploy? (game closed)" → deploy → the owner tests → check the log → record → commit.
 
 A 7 Days to Die mod adding a drive-based storage network (Core, Drive Bays, drives, Storage/Crafting Terminals, password, heat, armor tiers). Full design and roadmap: `docs/PLAN.md`.
 
@@ -67,6 +67,7 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Add `-p:Deploy=true` to also copy it into `<GameDir>\Mods\StashNet` (see the rule above).
 - The game path comes from `local.props` (gitignored; template in `local.props.example`).
 - `nuget.config` pins nuget.org because the owner's global NuGet config has no sources.
+- **Every version bump makes its zip (owner, 2026-11-14).** Bump the version only with `tools/release.ps1 -Version x.y.z` (never by hand-editing ModInfo.xml / StashNetMod.cs): it sets both files, runs the tests, and writes `dist/StashNet-v<version>.zip`. A plain run allows uncommitted work, so do it as part of each change, then commit. Mention the zip path when reporting the build. Deploying stays separate (`-p:Deploy=true`, owner OK each time).
 - **Releases (owner, 2026-11-14): cut on this PC with `tools/release.ps1`, not GitHub Actions** (the build needs the game's DLLs, which never go to GitHub; the owner declined both a self-hosted runner and committing stripped reference DLLs). `-Version x.y.z` alone sets the version, runs tests and writes `dist/StashNet-v<version>.zip` (local only); `-Tag` also commits + tags `v<version>`; `-Publish` also pushes the branch and tag and runs `gh release create` with the zip (pre-release if not on `master` or below 1.0.0). **`-Publish` publishes: ask the owner before each run.** The repo is private, so friends need repo access to download a release (or get the zip directly).
 - Decompiler: `dotnet tool run ilspycmd -- -t <TypeName> "<GameDir>\7DaysToDie_Data\Managed\Assembly-CSharp.dll" -r "<Managed dir>"`. Write decompiled output to a temp/scratch folder, **never into the repo**.
 
