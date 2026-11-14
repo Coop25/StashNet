@@ -67,6 +67,7 @@ Build to `dist/` only. Deploying (`-p:Deploy=true`) copies into the game's Mods 
 - Add `-p:Deploy=true` to also copy it into `<GameDir>\Mods\StashNet` (see the rule above).
 - The game path comes from `local.props` (gitignored; template in `local.props.example`).
 - `nuget.config` pins nuget.org because the owner's global NuGet config has no sources.
+- **Releases (owner, 2026-11-14): cut on this PC with `tools/release.ps1`, not GitHub Actions** (the build needs the game's DLLs, which never go to GitHub; the owner declined both a self-hosted runner and committing stripped reference DLLs). `-Version x.y.z` alone sets the version, runs tests and writes `dist/StashNet-v<version>.zip` (local only); `-Tag` also commits + tags `v<version>`; `-Publish` also pushes the branch and tag and runs `gh release create` with the zip (pre-release if not on `master` or below 1.0.0). **`-Publish` publishes: ask the owner before each run.** The repo is private, so friends need repo access to download a release (or get the zip directly).
 - Decompiler: `dotnet tool run ilspycmd -- -t <TypeName> "<GameDir>\7DaysToDie_Data\Managed\Assembly-CSharp.dll" -r "<Managed dir>"`. Write decompiled output to a temp/scratch folder, **never into the repo**.
 
 ## Game API facts (V3.4 b10, verified by decompiling)
