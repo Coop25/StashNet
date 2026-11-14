@@ -63,6 +63,29 @@ namespace StashNet.Drives
             }
         }
 
+        private static readonly Dictionary<string, string> groupKeys = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Terminal cell key: items with the same name and key show as one cell. No-quality items
+        /// (engines, dyes, mods, animals) ignore the game's hidden random seed, which only rolls stat
+        /// ranges on quality gear (owner, 2026-11-14: "No-quality items only"). Everything else, and
+        /// anything that can't be decoded, keys on its exact variant. Storage is not affected.
+        /// </summary>
+        public static string GroupKey(string name, string variant)
+        {
+            if (variant == null) return null;
+            if (groupKeys.TryGetValue(variant, out string cached)) return cached;
+            string key = variant;
+            if (TryDecode(name, variant, out ItemValue iv, out _) && iv.Quality == 0 && iv.Seed != 0)
+            {
+                iv.seed = 0;
+                key = EncodeVariant(iv) ?? variant;
+            }
+            if (groupKeys.Count > 4096) groupKeys.Clear();
+            groupKeys[variant] = key;
+            return key;
+        }
+
         /// <summary>Rebuilds a single item. False if the item (or one of its mods) no longer exists in this game.</summary>
         public static bool TryDecode(string name, string variant, out ItemValue iv, out string missingName)
         {

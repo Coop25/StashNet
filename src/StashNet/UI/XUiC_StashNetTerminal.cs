@@ -12,8 +12,8 @@ namespace StashNet.UI
     /// <summary>
     /// The Storage Terminal window (Mod/Config/XUi_InGame/windows.xml "stashnetTerminalWindow").
     /// Renders the last listing the server sent; every action is a request via TerminalClient.
-    /// Click = withdraw a stack, right-click = one, shift-click in backpack = deposit,
-    /// header button = deposit all. Search filters by name; sort = count (default) or name.
+    /// Click = withdraw one, shift-click = a stack, right-click = one; look-alike items (same but for
+    /// the hidden seed, no quality) share a cell. Search filters by name; sort = count (default) or name.
     /// </summary>
     public class XUiC_StashNetTerminal : XUiController
     {
@@ -34,7 +34,7 @@ namespace StashNet.UI
 
         private XUiC_StashNetEntry[] entries = new XUiC_StashNetEntry[0];
         private readonly List<ItemAmount> listing = new List<ItemAmount>();
-        private readonly List<ItemAmount> shown = new List<ItemAmount>();
+        private readonly List<ItemGroup> shown = new List<ItemGroup>();
         private XUiC_TextInput searchInput;
         private string search = "";
         private Vector3i terminalPos;
@@ -224,10 +224,13 @@ namespace StashNet.UI
             Render();
         }
 
-        public void Withdraw(ItemAmount item, bool single)
+        /// <summary>Takes 1 (single) or one stack from a cell, split across the cell's stored members in order.</summary>
+        public void Withdraw(ItemGroup group, bool single)
         {
-            int count = single ? 1 : Math.Min(item.Count, StackSize(item.Name));
-            Send(TerminalOp.Withdraw, new ItemAmount(item.Name, item.Variant, count));
+            int count = single ? 1 : Math.Min(group.Count, StackSize(group.Name));
+            TerminalRequest request = NewRequest(TerminalOp.Withdraw);
+            request.Items.AddRange(ListingGroups.Split(group.Members, count));
+            if (request.Items.Count > 0) SendAction(request);
         }
 
         /// <summary>
@@ -423,7 +426,7 @@ namespace StashNet.UI
 
         private void Render()
         {
-            IEnumerable<ItemAmount> items = listing.Where(i => InCategory(i.Name, category));
+            IEnumerable<ItemGroup> items = ListingGroups.Fold(listing, i => ItemCodec.GroupKey(i.Name, i.Variant)).Where(i => InCategory(i.Name, category));
             if (search.Length > 0)
             {
                 items = items.Where(i => DisplayName(i.Name).IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0);
@@ -439,7 +442,7 @@ namespace StashNet.UI
             for (int i = 0; i < entries.Length; i++)
             {
                 int idx = start + i;
-                entries[i].SetItem(idx < shown.Count ? shown[idx] : (ItemAmount?)null);
+                entries[i].SetItem(idx < shown.Count ? shown[idx] : null);
             }
             RefreshBindingsSelfAndChildren();
         }

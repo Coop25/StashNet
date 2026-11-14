@@ -9,7 +9,7 @@ namespace StashNet.Core.Protocol
     {
         /// <summary>Send me the current listing.</summary>
         List = 1,
-        /// <summary>Take Items[0] out of storage and give it to me.</summary>
+        /// <summary>Take these items out of storage and give them to me (several for a combined terminal cell).</summary>
         Withdraw = 2,
         /// <summary>I already removed these from my backpack; store them, give back what doesn't fit.</summary>
         Deposit = 3,
@@ -61,7 +61,7 @@ namespace StashNet.Core.Protocol
         public TerminalOp Op;
         public int X, Y, Z;
         public int RequestId;
-        /// <summary>Withdraw: one item (count = how many). Deposit/Return: the items. List: empty.</summary>
+        /// <summary>Withdraw: the items to take (count = how many of each). Deposit/Return: the items. List: empty.</summary>
         public List<ItemAmount> Items = new List<ItemAmount>();
     }
 

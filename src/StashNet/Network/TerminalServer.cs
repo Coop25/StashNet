@@ -91,10 +91,14 @@ namespace StashNet.Network
 
         private static void Withdraw(StashNetNetwork net, TerminalRequest req, TerminalResponse resp)
         {
-            if (req.Items.Count != 1) return;
-            ItemAmount want = req.Items[0];
-            int removed = net.Storage.Extract(want.Name, want.Variant, want.Count);
-            if (removed > 0) resp.Give.Add(new ItemAmount(want.Name, want.Variant, removed));
+            // Several items when a terminal cell combines look-alikes (engines differing only by
+            // seed): each share is extracted on its own, and only what was removed is given.
+            foreach (ItemAmount want in req.Items)
+            {
+                if (want.Count <= 0) continue;
+                int removed = net.Storage.Extract(want.Name, want.Variant, want.Count);
+                if (removed > 0) resp.Give.Add(new ItemAmount(want.Name, want.Variant, removed));
+            }
         }
 
         /// <summary>Store what fits; anything else goes to <paramref name="leftovers"/> (backpack, or the drive for DriveUnload).</summary>

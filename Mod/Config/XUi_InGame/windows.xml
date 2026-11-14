@@ -33,10 +33,12 @@
 					<button depth="2" name="clickable" width="58" height="58" on_scroll="true" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
 					<sprite depth="4" name="icon" atlas="ItemIconAtlas" sprite="{stashnet_icon}" color="{stashnet_iconcolor}" pos="29,-27" pivot="center" width="46" height="46" visible="{stashnet_hasitem}" foregroundlayer="true" />
 					<!-- Count: bottom-right normally; top-right when the durability bar takes the bottom. -->
-					<label depth="5" name="count" pos="2,-40" width="54" height="18" font_size="16" justify="right" text="{stashnet_count}" visible="{stashnet_nodurability}" />
-					<label depth="5" name="countTop" pos="2,-2" width="54" height="18" font_size="16" justify="right" text="{stashnet_count}" visible="{stashnet_hasdurability}" />
-					<!-- Durability bar colored by quality tier (vanilla look). -->
-					<sprite depth="5" name="durabilityBack" sprite="menu_empty2px" color="[darkGrey]" type="sliced" pos="3,-47" width="52" height="8" visible="{stashnet_hasdurability}" />
+					<label depth="5" name="count" pos="2,-40" width="54" height="18" font_size="16" justify="right" effect="outline" text="{stashnet_count}" visible="{stashnet_nodurability}" />
+					<label depth="5" name="countTop" pos="2,-2" width="54" height="18" font_size="16" justify="right" effect="outline" text="{stashnet_count}" visible="{stashnet_hasdurability}" />
+					<!-- Corner symbol like backpack slots: read/known, modded, boosted, block type. -->
+					<sprite depth="7" name="typeIcon" sprite="ui_game_symbol_{stashnet_typeicon}" color="{stashnet_typeicontint}" pos="2,-2" width="20" height="20" visible="{stashnet_hastypeicon}" foregroundlayer="true" />
+					<!-- Durability bar colored by quality tier; red behind it when max durability is permanently lost (vanilla look). -->
+					<sprite depth="5" name="durabilityBack" sprite="menu_empty2px" color="{stashnet_durabilitybackcolor}" type="sliced" pos="3,-47" width="52" height="8" visible="{stashnet_hasdurability}" />
 					<filledsprite depth="6" name="durability" sprite="menu_empty2px" color="{stashnet_durabilitycolor}" fill="{stashnet_durabilityfill}" type="filled" pos="3,-47" width="52" height="8" visible="{stashnet_hasdurability}" />
 				</rect>
 			</grid>

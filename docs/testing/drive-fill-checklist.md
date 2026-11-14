@@ -36,3 +36,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
     - Something that can't be stored is refused with a message and stays on the cursor.
     - If storage is full, what doesn't fit comes back to your backpack.
 19. **Trader won't take a full drive.** At a trader, try to sell a drive with items on it: refused with "unload it first". An empty drive sells normally (for little: drives are worth far less than their parts).
+20. **Corner symbols in the terminal (v0.18.0).** Store a book/recipe/magazine you've read and one you haven't, a modded weapon, and a block that shows a corner symbol in your backpack. Each terminal cell shows the same small top-left symbol and color as the backpack slot (read vs. unread differ; the modded weapon shows the mod symbol). Counts have a dark outline like backpack numbers.
+21. **Look-alikes share a cell (v0.18.0).** Store several engines (or dyes, mods, chickens): they show as ONE cell with the total, e.g. 6. The stack total at the top still counts each one as a stack.
+    - Click takes 1; shift-click also takes 1 (they don't stack in the backpack). The cell count drops by 1 each time, until it's gone.
+    - Two weapons of the same kind and quality still show as separate cells (on purpose).
