@@ -27,7 +27,9 @@ namespace StashNet.UI
         private static string category = "";
 
         private XUiC_CategoryList categories;
-        private bool categoriesFilled;
+        private static List<CraftingCategoryDisplayEntry> allCategories;
+        private string shownCategoriesKey;
+        private bool listingLoaded;
         private readonly Dictionary<string, string[]> groupsByName = new Dictionary<string, string[]>();
 
         private XUiC_StashNetEntry[] entries = new XUiC_StashNetEntry[0];
@@ -66,7 +68,6 @@ namespace StashNet.UI
             // Not on the grid itself: a grid collider would tie with the cell buttons and could steal their clicks.
             Hook("btnPrev", () => ChangePage(-1));
             Hook("btnNext", () => ChangePage(1));
-            Hook("btnDepositAll", DepositAll);
             Hook("btnSort", ToggleSort);
             categories = GetChildByType<XUiC_CategoryList>();
             if (categories != null) categories.CategoryChanged += entry =>
@@ -95,6 +96,8 @@ namespace StashNet.UI
             if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = true;
             page = 0;
             listing.Clear();
+            listingLoaded = false;
+            shownCategoriesKey = null;
             usage = "";
             status = Localization.Get("stashnetLoading");
             hoverName = "";
@@ -106,37 +109,60 @@ namespace StashNet.UI
 
         /// <summary>
         /// Tabs: "All", then the game's own item categories in the order the backpack filter uses
-        /// (ui_display.xml trader_category_display), so new or modded categories show up too.
+        /// (ui_display.xml trader_category_display), so new or modded categories show up too. Only
+        /// categories that hold at least one stored item get a tab (owner, 2026-11-14); they're packed
+        /// left in that order and rebuilt whenever the set changes.
         /// </summary>
         private void SetupCategories()
         {
             if (categories == null) return;
-            if (!categoriesFilled)
+            if (allCategories == null)
             {
+                allCategories = new List<CraftingCategoryDisplayEntry>();
+                foreach (CraftingCategoryDisplayEntry c in UIDisplayInfoManager.Current.GetTraderCategoryDisplayList())
+                {
+                    if (c != null) allCategories.Add(c);
+                }
+            }
+
+            var visible = new List<CraftingCategoryDisplayEntry>();
+            foreach (CraftingCategoryDisplayEntry c in allCategories)
+            {
+                if (listing.Any(i => InCategory(i.Name, c.Name))) visible.Add(c);
+            }
+            string key = string.Join("|", visible.Select(c => c.Name));
+            if (key != shownCategoriesKey)
+            {
+                shownCategoriesKey = key;
                 int slots = categories.MaxCategories;
                 int n = 0;
                 if (slots > 0) categories.SetCategoryEntry(n++, "", "ui_game_symbol_loot_sack", Localization.Get("lblAll"));
-                foreach (CraftingCategoryDisplayEntry c in UIDisplayInfoManager.Current.GetTraderCategoryDisplayList())
+                foreach (CraftingCategoryDisplayEntry c in visible)
                 {
-                    if (c == null || n >= slots) continue;
+                    if (n >= slots) break;
                     categories.SetCategoryEntry(n++, c.Name, c.Icon, c.DisplayName);
                 }
                 for (int i = n; i < slots; i++) categories.SetCategoryEmpty(i);
-                categoriesFilled = true;
             }
+
             XUiC_CategoryEntry selected = null;
             foreach (XUiC_CategoryEntry e in categories.CategoryButtons)
             {
                 if (e.SpriteName != "" && e.CategoryName == category) { selected = e; break; }
             }
-            if (selected == null) { selected = categories.GetCategoryByIndex(0); category = ""; }
-            categories.CurrentCategory = selected;
+            if (selected == null)
+            {
+                selected = categories.GetCategoryByIndex(0);
+                // Forget a remembered tab only once we know the network really has none of it.
+                if (listingLoaded && category.Length > 0) { category = ""; page = 0; }
+            }
+            if (categories.CurrentCategory != selected) categories.CurrentCategory = selected;
         }
 
-        /// <summary>Same rule as the backpack filter: the item's (or block's) group names.</summary>
-        private bool InCategory(string itemName)
+        /// <summary>Same rule as the backpack filter: the item's (or block's) group names. "" = All.</summary>
+        private bool InCategory(string itemName, string categoryName)
         {
-            if (category.Length == 0) return true;
+            if (categoryName.Length == 0) return true;
             if (!groupsByName.TryGetValue(itemName, out string[] groups))
             {
                 ItemClass ic = ItemClass.GetItemClass(itemName);
@@ -145,7 +171,7 @@ namespace StashNet.UI
             }
             foreach (string g in groups)
             {
-                if (g != null && g.EqualsCaseInsensitive(category)) return true;
+                if (g != null && g.EqualsCaseInsensitive(categoryName)) return true;
             }
             return false;
         }
@@ -187,6 +213,8 @@ namespace StashNet.UI
             {
                 listing.Clear();
                 listing.AddRange(response.Listing);
+                listingLoaded = true;
+                SetupCategories();
                 usage = string.Format(Localization.Get("stashnetUsage"), response.DistinctItems, response.UsedStacks, response.MaxStacks, response.Drives);
             }
             // The reply to the user's own action always sets the message; background refreshes
@@ -293,7 +321,7 @@ namespace StashNet.UI
 
         private int PageCount => Math.Max(1, (shown.Count + entries.Length - 1) / Math.Max(1, entries.Length));
 
-        /// <summary>Header button, and the backpack's "move all" button while a terminal is open.</summary>
+        /// <summary>The backpack's "move all" button while a terminal is open (the header button was removed, owner 2026-11-14).</summary>
         public void DepositAll() => DepositBackpack(false);
 
         /// <summary>The backpack's "fill and smart" button: only items the network already holds.</summary>
@@ -364,7 +392,7 @@ namespace StashNet.UI
 
         private void Render()
         {
-            IEnumerable<ItemAmount> items = listing.Where(i => InCategory(i.Name));
+            IEnumerable<ItemAmount> items = listing.Where(i => InCategory(i.Name, category));
             if (search.Length > 0)
             {
                 items = items.Where(i => DisplayName(i.Name).IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0);

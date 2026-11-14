@@ -14,7 +14,7 @@ Part A is single-player (about 10 minutes). Part B needs multiplayer: a friend j
 
 ### A2. Everything from 3a still works
 - [ ] Open the terminal. The list appears (it may say "Connecting to storage..." for a split second).
-- [ ] Left-click = a stack, right-click = one, shift-click deposits, Deposit-all works, a full backpack keeps leftovers in storage.
+- [ ] Click = one, shift-click = a stack, shift-click in the backpack deposits, the backpack's move-all button works, a full backpack keeps leftovers in storage.
 
 ### A3. Sort
 - [ ] On open, the list is sorted **most first** (the biggest stack is top-left).
@@ -42,7 +42,7 @@ Use **one** of these setups:
 
 ### B1. Client can use the terminal
 - [ ] The joined player opens a terminal. The list appears (no "not supported" message anymore).
-- [ ] The joined player withdraws (stack + single), shift-click deposits, and uses Deposit-all. All work.
+- [ ] The joined player withdraws (stack + single), shift-click deposits, and uses the backpack's move-all button. All work.
 
 ### B2. No duplication
 - [ ] Put exactly **10 nails** (or any small amount) in storage.

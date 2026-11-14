@@ -32,7 +32,7 @@ There are two parts:
 ### A1. Terminal as a joined player
 Build a small network: Scrap Core, a Drive Bay with a couple of Basic drives, a Storage Terminal.
 - [ ] Open the terminal. The list shows (no "not supported" message).
-- [ ] Withdraw a stack (left-click) and a single item (right-click). Shift-click to deposit. Use Deposit-all. All of it works.
+- [ ] Withdraw one item (click) and a stack (shift-click). Shift-click in the backpack to deposit. Use the backpack's move-all button. All of it works.
 - [ ] Fill your backpack, leaving 1 free slot, and withdraw something with several stacks. One slot fills, "Backpack full" shows, and the rest stays in storage. The numbers add up.
 - [ ] (Optional) Keep the terminal open, walk more than ~8 blocks away, and click an item: "You're too far from the terminal", and nothing moves.
 

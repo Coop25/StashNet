@@ -11,7 +11,6 @@
 				<sprite depth="1" name="headerbackground" sprite="ui_game_panel_header" />
 				<sprite depth="3" name="windowIcon" style="icon32px" pivot="center" pos="21,-21" sprite="ui_game_symbol_loot_sack" />
 				<label depth="2" name="title" pos="39,-6" width="360" height="32" font_size="30" text_key="stashnetTerminalTitle" />
-				<button depth="3" name="btnDepositAll" sprite="ui_game_symbol_store_all_up" tooltip_key="stashnetDepositAllTip" pos="460,-22" style="icon32px, press, hover" pivot="center" sound="[paging_click]" />
 			</rect>
 
 			<!-- Search + sort -->
