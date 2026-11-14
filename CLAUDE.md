@@ -3,7 +3,7 @@
 ## ▶ RESUME HERE (updated 2026-11-13)
 - **Where things are:**
   - `master` = M8 Progression + the Core spacing rule (merged and pushed 2026-11-13; GitHub is in sync). Milestones 0–8 are done. M8 design: `docs/superpowers/specs/2026-11-13-m8-progression-design.md`. M8 was accepted by the owner ("everything seems to work"). The v0.9.0 log was clean, but that session was only about 2.5 min with no `sn heat`, so not every M8 checklist step was confirmed.
-  - **Current work: M9 on branch `m9-release`** (ahead of `master`, **not pushed, not merged**). It contains:
+  - **Current work: M9 on branch `m9-release`** (ahead of `master`, **pushed to GitHub 2026-11-14 with the v0.17.0 pre-release; not merged**; GitHub Release https://github.com/Coop25/StashNet/releases/tag/v0.17.0 has `StashNet-v0.17.0.zip` for the server test). It contains:
     1. The release zip build option (`-p:Package=true` → `dist/StashNet-v<version>.zip`).
     2. A player-facing `README.md`.
     3. `docs/testing/M9-checklist.md`: Part A is solo, joining a dedicated server on the owner's PC; Part B needs a friend.
