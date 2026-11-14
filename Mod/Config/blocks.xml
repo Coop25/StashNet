@@ -315,5 +315,57 @@
 			<property name="SortOrder2" value="0003" />
 		</block>
 
+		<!-- v0.19.0 (owner, 2026-11-14): StashNet versions of four vanilla stations. Same model, window,
+		     recipes, fuel and heat; the StashNetCraftingTerminal marker makes them use network storage
+		     exactly like the Crafting Terminal. Recipes for chem/campfire/mixer are matched by block name
+		     in vanilla, so ours name the vanilla crafting area explicitly. -->
+		<block name="stashnetForge">
+			<property name="Extends" value="forge" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
+			<property name="StashNetCraftingTerminal" value="true" />
+			<property name="WorkstationWindow" value="workstation_forge" />
+			<property class="Workstation">
+				<property name="CraftingAreaRecipes" value="forge" />
+			</property>
+			<property name="DescriptionKey" value="stashnetForgeDesc" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0004" />
+		</block>
+
+		<block name="stashnetChemistryStation">
+			<property name="Extends" value="chemistryStation" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
+			<property name="StashNetCraftingTerminal" value="true" />
+			<property name="WorkstationWindow" value="workstation_chemistryStation" />
+			<property class="Workstation">
+				<property name="CraftingAreaRecipes" value="chemistryStation" />
+			</property>
+			<property name="DescriptionKey" value="stashnetChemistryStationDesc" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0005" />
+		</block>
+
+		<block name="stashnetCampfire">
+			<property name="Extends" value="campfire" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
+			<property name="StashNetCraftingTerminal" value="true" />
+			<property name="WorkstationWindow" value="workstation_campfire" />
+			<property class="Workstation">
+				<property name="CraftingAreaRecipes" value="campfire" />
+			</property>
+			<property name="DescriptionKey" value="stashnetCampfireDesc" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0006" />
+		</block>
+
+		<block name="stashnetCementMixer">
+			<property name="Extends" value="cementMixer" param1="UnlockedBy,DescriptionKey,CustomIcon,CustomIconTint,SortOrder1,SortOrder2,TraderStageTemplate" />
+			<property name="StashNetCraftingTerminal" value="true" />
+			<property name="WorkstationWindow" value="workstation_cementMixer" />
+			<property class="Workstation">
+				<property name="CraftingAreaRecipes" value="cementMixer" />
+			</property>
+			<property name="DescriptionKey" value="stashnetCementMixerDesc" />
+			<property name="SortOrder1" value="B900" />
+			<property name="SortOrder2" value="0007" />
+		</block>
+
 	</append>
 </configs>

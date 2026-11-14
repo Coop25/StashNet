@@ -7,6 +7,14 @@ stashnetTerminal,blocks,Block,,,Storage Terminal
 stashnetTerminalDesc,blocks,Block,,,"Browse, search, deposit and withdraw everything stored on your network's drives."
 stashnetCraftingTerminal,blocks,Block,,,Crafting Terminal
 stashnetCraftingTerminalDesc,blocks,Block,,,"A workbench wired into your storage network. Same recipes and skills as a workbench, but it can use ingredients stored on the network's drives (place it within reach of a Storage Core)."
+stashnetForge,blocks,Block,,,Network Forge
+stashnetForgeDesc,blocks,Block,,,"A forge wired into your storage network. Works like a normal forge (ore still goes into its smelting slots), but recipes can use ingredients stored on the network's drives. Place it within reach of a Storage Core."
+stashnetChemistryStation,blocks,Block,,,Network Chemistry Station
+stashnetChemistryStationDesc,blocks,Block,,,"A chemistry station wired into your storage network. Same recipes as a normal one, but it can use ingredients stored on the network's drives. Place it within reach of a Storage Core."
+stashnetCampfire,blocks,Block,,,Network Campfire
+stashnetCampfireDesc,blocks,Block,,,"A campfire wired into your storage network. Same recipes as a normal one, but it can use ingredients stored on the network's drives. Place it within reach of a Storage Core."
+stashnetCementMixer,blocks,Block,,,Network Cement Mixer
+stashnetCementMixerDesc,blocks,Block,,,"A cement mixer wired into your storage network. Same recipes as a normal one, but it can use ingredients stored on the network's drives. Place it within reach of a Storage Core."
 stashnetFetchingIngredients,UI,XUi,,,Fetching ingredients from storage... click Craft again.
 stashnetDriveBasic,items,Item,,,48-Stack Drive
 stashnetDriveBasicDesc,items,Item,,,"The smallest storage drive. Holds 48 stacks, about one wooden crate. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network. The bar under the drive shows how full it is, and the number in the middle is the percent used."

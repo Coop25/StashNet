@@ -19,7 +19,12 @@ $blocks = @(
   @{ Name='stashnetStorageCore'; Icon='controlPanelBase05'; Tint='4A503F'; Stripe='stripeGreen'; Emblem='coreHalfGreen'; Seed=112 },
   @{ Name='stashnetAdvancedCore'; Icon='controlPanelBase01'; Tint='4A503F'; Stripe='stripePurple'; Emblem='coreHalfPurple'; Seed=113 },
   @{ Name='stashnetTerminal'; Icon='tvCRT_Player'; Tint='4A503F'; Stripe='stripeGreen'; Seed=121 },
-  @{ Name='stashnetCraftingTerminal'; Icon='workbench'; Tint='4A503F'; Stripe='stripeGreen'; Seed=122 }
+  @{ Name='stashnetCraftingTerminal'; Icon='workbench'; Tint='4A503F'; Stripe='stripeGreen'; Seed=122 },
+  # v0.19.0 StashNet stations: their vanilla icon, StashNet green tint and stripe.
+  @{ Name='stashnetForge'; Icon='forge'; Tint='4A503F'; Stripe='stripeGreen'; Seed=123; LabelU=0.66; LabelV=0.55; LabelW=0.42 },
+  @{ Name='stashnetChemistryStation'; Icon='chemistryStation'; Tint='4A503F'; Stripe='stripeGreen'; Seed=124; LabelU=0.6; LabelV=0.55; LabelW=0.4 },
+  @{ Name='stashnetCampfire'; Icon='campfire'; Tint='4A503F'; Stripe='stripeGreen'; Seed=125; LabelV=0.45; LabelW=0.5 },
+  @{ Name='stashnetCementMixer'; Icon='cementMixer'; Tint='4A503F'; Stripe='stripeGreen'; Seed=126; LabelU=0.4; LabelV=0.8; LabelW=0.48 }
 )
 
 # ---- atlas sprites ----
@@ -77,7 +82,9 @@ foreach ($b in $blocks) {
   Sprite $g 'clawGouge' (& $X 0.32) (& $Y 0.50) ($W*0.36) ($H*0.30) 15
   Sprite $g 'bareMetal1' (& $X 0.15) (& $Y 0.94) ($W*0.28) ($H*0.10)
   Sprite $g $b.Stripe (& $X 0.5) (& $Y 0.28) ($W*0.92) ($H*0.06)
-  Sprite $g 'stencilStashnet' (& $X 0.5) (& $Y 0.84) ($W*0.62) ($H*0.08)
+  # Label spot: top center by default; LabelU/V/W move it onto the body for odd shapes (stations).
+  $lu = if ($b.LabelU) { $b.LabelU } else { 0.5 }; $lv = if ($b.LabelV) { $b.LabelV } else { 0.84 }; $lw = if ($b.LabelW) { $b.LabelW } else { 0.62 }
+  Sprite $g 'stencilStashnet' (& $X $lu) (& $Y $lv) ($W*$lw) ($H*0.08*$lw/0.62)
   if ($b.Emblem) {
     # Whole core emblem: the half sprite plus the same half turned 180 (the hexagon is symmetric), like in-game.
     $e = [math]::Min($W, $H) * 0.34
