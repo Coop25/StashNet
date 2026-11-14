@@ -36,17 +36,31 @@
 		<!-- M8 Progression: mid/late-game tiers, crafted at a workbench. The bay and Core tiers are also
 		     the hammer-upgrade item for the tier below (the old block is used up). Placeholders. -->
 		<recipe name="stashnetDriveStandard" count="1" craft_area="workbench" tags="workbenchCrafting">
-			<ingredient name="stashnetDriveBasic" count="2" />
+			<ingredient name="stashnetDriveBasic" count="3" />
 			<ingredient name="resourceForgedIron" count="5" />
 			<ingredient name="resourceElectricParts" count="8" />
 			<ingredient name="resourceMechanicalParts" count="2" />
 		</recipe>
 
 		<recipe name="stashnetDriveHighDensity" count="1" craft_area="workbench" tags="workbenchCrafting">
-			<ingredient name="stashnetDriveStandard" count="2" />
+			<ingredient name="stashnetDriveStandard" count="3" />
 			<ingredient name="resourceForgedSteel" count="5" />
 			<ingredient name="resourceElectricParts" count="15" />
 			<ingredient name="resourceMechanicalParts" count="4" />
+		</recipe>
+
+		<recipe name="stashnetDrive64K" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="stashnetDriveHighDensity" count="3" />
+			<ingredient name="resourceForgedSteel" count="10" />
+			<ingredient name="resourceElectricParts" count="25" />
+			<ingredient name="resourceMechanicalParts" count="8" />
+		</recipe>
+
+		<recipe name="stashnetDrive256K" count="1" craft_area="workbench" tags="workbenchCrafting">
+			<ingredient name="stashnetDrive64K" count="3" />
+			<ingredient name="resourceForgedSteel" count="20" />
+			<ingredient name="resourceElectricParts" count="40" />
+			<ingredient name="resourceMechanicalParts" count="12" />
 		</recipe>
 
 		<recipe name="stashnetDriveBayReinforced" count="1" craft_area="workbench" tags="workbenchCrafting">

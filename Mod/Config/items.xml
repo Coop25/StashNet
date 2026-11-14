@@ -6,13 +6,14 @@
 		     stacks, like chest slots; no separate type limit).
 		     StashNetHeatWeight = how much the drive counts toward its network's heat (M8: bigger
 		     drives run hotter). Weight = what scrapping an EMPTY drive gives back (electrical parts).
-		     Tiers: Basic 24 / weight 1, Standard 72 / 2, High-Density 216 / 4 (2026-11-14: 3x steps).
-		     To move up a tier: unload two drives (shift-click in a terminal), then craft them into the next tier (only EMPTY drives count as ingredients).
+		     Tiers (2026-11-14): 1K 48 / weight 1, 4K 192 / 2, 16K 576 / 4, 64K 1728 / 6, 256K 5184 / 8.
+		     1K/4K/16K keep the old stashnetDriveBasic/Standard/HighDensity IDs so saved drives still load.
+		     To move up a tier: unload three drives (shift-click in a terminal), then craft them into the next tier (only EMPTY drives count as ingredients).
 		     Icons: no CustomIcon, so the game uses Mod/UIAtlases/ItemIconAtlas/<item name>.png (drawn by
 		     tools/icons/draw-drive-icons.ps1). -->
 		<item name="stashnetDriveBasic">
 			<property name="Tags" value="stashnetDrive" />
-			<property name="StashNetMaxStacks" value="24" />
+			<property name="StashNetMaxStacks" value="48" />
 			<property name="StashNetHeatWeight" value="1" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
@@ -28,10 +29,10 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
-		<!-- Standard Drive (M8): mid-game, crafted at a workbench. -->
+		<!-- 4K Drive (ID kept from the old Standard Drive): crafted from three empty 1K Drives. -->
 		<item name="stashnetDriveStandard">
 			<property name="Tags" value="stashnetDrive" />
-			<property name="StashNetMaxStacks" value="72" />
+			<property name="StashNetMaxStacks" value="192" />
 			<property name="StashNetHeatWeight" value="2" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
@@ -47,10 +48,10 @@
 			<property name="SoundPlace" value="parts_place" />
 		</item>
 
-		<!-- High-Density Drive (M8): late-game, crafted at a workbench. -->
+		<!-- 16K Drive (ID kept from the old High-Density Drive): crafted from three empty 4K Drives. -->
 		<item name="stashnetDriveHighDensity">
 			<property name="Tags" value="stashnetDrive" />
-			<property name="StashNetMaxStacks" value="216" />
+			<property name="StashNetMaxStacks" value="576" />
 			<property name="StashNetHeatWeight" value="4" />
 			<property name="CreativeMode" value="Player" />
 			<property name="HoldType" value="45" />
@@ -62,6 +63,44 @@
 			<property name="EconomicValue" value="600" />
 			<property name="Group" value="Resources" />
 			<property name="DescriptionKey" value="stashnetDriveHighDensityDesc" />
+			<property name="SoundPickup" value="parts_grab" />
+			<property name="SoundPlace" value="parts_place" />
+		</item>
+
+		<!-- 64K Drive: crafted from three empty 16K Drives. -->
+		<item name="stashnetDrive64K">
+			<property name="Tags" value="stashnetDrive" />
+			<property name="StashNetMaxStacks" value="1728" />
+			<property name="StashNetHeatWeight" value="6" />
+			<property name="CreativeMode" value="Player" />
+			<property name="HoldType" value="45" />
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+			<property name="Material" value="MelectricParts" />
+			<property name="Weight" value="16" />
+			<property name="Stacknumber" value="1" />
+			<property name="EconomicValue" value="1500" />
+			<property name="Group" value="Resources" />
+			<property name="DescriptionKey" value="stashnetDrive64KDesc" />
+			<property name="SoundPickup" value="parts_grab" />
+			<property name="SoundPlace" value="parts_place" />
+		</item>
+
+		<!-- 256K Drive: crafted from three empty 64K Drives. -->
+		<item name="stashnetDrive256K">
+			<property name="Tags" value="stashnetDrive" />
+			<property name="StashNetMaxStacks" value="5184" />
+			<property name="StashNetHeatWeight" value="8" />
+			<property name="CreativeMode" value="Player" />
+			<property name="HoldType" value="45" />
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+			<property name="Material" value="MelectricParts" />
+			<property name="Weight" value="32" />
+			<property name="Stacknumber" value="1" />
+			<property name="EconomicValue" value="4000" />
+			<property name="Group" value="Resources" />
+			<property name="DescriptionKey" value="stashnetDrive256KDesc" />
 			<property name="SoundPickup" value="parts_grab" />
 			<property name="SoundPlace" value="parts_place" />
 		</item>

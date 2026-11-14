@@ -36,7 +36,7 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 
 ## Getting started
 
-1. **Craft** (from your backpack): a **Scrap Storage Core**, a **Drive Bay**, a few **Basic Drives**, and a **Storage Terminal**.
+1. **Craft** (from your backpack): a **Scrap Storage Core**, a **Drive Bay**, a few **1K Drives**, and a **Storage Terminal**.
 2. **Place the Core**, then place the Drive Bay and the Terminal **within 6 blocks** of it.
 3. **Put drives in the Drive Bay.** A bay only accepts drives.
 4. **Use the Terminal**: click an item to take a stack (right-click for one), shift-click items in your backpack to store them, or press Deposit-all.
@@ -48,11 +48,13 @@ Craft a **Crafting Terminal** (it needs a workbench and a Storage Terminal) and 
 ### Bigger drives
 | Drive | Holds | Made at |
 |---|---|---|
-| Basic Drive | 24 stacks | backpack |
-| Standard Drive | 72 stacks | workbench (2 empty Basic Drives + forged iron) |
-| High-Density Drive | 216 stacks | workbench (2 empty Standard Drives + forged steel) |
+| 1K Drive | 48 stacks | backpack |
+| 4K Drive | 192 stacks | workbench (3 empty 1K Drives + forged iron) |
+| 16K Drive | 576 stacks | workbench (3 empty 4K Drives + forged steel) |
+| 64K Drive | 1,728 stacks | workbench (3 empty 16K Drives + forged steel) |
+| 256K Drive | 5,184 stacks | workbench (3 empty 64K Drives + forged steel) |
 
-To move up a size: open a Terminal and **shift-click two drives** of the smaller size in your backpack to empty them into the network. Then craft them into one drive of the next size at a workbench. Only empty drives count as ingredients, and a drive that still holds items can't be scrapped either, so nothing gets thrown away by accident.
+To move up a size: open a Terminal and **shift-click three drives** of the smaller size in your backpack to empty them into the network. Then craft them into one drive of the next size at a workbench. Only empty drives count as ingredients, and a drive that still holds items can't be scrapped either, so nothing gets thrown away by accident.
 
 ### Tougher bays, farther-reaching Cores
 | Block | Holds / reaches | Toughness |
@@ -65,7 +67,7 @@ Craft the next tier at a workbench. Then hold a hammer (or stone axe, or nail gu
 **Cores must be more than 48 blocks apart**, so two networks never overlap.
 
 ### Heat
-The Core gives off heat that builds up in its area, the same way a forge or campfire does, and enough heat brings screamers. Bigger drives give off more heat (a High-Density drive counts as 4 Basic ones), and better Cores run cooler. A small early network alone never brings screamers. Heat is capped, so even a huge base only draws them now and then. Type `sn heat` in the console (F1) next to a Core to see the numbers.
+The Core gives off heat that builds up in its area, the same way a forge or campfire does, and enough heat brings screamers. Bigger drives give off more heat (a 256K drive counts as 8 of the 1K ones), and better Cores run cooler. A small early network alone never brings screamers. Heat is capped, so even a huge base only draws them now and then. Type `sn heat` in the console (F1) next to a Core to see the numbers.
 
 ---
 
