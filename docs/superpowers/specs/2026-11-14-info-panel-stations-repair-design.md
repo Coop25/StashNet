@@ -69,3 +69,6 @@ Remove the remaining "walk to storage and back" chores:
 Exact layout of the footer amount box and the toggle button (screenshot to the owner); the
 save-file format; the exact icon tint; how the info panel's action buttons
 are injected; tests for game-free parts (amount capping, station-output setting store).
+
+## Revision 1 (2026-11-14, v0.19.2)
+The output switch is removed (owner: "the output button does not work lets get rid of it"). StashNet stations always send finished items and cancel refunds into storage, like the Crafting Terminal.

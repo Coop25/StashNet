@@ -18,8 +18,6 @@ stashnetCementMixerDesc,blocks,Block,,,"A cement mixer wired into your storage n
 stashnetFetchingIngredients,UI,XUi,,,Fetching ingredients from storage... click Craft again.
 stashnetTakeStack,UI,XUi,,,Take stack
 stashnetFetchingRepair,UI,XUi,,,Fetching repair kits from storage... click Repair again.
-stashnetOutputOnTip,UI,XUi,,,"Finished items go into storage (click to keep them here instead)"
-stashnetOutputOffTip,UI,XUi,,,"Finished items stay here (click to send them into storage)"
 stashnetDriveBasic,items,Item,,,48-Stack Drive
 stashnetDriveBasicDesc,items,Item,,,"The smallest storage drive. Holds 48 stacks, about one wooden crate. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network. The bar under the drive shows how full it is, and the number in the middle is the percent used."
 stashnetUseTerminal,UI,HUD,,,Press {0} to Use

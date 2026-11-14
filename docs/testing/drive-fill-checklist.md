@@ -42,7 +42,7 @@ Use the StashNet test world. Creative menu or `sn` commands are fine for getting
     - Two weapons of the same kind and quality still show as separate cells (on purpose).
 
 ### v0.19.0: info panel, exact amounts, StashNet stations, repair from storage
-The log should show `Loaded v0.19.0 (36 methods patched)`.
+The log should show `Loaded v0.19.2 (36 methods patched)`.
 22. **Info panel.** Click a stored item once: its cell gets a white border and the item info panel (left of your backpack) shows it, with stats/mods/description like a backpack item, plus **Take** and **Take stack** buttons. Nothing leaves storage yet.
     - Click the same cell again: you get 1. Shift-click still takes a stack at once; right-click still takes 1 at once.
     - Click a backpack item, then the stored item again: the panel shows the stored item again (it doesn't take one).
@@ -51,9 +51,6 @@ The log should show `Loaded v0.19.0 (36 methods patched)`.
 24. **New stations.** In the crafting menu (backpack crafting) you'll find Network Forge, Network Chemistry Station, Network Campfire, Network Cement Mixer (each needs the vanilla station + a Storage Terminal + 4 electrical parts). Each icon is the vanilla one, dark green, with STASHNET on it.
     - Place each within reach of a Core. Its window is the vanilla one (forge smelting, fuel, tools all work). Recipes that need stored ingredients show as craftable; Craft pulls them into your backpack and crafts.
     - Placed outside any Core's reach, it works like a plain vanilla station.
-25. **Output switch.** In each StashNet station (and the Crafting Terminal), the OUTPUT box header has a power icon: green = finished items go into storage (default), grey = they stay in the station. Hover for the tooltip.
-    - Grey: finished items stay in the output slots, with the window open and closed. Cancelling a craft refunds to your backpack.
-    - Green again: they go into storage.
-    - Leave the world and come back: each station remembers its setting. Vanilla stations show no icon.
+25. **Finished items go into storage** (the output switch was removed in v0.19.2, owner: it didn't work). In a StashNet station near a Core, finished crafts move into storage within a second, like at the Crafting Terminal; cancelled crafts refund into storage.
 26. **Repair from storage.** Put repair kits in storage, none in your backpack. Open a Storage Terminal (or a StashNet station), select a damaged tool in your backpack: **Repair** is enabled. Click it: kits come out of storage and the repair starts. The kit count in storage drops by what was used.
     - With no kits anywhere, Repair stays disabled as usual. With the terminal closed, only backpack kits count.

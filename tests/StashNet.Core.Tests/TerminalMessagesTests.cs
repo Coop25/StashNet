@@ -34,7 +34,6 @@ namespace StashNet.Core.Tests
         [InlineData(TerminalOp.Deposit)]
         [InlineData(TerminalOp.Return)]
         [InlineData(TerminalOp.DriveUnload)]
-        [InlineData(TerminalOp.SetStationOutput)]
         public void Request_RoundTrips(TerminalOp op)
         {
             var r = new TerminalRequest { Op = op, X = -12, Y = 64, Z = 3000, RequestId = 42 };
@@ -47,25 +46,6 @@ namespace StashNet.Core.Tests
             Assert.Equal((-12, 64, 3000, 42), (back.X, back.Y, back.Z, back.RequestId));
             Assert.Equal(r.Items, back.Items);
             Assert.Null(back.Items[0].Variant);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void Request_Flag_RoundTrips(bool flag)
-        {
-            var back = RoundTrip(new TerminalRequest { Op = TerminalOp.SetStationOutput, Flag = flag });
-            Assert.Equal(flag, back.Flag);
-        }
-
-        [Theory]
-        [InlineData(StationOutputState.NotAStation)]
-        [InlineData(StationOutputState.On)]
-        [InlineData(StationOutputState.Off)]
-        public void Response_StationOutput_RoundTrips(StationOutputState state)
-        {
-            var back = RoundTrip(new TerminalResponse { RequestId = 7, StationOutput = state });
-            Assert.Equal(state, back.StationOutput);
         }
 
         [Fact]
@@ -121,7 +101,7 @@ namespace StashNet.Core.Tests
         public void OpAfterLast_Throws()
         {
             var bytes = Serialize(new TerminalRequest { Op = TerminalOp.List });
-            bytes[0] = (byte)TerminalOp.SetStationOutput + 1;
+            bytes[0] = (byte)TerminalOp.DriveUnload + 1;
             Assert.Throws<FormatException>(() => Read(bytes));
         }
 
