@@ -83,7 +83,7 @@ namespace StashNet.UI
             shownVersion = CraftingNetwork.Version;
             shownActive = CraftingNetwork.Active;
             shownRecipe = SelectedRecipe();
-            if (viewComponent != null) viewComponent.IsVisible = CraftingNetwork.Active;
+            SetShown(AtNetworkStation());
 
             List<StockRule> rules = CraftingNetwork.Settings?.Rules ?? new List<StockRule>();
             for (int i = 0; i < rows.Length; i++)
@@ -92,6 +92,26 @@ namespace StashNet.UI
                 rows[i].Show(r, r == null ? 0 : Stored(r.Item));
             }
             RefreshBindingsSelfAndChildren(); // rows have their own bindings
+        }
+
+        /// <summary>
+        /// Decided from the open station's block, not CraftingNetwork.Active: our OnOpen runs before the
+        /// window group's OnOpen postfix sets Active, and the game stacks the right column right after
+        /// OnOpen, leaving hidden windows out (v0.20.1 bug: the panel was drawn over Tools).
+        /// </summary>
+        private bool AtNetworkStation()
+        {
+            TileEntityWorkstation te = (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.WorkstationData?.TileEntity;
+            if (te == null) return false;
+            return CraftingNetwork.IsCraftingTerminal(GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block);
+        }
+
+        /// <summary>Show or hide the panel; if that changes while the screen is open, re-stack the column.</summary>
+        private void SetShown(bool show)
+        {
+            if (viewComponent == null || viewComponent.IsVisible == show) return;
+            viewComponent.IsVisible = show;
+            if (windowGroup != null && windowGroup.isShowing) xui.calculateWindowGroupLayout(windowGroup);
         }
 
         private static int Stored(string item) => CraftingNetwork.Listing.Where(a => a.Name == item).Sum(a => a.Count);
