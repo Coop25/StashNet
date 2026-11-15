@@ -159,8 +159,11 @@ namespace StashNet.Crafting
     [HarmonyPatch(typeof(TileEntityWorkstation), nameof(TileEntityWorkstation.UpdateTick))]
     public static class WorkstationOutputToNetworkPatch
     {
-        public static void Postfix(TileEntityWorkstation __instance, World world) =>
+        public static void Postfix(TileEntityWorkstation __instance, World world)
+        {
             CraftingOutputServer.TryMoveOutput(world, __instance);
+            Stations.StationAutomation.Tick(world, __instance); // auto-stock, auto-fuel, auto-fire
+        }
     }
 
     /// <summary>
