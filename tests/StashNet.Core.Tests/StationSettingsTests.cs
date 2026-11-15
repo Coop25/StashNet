@@ -160,6 +160,17 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void FuelModes_Previous_Cycles()
+        {
+            var fuels = new[] { "wood", "coal" };
+            Assert.Equal("wood", FuelModes.Previous("Manual", fuels));
+            Assert.Equal("coal", FuelModes.Previous("wood", fuels));
+            Assert.Equal("Auto", FuelModes.Previous("coal", fuels));
+            Assert.Equal("Manual", FuelModes.Previous("Auto", fuels));
+            Assert.Equal("Manual", FuelModes.Previous("gas", new[] { "coal" }));
+        }
+
+        [Fact]
         public void FuelModes_Next_Cycles()
         {
             var fuels = new[] { "wood", "coal" };

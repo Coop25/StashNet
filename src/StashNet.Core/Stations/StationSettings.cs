@@ -230,13 +230,18 @@ namespace StashNet.Core.Stations
         public static bool IsFuelItem(string mode) => mode != null && mode != Manual && mode != Auto;
 
         /// <summary>The fuel button's next mode: Manual → Auto → fuels in storage (by name) → Manual.</summary>
-        public static string Next(string current, IEnumerable<string> fuelsInStorage)
+        public static string Next(string current, IEnumerable<string> fuelsInStorage) => Step(current, fuelsInStorage, 1);
+
+        /// <summary>The ◄ arrow: Next in reverse.</summary>
+        public static string Previous(string current, IEnumerable<string> fuelsInStorage) => Step(current, fuelsInStorage, -1);
+
+        private static string Step(string current, IEnumerable<string> fuelsInStorage, int by)
         {
             List<string> order = new List<string> { Manual, Auto };
             order.AddRange(fuelsInStorage.Distinct().OrderBy(n => n, StringComparer.Ordinal));
             int i = order.IndexOf(current);
             if (i < 0) return Manual; // the chosen fuel ran out of storage
-            return order[(i + 1) % order.Count];
+            return order[(i + by + order.Count) % order.Count];
         }
     }
 }
