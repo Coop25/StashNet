@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using StashNet.Core.Protocol;
+using StashNet.Core.Stations;
 using StashNet.Network;
 
 namespace StashNet.Crafting
@@ -22,6 +23,20 @@ namespace StashNet.Crafting
         private static XUiController windowGroup;
         private static float refreshTimer;
         private static readonly HashSet<int> listRequests = new HashSet<int>();
+        /// <summary>Fuel mode / stock rule requests sent from this window (their replies carry the settings too).</summary>
+        private static readonly HashSet<int> settingsRequests = new HashSet<int>();
+
+        /// <summary>The open station's automation settings per the server; null until the first reply.</summary>
+        public static StationSettings Settings { get; private set; }
+
+        /// <summary>The network's items per the last listing (all variants), for the fuel button and the stock panel.</summary>
+        public static List<ItemAmount> Listing { get; private set; } = new List<ItemAmount>();
+
+        /// <summary>The open station burns fuel (forge, campfire, chemistry station).</summary>
+        public static bool HasFuel { get; private set; }
+
+        /// <summary>Bumped whenever Settings or Listing change, so the automation UI knows to redraw.</summary>
+        public static int Version { get; private set; }
         /// <summary>Plain (non-variant) network stock by item type id.</summary>
         private static readonly Dictionary<int, int> stockByType = new Dictionary<int, int>();
 
@@ -82,6 +97,10 @@ namespace StashNet.Crafting
             stationPos = pos;
             windowGroup = group;
             Active = true;
+            Settings = null;
+            Listing = new List<ItemAmount>();
+            HasFuel = Stations.StationRules.HasFuel(GameManager.Instance.World?.GetBlock(pos).Block);
+            Version++;
             stockByType.Clear();
             freeStacks = 0;
             outputTimer = 0f;
@@ -92,8 +111,11 @@ namespace StashNet.Crafting
         {
             Active = false;
             windowGroup = null;
+            Settings = null;
+            Listing = new List<ItemAmount>();
             stockByType.Clear();
             listRequests.Clear();
+            settingsRequests.Clear();
         }
 
         public static void Tick(float dt)
@@ -158,7 +180,9 @@ namespace StashNet.Crafting
         /// <summary>Called by TerminalClient for every response; uses listings that answer our requests.</summary>
         public static void OnResponse(TerminalResponse response)
         {
-            bool ours = listRequests.Remove(response.RequestId) && Active;
+            bool settingsReply = settingsRequests.Remove(response.RequestId);
+            bool ours = (listRequests.Remove(response.RequestId) || settingsReply) && Active;
+            if (ours) TakeStationReply(response);
             bool forRepair = RepairMode && !Active && response.HasListing;
             if (!ours && !forRepair) return;
             stockByType.Clear();
@@ -175,6 +199,46 @@ namespace StashNet.Crafting
                 }
             }
             RefreshUi();
+        }
+
+        /// <summary>Settings and listing from a reply to this station's own requests.</summary>
+        private static void TakeStationReply(TerminalResponse response)
+        {
+            if (response.Station != null)
+            {
+                try
+                {
+                    Settings = StationSettings.Parse(response.Station);
+                }
+                catch (FormatException e)
+                {
+                    Log.Warning($"[StashNet] bad station settings from the server: {e.Message}");
+                }
+            }
+            if (response.HasListing) Listing = response.Listing;
+            foreach (TerminalMessage m in response.Messages)
+            {
+                if (m.Key != "stashnetRuleRefused" && m.Key != "stashnetRulesFull") continue;
+                EntityPlayerLocal player = GameManager.Instance.World?.GetPrimaryPlayer();
+                string text = m.Arg >= 0 ? string.Format(Localization.Get(m.Key), m.Arg) : Localization.Get(m.Key);
+                if (player != null) GameManager.ShowTooltip(player, text, string.Empty, "ui_denied");
+            }
+            Version++;
+        }
+
+        public static void SendFuelMode(string mode) => SendSettings(TerminalOp.SetFuelMode, mode);
+
+        public static void SendStockRule(StockRule rule) => SendSettings(TerminalOp.SetStockRule, rule.ToLine());
+
+        public static void SendRemoveRule(string item) => SendSettings(TerminalOp.RemoveStockRule, item);
+
+        private static void SendSettings(TerminalOp op, string text)
+        {
+            if (!Active) return;
+            var request = NewRequest(op);
+            request.Text = text;
+            settingsRequests.Add(TerminalClient.NextRequestId);
+            TerminalClient.Send(request);
         }
 
         /// <summary>Network stock of this item (plain items only; 0 when inactive).</summary>
@@ -258,7 +322,7 @@ namespace StashNet.Crafting
         }
 
         /// <summary>Ingredient amount per craft, using the same modifiers as vanilla's craft-count math.</summary>
-        private static float PerCraftAmount(Recipe recipe, ItemStack ing, EntityPlayerLocal player, int tier)
+        internal static float PerCraftAmount(Recipe recipe, ItemStack ing, EntityPlayerLocal player, int tier)
         {
             float amount = ing.count;
             if (!recipe.UseIngredientModifier) return amount;
