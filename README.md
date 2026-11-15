@@ -5,11 +5,12 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 - **Physical drives** hold your items. Pull a drive out and its contents go with it.
 - **Storage Terminal**: every drive in one window, with search, sort, deposit and withdraw.
 - **Network Workbench**: a real workbench that can use ingredients stored on the network.
+- **Station automation**: Network stations can keep items in stock, refill their own fuel from storage, and put their fire out when idle.
 - **One code** set on the Core protects the network's Drive Bays and Terminals.
 - **Tiers**: bigger drives, tougher bays that hold more drives, and Cores that reach farther. You upgrade bays and Cores in place with a hammer.
 - **Heat**: a big hoard runs hot and draws screamers, just like a forge does.
 
-**Version 0.9.1.** Playable and tested in single-player on 7 Days to Die **V3.4 (b10)**. Multiplayer is still being tested.
+**Version 0.20.0.** Tested on 7 Days to Die **V3.4 (b10)**, in single-player and on a multiplayer server.
 
 ---
 
@@ -44,6 +45,12 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 
 ### Crafting from storage
 Craft a **Network Workbench** (it needs a workbench and a Storage Terminal) and place it near your Core. It works exactly like a workbench, but recipes can use ingredients from the network. If an ingredient is in storage, the workbench pulls it into your backpack when you click Craft.
+
+### Station automation
+Every Network station (Workbench, Forge, Chemistry Station, Campfire, Cement Mixer) has an **AUTOMATION** panel:
+
+- **Keep in stock:** select a recipe, set an amount and click Keep. While someone is nearby, the station crafts from stored ingredients whenever storage holds less than that. Up to 8 items per station. Automatic crafts give no crafting XP.
+- **Fuel** (Forge, Campfire, Chemistry Station): *Manual* is the normal game. *Auto* lights the fire when there's something to craft or smelt and puts it out when idle. Choose a fuel (Wood, Coal and so on) to also refill it from storage.
 
 ### Bigger drives
 | Drive | Holds | Made at |
