@@ -18,6 +18,22 @@ namespace StashNet.Core.Tests
         public void HasWork_RecipeQueued_True() => Assert.True(StationWork.HasWork(true, true, null));
 
         [Fact]
+        public void OutputFits_EmptySlot() =>
+            Assert.True(StationWork.OutputFits(new[] { (5, 1000, 1000), (0, 0, 0) }, 5, 1, 1000));
+
+        [Fact]
+        public void OutputFits_PartialStackOfSameItem() =>
+            Assert.True(StationWork.OutputFits(new[] { (5, 990, 1000), (7, 3, 10) }, 5, 10, 1000));
+
+        [Fact]
+        public void OutputFits_AllSlotsFull_False() =>
+            Assert.False(StationWork.OutputFits(new[] { (5, 1000, 1000), (7, 10, 10) }, 5, 1, 1000));
+
+        [Fact]
+        public void OutputFits_PartialTooSmall_False() =>
+            Assert.False(StationWork.OutputFits(new[] { (5, 995, 1000) }, 5, 10, 1000));
+
+        [Fact]
         public void Decide_Manual_None() =>
             Assert.Equal(FireAction.None, StationWork.Decide(FuelModes.Manual, true, false, true, 100f, false));
 

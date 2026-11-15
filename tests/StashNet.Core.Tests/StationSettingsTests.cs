@@ -66,6 +66,24 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void Parse_RefusesDuplicateIngredient()
+        {
+            string line = Rule().ToLine().Replace("resourceCement*5", "resourceRockSmall*5");
+            Assert.False(StockRule.TryParseLine(line, out _, out _));
+        }
+
+        [Fact]
+        public void SerializeForClients_LeavesOutOwners()
+        {
+            var s = new StationSettings();
+            s.SetRule(Rule());
+            string text = s.Serialize(includeOwners: false);
+            Assert.DoesNotContain("Steam_7656", text);
+            Assert.Equal("", StationSettings.Parse(text).Rules[0].Owner);
+            Assert.Contains("Steam_7656", s.Serialize());
+        }
+
+        [Fact]
         public void Parse_RefusesGarbage()
         {
             Assert.False(StockRule.TryParseLine("rule|x", out _, out _));
@@ -166,6 +184,15 @@ namespace StashNet.Core.Tests
             Assert.Equal(0, StockMath.CraftsNeeded(500, 500, 10));
             Assert.Equal(0, StockMath.CraftsNeeded(500, 600, 1));
             Assert.Equal(0, StockMath.CraftsNeeded(500, 0, 0));
+        }
+
+        [Fact]
+        public void MaxCraftsPerEntry_OneOutputStack()
+        {
+            Assert.Equal(1000, StockMath.MaxCraftsPerEntry(1, 1000));
+            Assert.Equal(10, StockMath.MaxCraftsPerEntry(10, 100));
+            Assert.Equal(1, StockMath.MaxCraftsPerEntry(5, 1)); // a non-stacking item: one craft per entry
+            Assert.Equal(1, StockMath.MaxCraftsPerEntry(0, 0));
         }
 
         [Fact]
