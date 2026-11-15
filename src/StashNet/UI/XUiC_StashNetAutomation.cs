@@ -39,10 +39,12 @@ namespace StashNet.UI
                 infoWindow = GetParentByType<XUiC_CraftingInfoWindow>();
                 tabButton = GetChildById("btnAutomationTab");
                 if (tabButton != null) tabButton.OnPress += (_s, _b) => OpenTab();
-                // The vanilla tab buttons close ours.
-                foreach (XUiController b in VanillaTabButtons())
+                // The vanilla tab buttons close ours. Looked up by id: the info window only fills its
+                // button fields after its children (us) have run Init.
+                foreach (string id in new[] { "ingredientsButton", "descriptionButton", "showunlocksButton" })
                 {
-                    b.OnPress += (_s, _b) => CloseTab();
+                    XUiController b = infoWindow?.GetChildById(id);
+                    if (b != null) b.OnPress += (_s, _b) => CloseTab();
                 }
                 rows = GetChildrenByType<XUiC_StashNetRuleRow>();
                 amount = GetChildById("amount") as XUiC_Counter;
@@ -80,6 +82,7 @@ namespace StashNet.UI
         public override void OnOpen()
         {
             base.OnOpen();
+            if (TabOpen) RestoreVanillaSelection();
             TabOpen = false;
             shownVersion = -1;
             if (broken) return;
@@ -90,7 +93,16 @@ namespace StashNet.UI
         public override void OnClose()
         {
             base.OnClose();
+            if (TabOpen) RestoreVanillaSelection();
             TabOpen = false;
+        }
+
+        /// <summary>Re-highlight the vanilla tab that is really showing (we turned them all off).</summary>
+        private void RestoreVanillaSelection()
+        {
+            SetSelected(tabButton, false);
+            if (infoWindow?.ingredientsButton != null && infoWindow.descriptionButton != null && infoWindow.unlockedByButton != null)
+                infoWindow.SetSelectedButtonByType(infoWindow.TabType);
         }
 
         private void OpenTab()
@@ -126,7 +138,12 @@ namespace StashNet.UI
             base.Update(_dt);
             if (broken) return;
             bool station = AtNetworkStation();
-            if (!station && TabOpen) CloseTab();
+            if (!station && TabOpen)
+            {
+                RestoreVanillaSelection();
+                CloseTab();
+            }
+            if (!station && !shownStation) return; // backpack crafting / vanilla stations: nothing to watch
             Recipe selected = SelectedRecipe();
             if (shownVersion == CraftingNetwork.Version && shownTab == TabOpen && shownStation == station && shownRecipe == selected) return;
             Refresh();
