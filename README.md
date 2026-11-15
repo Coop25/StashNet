@@ -4,7 +4,7 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 
 - **Physical drives** hold your items. Pull a drive out and its contents go with it.
 - **Storage Terminal**: every drive in one window, with search, sort, deposit and withdraw.
-- **Crafting Terminal**: a real workbench that can use ingredients stored on the network.
+- **Network Workbench**: a real workbench that can use ingredients stored on the network.
 - **One code** set on the Core protects the network's Drive Bays and Terminals.
 - **Tiers**: bigger drives, tougher bays that hold more drives, and Cores that reach farther. You upgrade bays and Cores in place with a hammer.
 - **Heat**: a big hoard runs hot and draws screamers, just like a forge does.
@@ -43,7 +43,7 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 5. **Lock it**: hold E on the Core and set a code. Everyone else needs the code to open your bays and terminals. The Core's owner always gets in.
 
 ### Crafting from storage
-Craft a **Crafting Terminal** (it needs a workbench and a Storage Terminal) and place it near your Core. It works exactly like a workbench, but recipes can use ingredients from the network. If an ingredient is in storage, the terminal pulls it into your backpack when you click Craft.
+Craft a **Network Workbench** (it needs a workbench and a Storage Terminal) and place it near your Core. It works exactly like a workbench, but recipes can use ingredients from the network. If an ingredient is in storage, the workbench pulls it into your backpack when you click Craft.
 
 ### Bigger drives
 | Drive | Holds | Made at |

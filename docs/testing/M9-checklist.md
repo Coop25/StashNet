@@ -58,8 +58,8 @@ Build a small network: Scrap Core, a Drive Bay with a couple of 48-Stack drives,
 - [ ] Open a terminal and shift-click that drive: its items move into the network, and the drive is now empty (its bar and percent disappear).
 - [ ] Scrap the empty drive: it works. (Or sell it: it sells.)
 
-### A5. Crafting Terminal as a joined player
-Place a Crafting Terminal near the Core and put some ingredients in storage (not in your backpack).
+### A5. Network Workbench as a joined player
+Place a Network Workbench near the Core and put some ingredients in storage (not in your backpack).
 - [ ] Open it. Recipes that need stored ingredients show as craftable.
 - [ ] Click **Craft**. As a joined player it may say "Fetching ingredients from storage... click Craft again". Click again, and the craft starts. (This was expected in the design. Tell me if it happens every time and feels bad.)
 - [ ] The craft-count arrows never let you queue more than fits in your backpack.
@@ -70,7 +70,7 @@ Place a Crafting Terminal near the Core and put some ingredients in storage (not
 ### A6. Upgrades and tiers on the server
 - [ ] Hammer a Reinforced Drive Bay onto a bay with drives in it: the drives stay, and there are 8 slots.
 - [ ] With a code set, hammer a Storage Core onto the Scrap Core: the code stays, and the reach grows (a terminal 10 blocks away connects).
-- [ ] **Drive upgrade:** with 3 empty 48-Stack drives and the parts in your backpack, craft a 192-Stack Drive at a workbench (or the Crafting Terminal): it works and uses exactly 3 drives. Put it in a bay: the stack total grows by 192.
+- [ ] **Drive upgrade:** with 3 empty 48-Stack drives and the parts in your backpack, craft a 192-Stack Drive at a workbench (or the Network Workbench): it works and uses exactly 3 drives. Put it in a bay: the stack total grows by 192.
 - [ ] With 1 full + 2 empty 48-Stack drives, the 192-Stack recipe isn't craftable and Craft is refused; the full drive keeps its items.
 - [ ] **New looks:** a Drive Bay looks like a tall file cabinet, Reinforced like a server rack, Armored like a dark gun safe. A Scrap Core looks like an electrical box, a Storage Core like a control panel with a sloped top, an Advanced Core like a control panel. Each sits flat on the floor (not floating or sunk in), you can't walk through it, and upgrading swaps the look in place. Their icons match.
 - [ ] **Drive names and icons:** five drives, 48-Stack to 5184-Stack Drive, each with its worn hard-drive icon (blue / green / purple / orange / red tape with 48 / 192 / 576 / 1728 / 5184) in your backpack, in a Drive Bay, and in the creative menu. None shows a blank or pink square, and nothing says "1K"/"4K".
@@ -107,7 +107,7 @@ Your friend needs the same mods, StashNet included, with EasyAntiCheat off. They
 - [ ] You change the code: they're locked out again until they enter the new one.
 
 ### B4. Two players crafting
-- [ ] You both use Crafting Terminals on the same network at the same time with the same ingredients. Nobody ends up with free ingredients, and storage never goes negative.
+- [ ] You both use Network Workbenches on the same network at the same time with the same ingredients. Nobody ends up with free ingredients, and storage never goes negative.
 
 ### B5. Spacing between two players
 - [ ] Your friend can't place a Core within 48 blocks of yours, and vice versa.
