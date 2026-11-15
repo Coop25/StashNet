@@ -98,14 +98,6 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
-        public void OpAfterLast_Throws()
-        {
-            var bytes = Serialize(new TerminalRequest { Op = TerminalOp.List });
-            bytes[0] = (byte)TerminalOp.DriveUnload + 1;
-            Assert.Throws<FormatException>(() => Read(bytes));
-        }
-
-        [Fact]
         public void BadOp_Throws()
         {
             var bytes = Serialize(new TerminalRequest { Op = TerminalOp.List });
@@ -142,6 +134,33 @@ namespace StashNet.Core.Tests
             var r = new TerminalRequest { Op = TerminalOp.Deposit };
             r.Items.Add(new ItemAmount("", null, 1));
             Assert.Throws<FormatException>(() => Read(Serialize(r)));
+        }
+
+        [Theory]
+        [InlineData(TerminalOp.SetFuelMode, "resourceCoal")]
+        [InlineData(TerminalOp.SetStockRule, "rule|a|1|a|1|1|1||b*2")]
+        [InlineData(TerminalOp.RemoveStockRule, "resourceConcreteMix")]
+        public void Request_TextRoundTrips(TerminalOp op, string text)
+        {
+            var back = RoundTrip(new TerminalRequest { Op = op, Text = text });
+            Assert.Equal(op, back.Op);
+            Assert.Equal(text, back.Text);
+            Assert.Equal("", RoundTrip(new TerminalRequest { Op = TerminalOp.List }).Text);
+        }
+
+        [Fact]
+        public void Response_StationRoundTrips_NullAndText()
+        {
+            Assert.Null(RoundTrip(new TerminalResponse()).Station);
+            Assert.Equal("fuel Auto\n", RoundTrip(new TerminalResponse { Station = "fuel Auto\n" }).Station);
+        }
+
+        [Fact]
+        public void Request_OpAboveRemoveStockRule_Refused()
+        {
+            var bytes = Serialize(new TerminalRequest { Op = TerminalOp.List });
+            bytes[0] = (byte)TerminalOp.RemoveStockRule + 1;
+            Assert.Throws<FormatException>(() => Read(bytes));
         }
 
         private static byte[] Serialize(TerminalRequest r)
