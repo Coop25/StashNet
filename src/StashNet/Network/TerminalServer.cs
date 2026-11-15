@@ -4,6 +4,8 @@ using System.Linq;
 using StashNet.Blocks;
 using StashNet.Core.Network;
 using StashNet.Core.Protocol;
+using StashNet.Core.Stations;
+using StashNet.Stations;
 using StashNet.Drives;
 using UnityEngine;
 
@@ -82,11 +84,81 @@ namespace StashNet.Network
                 case TerminalOp.Return:
                     Return(net, player, req);
                     break;
+                case TerminalOp.SetFuelMode:
+                case TerminalOp.SetStockRule:
+                case TerminalOp.RemoveStockRule:
+                    ChangeStation(world, player, pos, req, resp);
+                    break;
             }
 
             net.SaveDirty();
             FillListing(net, resp);
+            // Network stations learn their automation settings from every reply.
+            Block block = world.GetBlock(pos).Block;
+            if (Crafting.CraftingNetwork.IsCraftingTerminal(block)) resp.Station = StationSettingsStore.Get(pos, block).Serialize();
             return resp;
+        }
+
+        /// <summary>Fuel mode / stock rule changes for a Network station. Refusals add a message and change nothing.</summary>
+        private static void ChangeStation(World world, EntityPlayer player, Vector3i pos, TerminalRequest req, TerminalResponse resp)
+        {
+            Block block = world.GetBlock(pos).Block;
+            if (!Crafting.CraftingNetwork.IsCraftingTerminal(block)) return;
+            StationSettings s = StationSettingsStore.Get(pos, block);
+            string text = req.Text ?? "";
+            bool ok;
+            switch (req.Op)
+            {
+                case TerminalOp.SetFuelMode:
+                    ok = StationRules.HasFuel(block) && ValidFuelMode(text);
+                    if (ok) s.FuelMode = text;
+                    break;
+                case TerminalOp.SetStockRule:
+                    ok = StockRule.TryParseLine(text, out StockRule rule, out _) && ValidRule(block, rule);
+                    if (ok)
+                    {
+                        // The owner is whoever sent it (checked against the Core lock when the rule runs).
+                        rule.Owner = NetworkLock.PlayerId(player)?.CombinedString ?? "";
+                        if (!s.SetRule(rule))
+                        {
+                            resp.Messages.Add(new TerminalMessage("stashnetRulesFull", StationSettings.MaxRules));
+                            return;
+                        }
+                    }
+                    break;
+                default: // RemoveStockRule
+                    ok = s.RemoveRule(text);
+                    break;
+            }
+            if (!ok)
+            {
+                resp.Messages.Add(new TerminalMessage("stashnetRuleRefused", -1));
+                return;
+            }
+            StationSettingsStore.Set(pos, block, s);
+        }
+
+        private static bool ValidFuelMode(string mode)
+        {
+            if (mode == FuelModes.Manual || mode == FuelModes.Auto) return true;
+            if (!StockRule.ValidName(mode)) return false;
+            ItemValue iv = ItemClass.GetItem(mode);
+            return iv != null && !iv.IsEmpty() && ItemClass.GetFuelValue(iv) > 0;
+        }
+
+        /// <summary>The recipe is one this station crafts, and every item named exists in this game.</summary>
+        private static bool ValidRule(Block block, StockRule rule)
+        {
+            Recipe recipe = StationRules.FindRecipe(block, rule.Recipe);
+            if (recipe == null) return false;
+            ItemClass output = recipe.GetOutputItemClass();
+            if (output == null || output.GetItemName() != rule.Item) return false;
+            foreach (var (name, _) in rule.Ingredients)
+            {
+                ItemValue iv = ItemClass.GetItem(name);
+                if (iv == null || iv.IsEmpty() || iv.HasQuality) return false;
+            }
+            return true;
         }
 
         private static void Withdraw(StashNetNetwork net, TerminalRequest req, TerminalResponse resp)
