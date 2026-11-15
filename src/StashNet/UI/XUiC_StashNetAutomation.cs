@@ -22,10 +22,22 @@ namespace StashNet.UI
         private int shownVersion = -1;
         private bool shownActive;
         private Recipe shownRecipe;
+        private bool broken;
 
         public override void Init()
         {
-            base.Init();
+            // This panel sits in the VANILLA station window groups: an exception here would stop every
+            // workbench/forge/campfire window from opening (v0.20.0 bug). Lose the panel, never the stations.
+            try
+            {
+                base.Init();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[StashNet] automation panel failed to initialize, panel disabled: {e}");
+                broken = true;
+                return;
+            }
             rows = GetChildrenByType<XUiC_StashNetRuleRow>();
             amount = GetChildById("amount") as XUiC_Counter;
             if (amount != null)
@@ -47,6 +59,11 @@ namespace StashNet.UI
         public override void OnOpen()
         {
             base.OnOpen();
+            if (broken)
+            {
+                if (viewComponent != null) viewComponent.IsVisible = false;
+                return;
+            }
             shownVersion = -1;
             amount?.ForceTextRefresh();
             Refresh();
@@ -55,6 +72,7 @@ namespace StashNet.UI
         public override void Update(float _dt)
         {
             base.Update(_dt);
+            if (broken) return;
             Recipe selected = SelectedRecipe();
             if (shownVersion == CraftingNetwork.Version && shownActive == CraftingNetwork.Active && shownRecipe == selected) return;
             Refresh();

@@ -84,6 +84,8 @@
 				<button depth="3" name="countDown" style="icon30px, press, held" pos="0,-13" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" />
 				<textfield name="count_input" depth="3" pos="16,0" width="66" height="28" character_limit="7" validation="integer" virtual_keyboard_prompt="vkPromptCount" />
 				<button depth="3" name="countUp" style="icon30px, press, held" pos="96,-13" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" />
+				<!-- The vanilla Counter controller requires countMax (null reference without it, v0.20.0 bug). Hidden: max would be 1,000,000. -->
+				<button depth="3" name="countMax" style="icon30px, press" pos="96,-13" sprite="ui_game_symbol_arrow_max" pivot="center" visible="false" />
 			</rect>
 			<rect name="addRow" depth="3" pos="124,-106" width="98" height="30">
 				<button depth="3" name="btnAddRule" width="98" height="30" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetAddRuleTip" />
