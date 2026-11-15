@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using StashNet.Core.Protocol;
 using StashNet.Core.Stations;
 using StashNet.Crafting;
 using StashNet.Stations;
@@ -9,45 +8,67 @@ using StashNet.Stations;
 namespace StashNet.UI
 {
     /// <summary>
-    /// The AUTOMATION panel under a Network station's output (Mod/Config/XUi_InGame/windows.xml,
-    /// added to every station window group in xui.xml). Hidden at vanilla stations.
-    /// Fuel button (fuel stations only): Manual → Auto → each fuel in storage → Manual.
-    /// Keep in stock: the selected recipe + amount → Add/Update; one row per rule with a remove button.
-    /// The server holds the settings; this panel shows what the last reply said.
+    /// The AUTOMATION tab in the recipe box (vanilla craftingInfoPanel, Mod/Config/XUi_InGame/windows.xml),
+    /// next to Ingredients / Description. The tab button only shows at Network stations. While the tab is
+    /// open (<see cref="TabOpen"/>), AutomationTabPatches hides the vanilla tab contents.
+    /// Keep in stock: the selected recipe + amount → Keep/Update; one row per rule with a remove button.
+    /// Fuel (fuel stations only): ◄ Manual / Auto / each fuel in storage ►, with what the mode does.
+    /// The server holds the settings; this shows what the last reply said.
     /// </summary>
     public class XUiC_StashNetAutomation : XUiController
     {
+        /// <summary>Our tab is showing (only ever true at a Network station).</summary>
+        public static bool TabOpen { get; private set; }
+
+        private XUiC_CraftingInfoWindow infoWindow;
+        private XUiController tabButton;
         private XUiC_Counter amount;
-        private XUiC_StashNetRuleRow[] rows;
-        private int shownVersion = -1;
-        private bool shownActive;
-        private Recipe shownRecipe;
+        private XUiC_StashNetRuleRow[] rows = new XUiC_StashNetRuleRow[0];
         private bool broken;
+        private int shownVersion = -1;
+        private bool shownTab, shownStation;
+        private Recipe shownRecipe;
 
         public override void Init()
         {
-            // This panel sits in the VANILLA station window groups: an exception here would stop every
-            // workbench/forge/campfire window from opening (v0.20.0 bug). Lose the panel, never the stations.
+            // This lives inside the VANILLA recipe box, used by every crafting screen: an exception here
+            // must never take that window down (v0.20.0 lesson). Lose the tab, never the crafting screen.
             try
             {
                 base.Init();
+                infoWindow = GetParentByType<XUiC_CraftingInfoWindow>();
+                tabButton = GetChildById("btnAutomationTab");
+                if (tabButton != null) tabButton.OnPress += (_s, _b) => OpenTab();
+                // The vanilla tab buttons close ours.
+                foreach (XUiController b in VanillaTabButtons())
+                {
+                    b.OnPress += (_s, _b) => CloseTab();
+                }
+                rows = GetChildrenByType<XUiC_StashNetRuleRow>();
+                amount = GetChildById("amount") as XUiC_Counter;
+                if (amount != null)
+                {
+                    amount.MaxCount = StockRule.MaxTarget;
+                    amount.Step = 10;
+                    amount.Count = 100;
+                }
+                Hook("btnAddRule", AddRule);
+                Hook("btnFuelPrev", () => CycleFuel(-1));
+                Hook("btnFuelNext", () => CycleFuel(1));
             }
             catch (Exception e)
             {
-                Log.Error($"[StashNet] automation panel failed to initialize, panel disabled: {e}");
+                Log.Error($"[StashNet] automation tab failed to initialize, tab disabled: {e}");
                 broken = true;
-                return;
             }
-            rows = GetChildrenByType<XUiC_StashNetRuleRow>();
-            amount = GetChildById("amount") as XUiC_Counter;
-            if (amount != null)
-            {
-                amount.MaxCount = StockRule.MaxTarget;
-                amount.Step = 10;
-                amount.Count = 100;
-            }
-            Hook("btnFuel", CycleFuel);
-            Hook("btnAddRule", AddRule);
+        }
+
+        private IEnumerable<XUiController> VanillaTabButtons()
+        {
+            if (infoWindow == null) yield break;
+            if (infoWindow.ingredientsButton != null) yield return infoWindow.ingredientsButton;
+            if (infoWindow.descriptionButton != null) yield return infoWindow.descriptionButton;
+            if (infoWindow.unlockedByButton != null) yield return infoWindow.unlockedByButton;
         }
 
         private void Hook(string id, Action action)
@@ -59,31 +80,64 @@ namespace StashNet.UI
         public override void OnOpen()
         {
             base.OnOpen();
-            if (broken)
-            {
-                if (viewComponent != null) viewComponent.IsVisible = false;
-                return;
-            }
+            TabOpen = false;
             shownVersion = -1;
+            if (broken) return;
             amount?.ForceTextRefresh();
             Refresh();
+        }
+
+        public override void OnClose()
+        {
+            base.OnClose();
+            TabOpen = false;
+        }
+
+        private void OpenTab()
+        {
+            if (broken || !AtNetworkStation()) return;
+            TabOpen = true;
+            SelectTabButtons();
+            Refresh();
+        }
+
+        private void CloseTab()
+        {
+            if (!TabOpen) return;
+            TabOpen = false;
+            SetSelected(tabButton, false);
+            Refresh();
+        }
+
+        /// <summary>Ours selected, the vanilla ones not (vanilla re-selects Ingredients on every recipe change).</summary>
+        public void SelectTabButtons()
+        {
+            foreach (XUiController b in VanillaTabButtons()) SetSelected(b, false);
+            SetSelected(tabButton, true);
+        }
+
+        private static void SetSelected(XUiController button, bool selected)
+        {
+            if (button?.ViewComponent is XUiV_Button v) v.Selected = selected;
         }
 
         public override void Update(float _dt)
         {
             base.Update(_dt);
             if (broken) return;
+            bool station = AtNetworkStation();
+            if (!station && TabOpen) CloseTab();
             Recipe selected = SelectedRecipe();
-            if (shownVersion == CraftingNetwork.Version && shownActive == CraftingNetwork.Active && shownRecipe == selected) return;
+            if (shownVersion == CraftingNetwork.Version && shownTab == TabOpen && shownStation == station && shownRecipe == selected) return;
             Refresh();
         }
 
         private void Refresh()
         {
             shownVersion = CraftingNetwork.Version;
-            shownActive = CraftingNetwork.Active;
+            shownTab = TabOpen;
+            shownStation = AtNetworkStation();
             shownRecipe = SelectedRecipe();
-            SetShown(AtNetworkStation());
 
             List<StockRule> rules = CraftingNetwork.Settings?.Rules ?? new List<StockRule>();
             for (int i = 0; i < rows.Length; i++)
@@ -92,26 +146,16 @@ namespace StashNet.UI
                 rows[i].Show(r, r == null ? 0 : Stored(r.Item));
             }
             RefreshBindingsSelfAndChildren(); // rows have their own bindings
+            if (infoWindow != null) infoWindow.IsDirty = true; // its showingredients/... bindings follow TabOpen
         }
 
-        /// <summary>
-        /// Decided from the open station's block, not CraftingNetwork.Active: our OnOpen runs before the
-        /// window group's OnOpen postfix sets Active, and the game stacks the right column right after
-        /// OnOpen, leaving hidden windows out (v0.20.1 bug: the panel was drawn over Tools).
-        /// </summary>
+        /// <summary>The recipe box belongs to an open Network station (not backpack crafting, not a vanilla station).</summary>
         private bool AtNetworkStation()
         {
+            if (!CraftingNetwork.Active) return false;
             TileEntityWorkstation te = (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.WorkstationData?.TileEntity;
             if (te == null) return false;
             return CraftingNetwork.IsCraftingTerminal(GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block);
-        }
-
-        /// <summary>Show or hide the panel; if that changes while the screen is open, re-stack the column.</summary>
-        private void SetShown(bool show)
-        {
-            if (viewComponent == null || viewComponent.IsVisible == show) return;
-            viewComponent.IsVisible = show;
-            if (windowGroup != null && windowGroup.isShowing) xui.calculateWindowGroupLayout(windowGroup);
         }
 
         private static int Stored(string item) => CraftingNetwork.Listing.Where(a => a.Name == item).Sum(a => a.Count);
@@ -119,14 +163,15 @@ namespace StashNet.UI
         private Recipe SelectedRecipe() =>
             windowGroup?.Controller?.GetChildByType<XUiC_RecipeList>()?.SelectedEntry?.Recipe;
 
-        private void CycleFuel()
+        private void CycleFuel(int direction)
         {
             if (!CraftingNetwork.Active || !CraftingNetwork.HasFuel) return;
-            IEnumerable<string> fuels = CraftingNetwork.Listing
+            List<string> fuels = CraftingNetwork.Listing
                 .Where(a => a.Variant == null && IsFuel(a.Name))
-                .Select(a => a.Name);
+                .Select(a => a.Name)
+                .ToList();
             string current = CraftingNetwork.Settings?.FuelMode ?? FuelModes.Manual;
-            CraftingNetwork.SendFuelMode(FuelModes.Next(current, fuels));
+            CraftingNetwork.SendFuelMode(direction < 0 ? FuelModes.Previous(current, fuels) : FuelModes.Next(current, fuels));
         }
 
         private static bool IsFuel(string name)
@@ -158,11 +203,20 @@ namespace StashNet.UI
         {
             switch (bindingName)
             {
+                case "stashnet_atstation":
+                    value = !broken && AtNetworkStation() ? "true" : "false";
+                    return true;
+                case "stashnet_tabopen":
+                    value = TabOpen ? "true" : "false";
+                    return true;
                 case "stashnet_hasfuel":
                     value = CraftingNetwork.Active && CraftingNetwork.HasFuel ? "true" : "false";
                     return true;
-                case "stashnet_fuel":
-                    value = string.Format(Localization.Get("stashnetFuelLabel"), FuelName(CraftingNetwork.Settings?.FuelMode ?? FuelModes.Manual));
+                case "stashnet_fuelmode":
+                    value = FuelName(CurrentFuelMode);
+                    return true;
+                case "stashnet_fueltip":
+                    value = FuelTip(CurrentFuelMode);
                     return true;
                 case "stashnet_keeplabel":
                     value = shownRecipe == null
@@ -182,11 +236,31 @@ namespace StashNet.UI
             }
         }
 
+        private static string CurrentFuelMode => CraftingNetwork.Settings?.FuelMode ?? FuelModes.Manual;
+
         private static string FuelName(string mode)
         {
             if (mode == FuelModes.Manual) return Localization.Get("stashnetFuelManual");
             if (mode == FuelModes.Auto) return Localization.Get("stashnetFuelAuto");
             return ItemClass.GetItemClass(mode)?.GetLocalizedItemName() ?? mode;
+        }
+
+        private string FuelTip(string mode)
+        {
+            if (mode == FuelModes.Manual) return string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
+            if (mode == FuelModes.Auto) return Localization.Get("stashnetFuelAutoTip");
+            return string.Format(Localization.Get("stashnetFuelItemTip"), FuelName(mode));
+        }
+
+        /// <summary>"Forge", "Campfire"...: the vanilla station this one copies (StashNetCategories), for "like a normal forge".</summary>
+        private string VanillaStationName()
+        {
+            TileEntityWorkstation te = (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.WorkstationData?.TileEntity;
+            Block block = te == null ? null : GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block;
+            string vanilla = block != null && block.Properties.Contains(StationCategoryPatch.Property)
+                ? block.Properties.GetString(StationCategoryPatch.Property)
+                : null;
+            return vanilla == null ? "" : Localization.Get(vanilla).ToLowerInvariant();
         }
     }
 
@@ -217,7 +291,7 @@ namespace StashNet.UI
                     value = rule != null ? "true" : "false";
                     return true;
                 case "stashnet_rule":
-                    value = rule == null ? "" : $"{ItemClass.GetItemClass(rule.Item)?.GetLocalizedItemName() ?? rule.Item}  {stored} / {rule.Target}";
+                    value = rule == null ? "" : $"{ItemClass.GetItemClass(rule.Item)?.GetLocalizedItemName() ?? rule.Item}   {stored} / {rule.Target}";
                     return true;
                 case "stashnet_rulecolor":
                     value = rule != null && stored >= rule.Target ? "150,220,150,255" : "210,210,210,255"; // green once stocked

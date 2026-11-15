@@ -5,9 +5,5 @@
 		</window_group>
 	</append>
 
-	<!-- v0.20.0: the AUTOMATION panel in every window group a Network station opens (vanilla groups,
-	     shared with vanilla stations: the panel hides itself there). Right panel, below the output. -->
-	<append xpath="/xui/window_group[@name='workstation_workbench' or @name='workstation_forge' or @name='workstation_forge_nosmelting' or @name='workstation_chemistryStation' or @name='workstation_campfire' or @name='workstation_cementMixer']">
-		<window name="stashnetAutomation" />
-	</append>
+
 </configs>

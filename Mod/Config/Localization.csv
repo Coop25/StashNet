@@ -72,11 +72,8 @@ stashnetBayNotEmpty,UI,XUi,,,Take the drives out of this bay first.
 stashnetDriveFillLine,UI,XUi,,,{0} / {1} stacks used ({2}) · {3} different items
 stashnetDriveFillEmpty,UI,XUi,,,Empty.
 stashnetDriveFillUnreadable,UI,XUi,,,This drive's data can't be read.
-stashnetAutomationTitle,UI,XUi,,,AUTOMATION
-stashnetFuelLabel,UI,XUi,,,Fuel: {0}
 stashnetFuelManual,UI,XUi,,,Manual
 stashnetFuelAuto,UI,XUi,,,Auto
-stashnetFuelTip,UI,XUi,,,"Click to change. Manual: you light it. Auto: lights itself when there is something to craft or smelt, goes out when idle. A fuel name: Auto, and it refills that fuel from storage."
 stashnetKeepInStock,UI,XUi,,,Keep in stock: {0}
 stashnetPickRecipe,UI,XUi,,,Select a recipe to keep in stock.
 stashnetAddRule,UI,XUi,,,Keep
@@ -87,3 +84,9 @@ stashnetNoRules,UI,XUi,,,No items kept in stock yet.
 stashnetRuleRefused,UI,XUi,,,That can't be automated at this station.
 stashnetRulesFull,UI,XUi,,,This station already keeps {0} items in stock. Remove one first.
 stashnetRuleCantAuto,UI,XUi,,,"This recipe can't be kept in stock (locked, or it uses tools or weapons as ingredients)."
+stashnetAutomationTab,UI,XUi,,,Automation: keep items in stock and run the fire for you
+stashnetKeptHere,UI,XUi,,,Kept in stock at this station:
+stashnetFuelLabelShort,UI,XUi,,,Fuel:
+stashnetFuelManualTip,UI,XUi,,,"You light it yourself, like a normal {0}."
+stashnetFuelAutoTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle. Uses the fuel you put in."
+stashnetFuelItemTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle, and refills {0} from storage (one stack)."

@@ -1,18 +1,18 @@
-# Station automation checklist (v0.20.0)
+# Station automation checklist (v0.21.0)
 
 Use your StashNet test world. You need a Core with drives, and Network stations near it
-(Network Workbench, Network Forge, Network Campfire at least). The new **AUTOMATION** panel is on
-the right side of a station's screen, below OUTPUT.
+(Network Workbench, Network Forge, Network Campfire at least). Automation is a tab in the recipe box:
+select any recipe, then click the **lightning icon** next to the Ingredients and Description icons.
 
-**Please send a screenshot of the Network Forge screen**, so I can check the panel fits.
-
-## 1. The panel
-- [ ] The Network Workbench shows the AUTOMATION panel, but no fuel button.
-- [ ] The Network Forge and Network Campfire show the panel with a "Fuel: Manual" button.
-- [ ] A plain vanilla workbench, forge or campfire does **not** show the panel.
+## 1. The tab and the category icons
+- [ ] Every Network station shows the lightning tab icon. Clicking it shows "Keep ... in stock", the rule list and (forge, campfire, chemistry station) the fuel line with its explanation.
+- [ ] Clicking Ingredients or Description goes back to those. Selecting another recipe while on Automation stays on Automation and changes the "Keep ... in stock" name.
+- [ ] A plain vanilla workbench, forge or campfire, and backpack crafting, show **no** lightning icon.
+- [ ] The category icons above the recipe list now show on every Network station (same as the vanilla station).
+- [ ] Send a screenshot of the Automation tab at the Network Forge.
 
 ## 2. Fuel button and auto-fire
-- [ ] With wood and coal in storage, clicking the fuel button goes Manual → Auto → Coal → Wood → Manual (fuels are listed by item name, so the order may differ).
+- [ ] With wood and coal in storage, the fuel arrows go Manual → Auto → Coal → Wood → Manual (◄ goes backwards). The sentence under it explains each mode.
 - [ ] **Manual:** nothing changes compared to before. You light it yourself, and it keeps burning when idle.
 - [ ] **Auto:** put fuel in the slots, queue a craft and close the screen. The fire lights by itself within about 5 seconds. When the craft finishes, the fire goes out within about 5 seconds.
 - [ ] **Coal (a fuel item):** empty the fuel slots, queue a craft and close the screen. Coal from storage fills the fuel slots (one stack in total), the fire lights, and it goes out when idle.
