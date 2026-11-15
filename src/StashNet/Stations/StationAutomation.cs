@@ -103,7 +103,8 @@ namespace StashNet.Stations
                 sources.Add((name, amount, slot, stored));
             }
             int crafts = Math.Min(needed, StockMath.CraftsAffordable(sources.Select(s => (s.PerCraft, s.Stored))));
-            crafts = Math.Min(crafts, short.MaxValue);
+            int stackSize = Math.Max(1, ItemClass.GetForId(outputType)?.Stacknumber.Value ?? 1);
+            crafts = Math.Min(crafts, Math.Min(StockMath.MaxCraftsPerEntry(rule.OutputCount, stackSize), short.MaxValue));
             if (crafts <= 0) return false;
 
             // Take from storage first; anything short puts back what was taken and gives up.
@@ -139,7 +140,7 @@ namespace StashNet.Stations
                 itemValueType = outputType,
                 count = rule.OutputCount,
                 craftingArea = serverRecipe.craftingArea,
-                craftExpGain = serverRecipe.craftExpGain,
+                craftExpGain = 0, // no crafting XP for automatic crafts; also marks them for AutoCraftRecordPatch
                 craftingTime = rule.CraftTime,
                 craftingToolType = serverRecipe.craftingToolType,
                 craftingTier = rule.Tier,
@@ -205,12 +206,12 @@ namespace StashNet.Stations
             bool hasFuelModule = te.isModuleUsed[FuelModule];
             if (!hasFuelModule || settings.FuelMode == FuelModes.Manual) return false;
 
-            bool queued = te.queue.Any(q => !SlotFree(q));
+            bool queued = CurrentCraftCanOutput(te);
             int[] rawOre = null;
             if (te.isModuleUsed[MaterialInputModule])
             {
                 int raw = te.input.Length - (te.materialNames?.Length ?? 0);
-                rawOre = te.input.Take(Math.Max(0, raw)).Select(s => s == null || s.IsEmpty() ? 0 : s.count).ToArray();
+                rawOre = te.input.Take(Math.Max(0, raw)).Select(s => CanMelt(te, s) ? s.count : 0).ToArray();
             }
             bool work = StationWork.HasWork(queued, XUiM_Recipes.DisableSmelter, rawOre);
 
@@ -228,6 +229,39 @@ namespace StashNet.Stations
                 default:
                     return changed;
             }
+        }
+
+        /// <summary>A recipe is queued and its next output has room in the output slots (else vanilla stalls it).</summary>
+        private static bool CurrentCraftCanOutput(TileEntityWorkstation te)
+        {
+            RecipeQueueItem current = te.queue.Length > 0 ? te.queue[te.queue.Length - 1] : null;
+            if (SlotFree(current)) return te.queue.Any(q => !SlotFree(q)); // vanilla moves the next one up on its tick
+            ItemClass ic = ItemClass.GetForId(current.Recipe.itemValueType);
+            if (ic == null) return false;
+            var slots = te.output.Select(s => s == null || s.IsEmpty()
+                ? (0, 0, 0)
+                : (s.itemValue.type, s.count, Math.Max(1, s.itemValue.ItemClass?.Stacknumber.Value ?? 1))).ToArray();
+            // Quality items never stack, so only an empty slot takes them.
+            int type = ic.HasQuality ? -1 : current.Recipe.itemValueType;
+            return StationWork.OutputFits(slots, type, current.Recipe.count, Math.Max(1, ic.Stacknumber.Value));
+        }
+
+        /// <summary>Raw ore whose melted-metal tally still has room (vanilla stops melting at the tally's MaxCount).</summary>
+        private static bool CanMelt(TileEntityWorkstation te, ItemStack ore)
+        {
+            if (ore == null || ore.IsEmpty() || te.materialNames == null) return false;
+            ItemClass ic = ItemClass.GetForId(ore.itemValue.type);
+            string category = ic?.MadeOfMaterial?.ForgeCategory;
+            if (category == null) return false;
+            for (int j = 0; j < te.materialNames.Length; j++)
+            {
+                if (!category.Equals(te.materialNames[j], StringComparison.OrdinalIgnoreCase)) continue;
+                ItemClass unit = ItemClass.GetItemClass("unit_" + te.materialNames[j]);
+                int slot = te.input.Length - te.materialNames.Length + j;
+                if (unit == null || slot < 0 || slot >= te.input.Length) return false;
+                return te.input[slot].count + ic.GetWeight() <= unit.MaxCount;
+            }
+            return false;
         }
 
         /// <summary>Top the fuel slots up to one full stack of the chosen fuel. Never moves other fuel.</summary>

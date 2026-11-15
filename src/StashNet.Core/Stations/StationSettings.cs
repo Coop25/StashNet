@@ -30,14 +30,17 @@ namespace StashNet.Core.Stations
         public List<(string Name, int Amount)> Ingredients = new List<(string Name, int Amount)>();
 
         /// <summary>rule|item|target|recipe|outputCount|craftTime|tier|owner|name*amt;name*amt</summary>
-        public string ToLine()
+        public string ToLine() => ToLine(true);
+
+        /// <param name="includeOwner">False for text sent to clients: other players' platform IDs stay on the server.</param>
+        public string ToLine(bool includeOwner)
         {
             string ings = string.Join(";", Ingredients.Select(i => i.Name + "*" + i.Amount.ToString(CultureInfo.InvariantCulture)));
             return string.Join("|", new[]
             {
                 "rule", Item, Target.ToString(CultureInfo.InvariantCulture), Recipe,
                 OutputCount.ToString(CultureInfo.InvariantCulture), CraftTime.ToString("R", CultureInfo.InvariantCulture),
-                Tier.ToString(CultureInfo.InvariantCulture), Owner ?? "", ings,
+                Tier.ToString(CultureInfo.InvariantCulture), includeOwner ? Owner ?? "" : "", ings,
             });
         }
 
@@ -68,6 +71,7 @@ namespace StashNet.Core.Stations
             {
                 string[] p = ing.Split('*');
                 if (p.Length != 2 || !ValidName(p[0]) || !TryInt(p[1], 1, MaxIngredientAmount, out int amt)) return Fail("bad ingredient", out error);
+                if (r.Ingredients.Any(i => i.Name == p[0])) return Fail("duplicate ingredient", out error);
                 r.Ingredients.Add((p[0], amt));
             }
             rule = r;
@@ -117,11 +121,12 @@ namespace StashNet.Core.Stations
         public StationSettings Clone() => new StationSettings { FuelMode = FuelMode, Rules = Rules.Select(r => r.Clone()).ToList() };
 
         /// <summary>"fuel &lt;mode&gt;" then one rule line each.</summary>
-        public string Serialize()
+        /// <param name="includeOwners">False for text sent to clients (see StockRule.ToLine).</param>
+        public string Serialize(bool includeOwners = true)
         {
             var sb = new StringBuilder();
             sb.Append("fuel ").Append(FuelMode).Append('\n');
-            foreach (StockRule r in Rules) sb.Append(r.ToLine()).Append('\n');
+            foreach (StockRule r in Rules) sb.Append(r.ToLine(includeOwners)).Append('\n');
             return sb.ToString();
         }
 

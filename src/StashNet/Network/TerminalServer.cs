@@ -95,7 +95,7 @@ namespace StashNet.Network
             FillListing(net, resp);
             // Network stations learn their automation settings from every reply.
             Block block = world.GetBlock(pos).Block;
-            if (Crafting.CraftingNetwork.IsCraftingTerminal(block)) resp.Station = StationSettingsStore.Get(pos, block).Serialize();
+            if (Crafting.CraftingNetwork.IsCraftingTerminal(block)) resp.Station = StationSettingsStore.Get(pos, block).Serialize(includeOwners: false);
             return resp;
         }
 

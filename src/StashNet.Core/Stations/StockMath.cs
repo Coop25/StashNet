@@ -13,6 +13,16 @@ namespace StashNet.Core.Stations
             return (int)((missing + outputCount - 1) / outputCount);
         }
 
+        /// <summary>
+        /// Crafts in one automatic queue entry: about one stack of output, so a big target never pulls
+        /// every ingredient out of storage at once (queued ingredients are lost if the station breaks).
+        /// </summary>
+        public static int MaxCraftsPerEntry(int outputCount, int outputStackSize)
+        {
+            if (outputCount <= 0 || outputStackSize <= 0) return 1;
+            return Math.Max(1, outputStackSize / outputCount);
+        }
+
         /// <summary>Crafts the stored ingredients pay for (0 when there are no ingredients).</summary>
         public static int CraftsAffordable(IEnumerable<(int perCraft, int stored)> ingredients)
         {

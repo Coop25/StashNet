@@ -1,3 +1,5 @@
+using System;
+
 namespace StashNet.Core.Stations
 {
     public enum FireAction
@@ -18,6 +20,26 @@ namespace StashNet.Core.Stations
             foreach (int c in rawOreCounts)
             {
                 if (c > 0) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="count"/> of item <paramref name="type"/> fits the output slots
+        /// (type, count, stackSize; type 0 = empty), like vanilla ItemStack.AddToItemStackArray: one
+        /// partial stack of the same item with room, else an empty slot. A craft that can't output
+        /// stalls, so it isn't work.
+        /// </summary>
+        public static bool OutputFits((int Type, int Count, int StackSize)[] slots, int type, int count, int stackSize)
+        {
+            if (slots == null) return false;
+            foreach (var s in slots)
+            {
+                if (s.Type == type && s.Count > 0 && s.Count + count <= Math.Max(1, s.StackSize)) return true;
+            }
+            foreach (var s in slots)
+            {
+                if (s.Type == 0 || s.Count <= 0) return count <= Math.Max(1, stackSize);
             }
             return false;
         }

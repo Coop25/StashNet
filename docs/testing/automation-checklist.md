@@ -31,7 +31,9 @@ the right side of a station's screen, below OUTPUT.
 - [ ] Not enough ingredients in storage: nothing is queued, and nothing leaves storage.
 - [ ] A campfire recipe that needs a Cooking Pot doesn't run without the pot in the tool slot, and runs with it.
 - [ ] Network Forge recipes (e.g. forged iron) run from the forge's melted iron.
-- [ ] Storage full: nothing breaks. Finished items wait in the station's output.
+- [ ] Storage full: nothing breaks. Finished items wait in the station's output. Once the output slots are full too, the fire goes out (in Auto) instead of burning forever.
+- [ ] A big target (e.g. 5000) queues about one stack per craft entry, not everything at once.
+- [ ] No XP: automatic crafts give nobody crafting XP, even if you open the station while one is running. A craft you start by hand afterwards still gives you your normal XP.
 
 ## 4. Lock, save, removal
 - [ ] Lock the Core with a code. A rule set by you still runs. (With a friend: a rule set by someone without the code stops.)
