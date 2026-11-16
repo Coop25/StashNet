@@ -23,6 +23,12 @@ namespace StashNet.Core.Protocol
         SetStockRule = 7,
         /// <summary>Network station: remove the stock rule for the item named in Text.</summary>
         RemoveStockRule = 8,
+        /// <summary>Network station: output switch, Text "on" (finished items to storage) or "off" (stay in the station).</summary>
+        SetOutput = 9,
+        /// <summary>Forge: add or replace the melt target in Text (MeltTarget line).</summary>
+        SetMeltTarget = 10,
+        /// <summary>Forge: remove the melt target for the metal named in Text.</summary>
+        RemoveMeltTarget = 11,
     }
 
     /// <summary>An item (by name + variant, see ItemCodec) and an amount.</summary>
@@ -69,7 +75,7 @@ namespace StashNet.Core.Protocol
         public int RequestId;
         /// <summary>Withdraw: the items to take (count = how many of each). Deposit/Return: the items. List: empty.</summary>
         public List<ItemAmount> Items = new List<ItemAmount>();
-        /// <summary>SetFuelMode / SetStockRule / RemoveStockRule: the mode, rule line or item name. Empty otherwise.</summary>
+        /// <summary>Station settings ops: the mode, rule line, item name, "on"/"off", melt line or metal. Empty otherwise.</summary>
         public string Text = "";
     }
 
@@ -108,7 +114,7 @@ namespace StashNet.Core.Protocol
         public static TerminalRequest ReadRequest(BinaryReader rd)
         {
             byte op = rd.ReadByte();
-            if (op < (byte)TerminalOp.List || op > (byte)TerminalOp.RemoveStockRule) throw new FormatException($"Unknown terminal op {op}.");
+            if (op < (byte)TerminalOp.List || op > (byte)TerminalOp.RemoveMeltTarget) throw new FormatException($"Unknown terminal op {op}.");
             return new TerminalRequest
             {
                 Op = (TerminalOp)op,

@@ -83,6 +83,7 @@ stashnetRemoveRuleTip,UI,XUi,,,Stop keeping this in stock
 stashnetNoRules,UI,XUi,,,No items kept in stock yet.
 stashnetRuleRefused,UI,XUi,,,That can't be automated at this station.
 stashnetRulesFull,UI,XUi,,,This station already keeps {0} items in stock. Remove one first.
+stashnetMeltsFull,UI,XUi,,,This forge already keeps {0} metals melted. Remove one first.
 stashnetRuleCantAuto,UI,XUi,,,"This recipe can't be kept in stock (locked, or it uses tools or weapons as ingredients)."
 stashnetAutomationTab,UI,XUi,,,Automation: keep items in stock and run the fire for you
 stashnetKeptHere,UI,XUi,,,Kept in stock at this station:

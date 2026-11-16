@@ -87,6 +87,9 @@ namespace StashNet.Network
                 case TerminalOp.SetFuelMode:
                 case TerminalOp.SetStockRule:
                 case TerminalOp.RemoveStockRule:
+                case TerminalOp.SetOutput:
+                case TerminalOp.SetMeltTarget:
+                case TerminalOp.RemoveMeltTarget:
                     ChangeStation(world, player, pos, req, resp);
                     break;
             }
@@ -125,6 +128,27 @@ namespace StashNet.Network
                             return;
                         }
                     }
+                    break;
+                case TerminalOp.SetOutput:
+                    ok = text == "on" || text == "off";
+                    if (ok) s.OutputOn = text == "on";
+                    break;
+                case TerminalOp.SetMeltTarget:
+                    ok = MeltTarget.TryParseLine(text, out MeltTarget melt, out _) && StationRules.MeltMetals(block).Contains(melt.Metal);
+                    if (ok)
+                    {
+                        ItemClass unit = StationRules.UnitOf(melt.Metal);
+                        if (unit != null) melt.Target = Math.Min(melt.Target, Math.Max(1, unit.MaxCount));
+                        melt.Owner = NetworkLock.PlayerId(player)?.CombinedString ?? "";
+                        if (!s.SetMelt(melt))
+                        {
+                            resp.Messages.Add(new TerminalMessage("stashnetMeltsFull", StationSettings.MaxMelts));
+                            return;
+                        }
+                    }
+                    break;
+                case TerminalOp.RemoveMeltTarget:
+                    ok = s.RemoveMelt(text);
                     break;
                 default: // RemoveStockRule
                     ok = s.RemoveRule(text);

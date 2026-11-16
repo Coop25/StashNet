@@ -34,6 +34,37 @@ namespace StashNet.Stations
             return areas;
         }
 
+        /// <summary>Metals this station melts (Workstation InputMaterials, lower case); empty when it doesn't smelt.</summary>
+        public static string[] MeltMetals(Block block)
+        {
+            if (block == null || !block.Properties.Contains("Workstation", "InputMaterials")) return new string[0];
+            return block.Properties.GetString("Workstation", "InputMaterials")
+                .Split(',').Select(m => m.Trim().ToLowerInvariant()).Where(m => m.Length > 0).ToArray();
+        }
+
+        public const string MeltFeedProperty = "StashNetMeltFeed";
+
+        /// <summary>
+        /// Raw items automation may feed per metal, in priority order: block property
+        /// StashNetMeltFeed = "metal:item,item;metal:item". Only these are ever melted automatically.
+        /// </summary>
+        public static Dictionary<string, string[]> MeltFeed(Block block)
+        {
+            var feed = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+            if (block == null || !block.Properties.Contains(MeltFeedProperty)) return feed;
+            foreach (string part in block.Properties.GetString(MeltFeedProperty).Split(';'))
+            {
+                string[] kv = part.Split(':');
+                if (kv.Length != 2) continue;
+                string[] items = kv[1].Split(',').Select(i => i.Trim()).Where(i => i.Length > 0).ToArray();
+                if (kv[0].Trim().Length > 0 && items.Length > 0) feed[kv[0].Trim()] = items;
+            }
+            return feed;
+        }
+
+        /// <summary>The melted-metal tally's item (unit_iron ...) for a metal, or null.</summary>
+        public static ItemClass UnitOf(string metal) => ItemClass.GetItemClass("unit_" + metal);
+
         /// <summary>The server's own recipe with this name that this station crafts, or null.</summary>
         public static Recipe FindRecipe(Block block, string recipeName)
         {

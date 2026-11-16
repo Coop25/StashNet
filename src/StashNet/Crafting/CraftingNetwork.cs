@@ -218,7 +218,7 @@ namespace StashNet.Crafting
             if (response.HasListing) Listing = response.Listing;
             foreach (TerminalMessage m in response.Messages)
             {
-                if (m.Key != "stashnetRuleRefused" && m.Key != "stashnetRulesFull") continue;
+                if (m.Key != "stashnetRuleRefused" && m.Key != "stashnetRulesFull" && m.Key != "stashnetMeltsFull") continue;
                 EntityPlayerLocal player = GameManager.Instance.World?.GetPrimaryPlayer();
                 string text = m.Arg >= 0 ? string.Format(Localization.Get(m.Key), m.Arg) : Localization.Get(m.Key);
                 if (player != null) GameManager.ShowTooltip(player, text, string.Empty, "ui_denied");

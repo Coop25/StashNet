@@ -140,6 +140,9 @@ namespace StashNet.Core.Tests
         [InlineData(TerminalOp.SetFuelMode, "resourceCoal")]
         [InlineData(TerminalOp.SetStockRule, "rule|a|1|a|1|1|1||b*2")]
         [InlineData(TerminalOp.RemoveStockRule, "resourceConcreteMix")]
+        [InlineData(TerminalOp.SetOutput, "off")]
+        [InlineData(TerminalOp.SetMeltTarget, "melt|iron|2000|")]
+        [InlineData(TerminalOp.RemoveMeltTarget, "iron")]
         public void Request_TextRoundTrips(TerminalOp op, string text)
         {
             var back = RoundTrip(new TerminalRequest { Op = op, Text = text });
@@ -156,10 +159,10 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
-        public void Request_OpAboveRemoveStockRule_Refused()
+        public void Request_OpAboveRemoveMeltTarget_Refused()
         {
             var bytes = Serialize(new TerminalRequest { Op = TerminalOp.List });
-            bytes[0] = (byte)TerminalOp.RemoveStockRule + 1;
+            bytes[0] = (byte)TerminalOp.RemoveMeltTarget + 1;
             Assert.Throws<FormatException>(() => Read(bytes));
         }
 
