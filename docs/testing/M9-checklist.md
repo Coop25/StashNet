@@ -84,6 +84,11 @@ Place a Network Workbench near the Core and put some ingredients in storage (not
 ### A8. Restart
 - [ ] Note what's in storage. Stop the server (type `shutdown` in the server window), start it again, and rejoin. Everything is still there, upgraded blocks are still upgraded, and the code still works.
 
+### A9. v0.19.4–0.19.5 fixes
+- [ ] **Category tabs:** with lots of different items stored, all the tabs show in one row (All + up to 13), look fine, and each one filters when clicked.
+- [ ] **Shift freezes the grid:** hold Shift and shift-click several stacks out, including the last stack of an item. While Shift is held, nothing slides around: emptied spots stay empty. Let go of Shift: the grid re-sorts.
+- [ ] **Repair as a joined player:** with repair kits only in storage, click Repair 2–3 times quickly. Only one batch of kits lands in your backpack, then the repair works.
+
 ### Known gap
 - `sn heat` doesn't work for a joined player on a dedicated server yet. It only works for the host or in single-player. Heat itself still runs on the server. Skip the heat checks here.
 

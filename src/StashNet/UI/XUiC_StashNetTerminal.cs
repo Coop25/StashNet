@@ -191,6 +191,7 @@ namespace StashNet.UI
         {
             base.OnClose();
             isOpen = false;
+            frozenOrder = null;
             if (Current == this) Current = null;
             if (xui.DragAndDropWindow != null) xui.DragAndDropWindow.InMenu = false;
             Crafting.CraftingNetwork.CloseRepair();
@@ -215,6 +216,15 @@ namespace StashNet.UI
         {
             base.Update(_dt);
             if (!isOpen) return;
+            // Shift held = the grid keeps its layout (owner, 2026-11-16, like Applied Energistics), so
+            // shift-clicking a stack out doesn't move the cells under the cursor. Released: re-sort.
+            bool shift = InputUtils.ShiftKeyPressed;
+            if (shift && frozenOrder == null) Freeze();
+            else if (!shift && frozenOrder != null)
+            {
+                frozenOrder = null;
+                Render();
+            }
             refreshTimer += _dt;
             if (refreshTimer >= RefreshInterval) RequestListing();
         }
@@ -562,6 +572,11 @@ namespace StashNet.UI
                 : items.OrderByDescending(i => i.Count).ThenBy(i => DisplayName(i.Name), StringComparer.CurrentCultureIgnoreCase);
             shown.Clear();
             shown.AddRange(items);
+            if (frozenOrder != null)
+            {
+                if (frozenFilter == FilterKey) KeepFrozenOrder();
+                else Freeze(); // search, tab or sort changed while shift is held: freeze the new view
+            }
 
             page = Math.Min(page, PageCount - 1);
             int start = page * entries.Length;
@@ -571,6 +586,50 @@ namespace StashNet.UI
                 entries[i].SetItem(idx < shown.Count ? shown[idx] : null);
             }
             RefreshBindingsSelfAndChildren();
+        }
+
+        // ---- Frozen layout while shift is held ----
+        // frozenOrder = the cell ids in on-screen order when shift went down (null = an emptied spot).
+
+        private List<string> frozenOrder;
+        private string frozenFilter;
+
+        private string FilterKey => category + "\u0001" + search + "\u0001" + sortByName;
+
+        private static string CellId(ItemGroup g) => g.Name + "\u0001" + GroupKeyOf(g);
+
+        private void Freeze()
+        {
+            frozenOrder = shown.Select(g => g == null ? null : CellId(g)).ToList();
+            frozenFilter = FilterKey;
+        }
+
+        /// <summary>Puts <see cref="shown"/> back in the frozen order: items that ran out leave an empty
+        /// spot, new items go at the end (and then keep that spot too).</summary>
+        private void KeepFrozenOrder()
+        {
+            var byId = new Dictionary<string, ItemGroup>();
+            foreach (ItemGroup g in shown) byId[CellId(g)] = g;
+            var result = new List<ItemGroup>(frozenOrder.Count);
+            foreach (string id in frozenOrder)
+            {
+                if (id != null && byId.TryGetValue(id, out ItemGroup g))
+                {
+                    result.Add(g);
+                    byId.Remove(id);
+                }
+                else result.Add(null);
+            }
+            foreach (ItemGroup g in shown)
+            {
+                string id = CellId(g);
+                if (!byId.ContainsKey(id)) continue;
+                result.Add(g);
+                frozenOrder.Add(id);
+                byId.Remove(id);
+            }
+            shown.Clear();
+            shown.AddRange(result);
         }
 
         private void Hook(string id, Action action)
