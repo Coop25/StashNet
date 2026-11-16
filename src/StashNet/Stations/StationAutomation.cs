@@ -42,11 +42,12 @@ namespace StashNet.Stations
                 if (settings.IsDefault) return;
 
                 StashNetNetwork net = null;
-                bool needsNetwork = settings.Rules.Count > 0 || FuelModes.IsFuelItem(settings.FuelMode);
+                bool needsNetwork = settings.Rules.Count > 0 || settings.Melts.Count > 0 || FuelModes.IsFuelItem(settings.FuelMode);
                 if (needsNetwork && !StashNetNetwork.TryOpen(world, pos, out net, out _)) net = null;
 
                 bool changed = false;
                 if (net != null) changed |= RunStockRules(world, te, block, settings, net);
+                if (net != null) changed |= RunMelts(te, block, settings, net); // before the fire, so it sees the new ore
                 changed |= RunFire(te, settings, net);
                 if (changed) te.SetModified();
             }
@@ -195,6 +196,95 @@ namespace StashNet.Stations
                 if (i >= 0 && te.input[i] != null && te.input[i].itemValue.type == iv.type) return i;
             }
             return -1;
+        }
+
+        // ---------------------------------------------------------------- melt targets
+
+        /// <summary>
+        /// Forge: for each melt target, pull only the listed raw items (StashNetMeltFeed) from storage
+        /// into the ore slots, just enough that the melted tally reaches the target. Stops on its own.
+        /// </summary>
+        private static bool RunMelts(TileEntityWorkstation te, Block block, StationSettings settings, StashNetNetwork net)
+        {
+            if (settings.Melts.Count == 0 || XUiM_Recipes.DisableSmelter) return false;
+            if (!te.isModuleUsed[MaterialInputModule] || te.materialNames == null || te.input == null) return false;
+            int rawCount = te.input.Length - te.materialNames.Length;
+            if (rawCount <= 0) return false;
+            Dictionary<string, string[]> feed = StationRules.MeltFeed(block);
+
+            bool changed = false;
+            foreach (MeltTarget melt in settings.Melts)
+            {
+                if (!OwnerAllowed(net, melt.Owner)) continue;
+                int metalIndex = Array.FindIndex(te.materialNames, m => m.Equals(melt.Metal, StringComparison.OrdinalIgnoreCase));
+                ItemClass unit = StationRules.UnitOf(melt.Metal);
+                if (metalIndex < 0 || unit == null || !feed.TryGetValue(melt.Metal, out string[] rawNames)) continue;
+
+                int tally = te.input[rawCount + metalIndex]?.count ?? 0;
+                int pending = 0, emptySlots = 0;
+                for (int i = 0; i < rawCount; i++)
+                {
+                    ItemStack s = te.input[i];
+                    if (s == null || s.IsEmpty()) { emptySlots++; continue; }
+                    ItemClass ic = s.itemValue.ItemClass;
+                    if (melt.Metal.Equals(ic?.MadeOfMaterial?.ForgeCategory, StringComparison.OrdinalIgnoreCase)) pending += s.count * ic.GetWeight();
+                }
+                int wanted = MeltFeed.UnitsWanted(tally, pending, melt.Target, unit.MaxCount);
+                if (wanted <= 0) continue;
+
+                var raws = new List<MeltRaw>();
+                foreach (string name in rawNames)
+                {
+                    ItemValue iv = ItemClass.GetItem(name);
+                    ItemClass ic = iv?.ItemClass;
+                    if (iv == null || iv.IsEmpty() || ic == null || ic.GetWeight() <= 0) continue;
+                    // Belt and braces: only items that really melt into this metal.
+                    if (!melt.Metal.Equals(ic.MadeOfMaterial?.ForgeCategory, StringComparison.OrdinalIgnoreCase)) continue;
+                    int stack = Math.Max(1, ic.Stacknumber.Value);
+                    int partial = te.input.Take(rawCount).Where(s => s != null && !s.IsEmpty() && s.itemValue.type == iv.type).Sum(s => Math.Max(0, stack - s.count));
+                    raws.Add(new MeltRaw(name, ic.GetWeight(), StoredCount(net, name, plainOnly: true), stack, partial));
+                }
+                foreach (var (name, count) in MeltFeed.Plan(wanted, raws, emptySlots))
+                {
+                    int got = net.Storage.Extract(name, null, count);
+                    if (got <= 0) continue;
+                    net.SaveDirty(); // drives first: a failure after this duplicates, never loses
+                    int left = PutIntoOreSlots(te, rawCount, ItemClass.GetItem(name), got);
+                    if (left > 0)
+                    {
+                        net.Storage.Insert(name, null, left);
+                        net.SaveDirty();
+                    }
+                    if (left < got) changed = true;
+                }
+            }
+            return changed;
+        }
+
+        /// <summary>Adds to partial stacks of the item in the raw ore slots, then empty ones. Returns what didn't fit.</summary>
+        private static int PutIntoOreSlots(TileEntityWorkstation te, int rawCount, ItemValue item, int count)
+        {
+            int stack = Math.Max(1, item.ItemClass.Stacknumber.Value);
+            int left = count;
+            for (int i = 0; i < rawCount && left > 0; i++)
+            {
+                ItemStack s = te.input[i];
+                if (s == null || s.IsEmpty() || s.itemValue.type != item.type) continue;
+                int add = Math.Min(left, stack - s.count);
+                if (add <= 0) continue;
+                ItemStack c = s.Clone();
+                c.count += add;
+                te.input[i] = c;
+                left -= add;
+            }
+            for (int i = 0; i < rawCount && left > 0; i++)
+            {
+                if (te.input[i] != null && !te.input[i].IsEmpty()) continue;
+                int add = Math.Min(left, stack);
+                te.input[i] = new ItemStack(item.Clone(), add);
+                left -= add;
+            }
+            return left;
         }
 
         // ---------------------------------------------------------------- auto-fuel / auto-fire
