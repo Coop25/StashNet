@@ -217,17 +217,19 @@ namespace StashNet.Network
         {
             if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
             if (req.Op == TerminalOp.DriveUnload) resp.ReturnToDrive.AddRange(req.Items);
-            if (req.Op == TerminalOp.Return) DropAll(player, req.Items);
+            if (req.Op == TerminalOp.Return) DropAll(player, req, req.Items);
         }
 
         /// <summary>Overflow from a client: store what fits, drop the rest. Never sent back.</summary>
         private static void Return(StashNetNetwork net, EntityPlayer player, TerminalRequest req)
         {
+            var rest = new List<ItemAmount>();
             foreach (ItemAmount a in req.Items)
             {
                 int accepted = Storable(a) ? net.Storage.Insert(a.Name, a.Variant, a.Count) : 0;
-                if (accepted < a.Count) Drop(player, new ItemAmount(a.Name, a.Variant, a.Count - accepted));
+                if (accepted < a.Count) rest.Add(new ItemAmount(a.Name, a.Variant, a.Count - accepted));
             }
+            DropAll(player, req, rest);
         }
 
         private static void FillListing(StashNetNetwork net, TerminalResponse resp)
@@ -260,25 +262,30 @@ namespace StashNet.Network
             return !DriveRules.IsDrive(iv) && ItemCodec.CanStore(iv);
         }
 
-        private static void DropAll(EntityPlayer player, System.Collections.Generic.List<ItemAmount> items)
+        /// <summary>
+        /// Items that fit nowhere go into a vanilla loot bag ("DroppedLootContainer", the same bag the game
+        /// uses for a destroyed container's contents) at the player's feet, or at the terminal if the player
+        /// is gone. Never a loose dropped item: those despawn after 60 s (EntityItem lifetime).
+        /// </summary>
+        private static void DropAll(EntityPlayer player, TerminalRequest req, List<ItemAmount> items)
         {
-            foreach (ItemAmount a in items) Drop(player, a);
-        }
-
-        private static void Drop(EntityPlayer player, ItemAmount a)
-        {
-            if (player == null || !ItemCodec.TryDecode(a.Name, a.Variant, out ItemValue template, out _))
+            if (items.Count == 0) return;
+            var stacks = new List<ItemStack>();
+            foreach (ItemAmount a in items)
             {
-                Log.Warning($"[StashNet] Could not drop {a} (item or player missing).");
-                return;
+                if (!ItemCodec.TryDecode(a.Name, a.Variant, out ItemValue template, out _))
+                {
+                    Log.Warning($"[StashNet] Could not drop {a}: the item no longer exists in this game.");
+                    continue;
+                }
+                int maxStack = Math.Max(1, template.ItemClass.Stacknumber.Value);
+                for (int left = a.Count; left > 0; left -= maxStack)
+                    stacks.Add(new ItemStack(template.Clone(), Math.Min(left, maxStack)));
             }
-            int maxStack = Math.Max(1, template.ItemClass.Stacknumber.Value);
-            for (int left = a.Count; left > 0; left -= maxStack)
-            {
-                var stack = new ItemStack(template.Clone(), Math.Min(left, maxStack));
-                GameManager.Instance.ItemDropServer(stack, player.position + Vector3.up, Vector3.zero, player.entityId, 60f);
-            }
-            Log.Out($"[StashNet] Dropped {a} at {player.EntityName}'s feet (storage and backpack full).");
+            if (stacks.Count == 0) return;
+            Vector3 pos = player != null ? player.position : new Vector3(req.X + 0.5f, req.Y + 1f, req.Z + 0.5f);
+            GameManager.Instance.DropContentInLootContainerServer(player?.entityId ?? -1, "DroppedLootContainer", pos, stacks.ToArray());
+            Log.Out($"[StashNet] Dropped {string.Join(", ", items)} in a loot bag at {(player != null ? player.EntityName + "'s feet" : "the terminal")} (storage and backpack full).");
         }
     }
 }

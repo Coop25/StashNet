@@ -89,7 +89,8 @@ namespace StashNet.Network
         {
             StashNetNetwork net = freshNet;
             freshNet = null;
-            return net != null && freshFrame == UnityEngine.Time.frameCount && net.CorePos == corePos ? net : null;
+            // Also refused if a bay it read has been opened since (never write into an open bay).
+            return net != null && freshFrame == UnityEngine.Time.frameCount && net.CorePos == corePos && !net.AnyReadBayOpen() ? net : null;
         }
 
         /// <summary>Called after a real read and after a save: this network's state, from memory.</summary>
@@ -141,7 +142,7 @@ namespace StashNet.Network
             nextBayCheck[pos] = now + BayCheckSeconds;
 
             TEFeatureStorage storage = bay.GetFeature<TEFeatureStorage>();
-            if (storage == null || storage.IsUserAccessing()) return;
+            if (storage == null || StashNetNetwork.BayIsOpen(storage)) return;
 
             BaySlotPrint[] current = null;
             foreach (var kv in entries)

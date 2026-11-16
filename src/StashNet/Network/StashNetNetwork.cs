@@ -63,6 +63,27 @@ namespace StashNet.Network
             return ok;
         }
 
+        /// <summary>
+        /// Someone has this bay open. IsUserAccessing is only set by the local player's own window, so on a
+        /// dedicated server a joined player's open bay shows false there (decompiled V3.4: the server's only
+        /// record is the LockManager lock taken by TEFeatureStorage "Search"). While a player has it open,
+        /// their game ignores server updates to it and later sends its own (stale) copy of the slots back,
+        /// so the server must never change its drives: that would lose deposits and duplicate takes.
+        /// </summary>
+        internal static bool BayIsOpen(TEFeatureStorage storage)
+        {
+            if (storage.IsUserAccessing()) return true;
+            return SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer && LockManager.Instance.IsLockedServer(storage, 0);
+        }
+
+        /// <summary>True if any bay whose drives this read loaded is open now.</summary>
+        internal bool AnyReadBayOpen()
+        {
+            foreach (var b in bays)
+                if (b.Storage != null && BayIsOpen(b.Storage)) return true;
+            return false;
+        }
+
         private static bool TryOpenTimed(World world, Vector3i terminalPos, out StashNetNetwork network, out string problemKey)
         {
             network = null;
@@ -93,7 +114,7 @@ namespace StashNet.Network
                 }
 
                 net.BayCount++;
-                if (storage.IsUserAccessing())
+                if (BayIsOpen(storage))
                 {
                     net.SkippedBays++;
                     net.bays.Add((te.ToWorldPos(), null, true)); // open: re-checked once it closes

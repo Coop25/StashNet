@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using StashNet.Network;
 
 namespace StashNet.Blocks
@@ -36,6 +37,39 @@ namespace StashNet.Blocks
         {
             base.UpdateTick(_world);
             NetworkSummaryCache.CheckBay(_world, Parent);
+            EjectNonDrives();
+        }
+
+        private float nextEjectCheck;
+
+        /// <summary>
+        /// SERVER: drives only, enforced here too (players' games already refuse other items, see
+        /// Patches/DriveBayOnlyDrivesPatches.cs; this catches a modified client). Anything else is moved into
+        /// a loot bag beside the bay, never deleted, and only while nobody has the bay open: an open bay's
+        /// player sends their own copy of the slots back, so changing it then would duplicate the item.
+        /// </summary>
+        private void EjectNonDrives()
+        {
+            if (!SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer) return;
+            float now = UnityEngine.Time.time;
+            if (now < nextEjectCheck) return;
+            nextEjectCheck = now + 2f;
+
+            TEFeatureStorage storage = Parent.GetFeature<TEFeatureStorage>();
+            if (storage == null || StashNetNetwork.BayIsOpen(storage)) return;
+            List<ItemStack> wrong = null;
+            for (int i = 0; i < storage.ItemGrid.Length; i++)
+            {
+                ItemStack s = storage.ItemGrid[i];
+                if (s == null || s.IsEmpty() || DriveRules.IsDrive(s.itemValue)) continue;
+                (wrong = wrong ?? new List<ItemStack>()).Add(s.Clone());
+                storage.UpdateSlot(i, ItemStack.Empty.Clone());
+            }
+            if (wrong == null) return;
+            storage.SetModified();
+            Vector3i pos = Parent.ToWorldPos();
+            GameManager.Instance.DropContentInLootContainerServer(-1, "DroppedLootContainer", pos.ToVector3() + new UnityEngine.Vector3(0.5f, 1f, 0.5f), wrong.ToArray());
+            Log.Out($"[StashNet] Drive Bay at {pos} held {wrong.Count} non-drive stack(s); moved them to a loot bag beside it.");
         }
 
         public override void InitBlockActivationCommands(Action<BlockActivationCommand, TileEntityComposite.EBlockCommandOrder, TileEntityFeatureData> _addCallback)
