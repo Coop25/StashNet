@@ -180,8 +180,10 @@ namespace StashNet.Core.Tests
             Assert.Empty(warnings);
             foreach (string b in new[] { "stashnetDriveBay", "stashnetDriveBayReinforced", "stashnetDriveBayArmored",
                                          "stashnetScrapCore", "stashnetStorageCore", "stashnetAdvancedCore",
-                                         "stashnetTerminal", "stashnetCraftingTerminal" })
+                                         "stashnetTerminal" })
                 Assert.True(spec.TryGet(b, out _), $"paint.xml has no entry for {b}");
+            // Owner, 2026-11-16: the Network Workbench keeps the plain vanilla look.
+            Assert.False(spec.TryGet("stashnetCraftingTerminal", out _), "the Network Workbench should have no skin");
         }
     }
 }
