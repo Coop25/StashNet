@@ -150,3 +150,40 @@ namespace StashNet.Core.Tests
         }
     }
 }
+
+namespace StashNet.Core.Tests
+{
+    // Owner, 2026-11-16: one melt target may use both ore slots; with several, each metal gets one slot.
+    public class MeltSlotShareTests
+    {
+        [Fact]
+        public void SingleTargetUsesEverySlot() => Assert.Equal(2, MeltFeed.SlotsPerMetal(meltTargets: 1, oreSlots: 2));
+
+        [Fact]
+        public void SeveralTargetsGetOneSlotEach()
+        {
+            Assert.Equal(1, MeltFeed.SlotsPerMetal(meltTargets: 2, oreSlots: 2));
+            Assert.Equal(1, MeltFeed.SlotsPerMetal(meltTargets: 3, oreSlots: 2));
+        }
+
+        [Fact]
+        public void FreesTheSmallerDuplicateForAWaitingMetal() =>
+            Assert.Equal(1, MeltFeed.SlotToFree(new[] { "clay", "clay" }, new[] { 40, 10 }, new[] { "clay", "iron" }));
+
+        [Fact]
+        public void NothingFreedWhenTheWaitingMetalAlreadyHasASlot() =>
+            Assert.Equal(-1, MeltFeed.SlotToFree(new[] { "clay", "iron" }, new[] { 40, 10 }, new[] { "clay", "iron", "brass" }));
+
+        [Fact]
+        public void NothingFreedWhenASlotIsEmpty() =>
+            Assert.Equal(-1, MeltFeed.SlotToFree(new[] { "clay", null }, new[] { 40, 0 }, new[] { "clay", "iron" }));
+
+        [Fact]
+        public void NothingFreedWhenNoOtherMetalWaits() =>
+            Assert.Equal(-1, MeltFeed.SlotToFree(new[] { "clay", "clay" }, new[] { 40, 10 }, new[] { "clay" }));
+
+        [Fact]
+        public void MetalNamesIgnoreCase() =>
+            Assert.Equal(0, MeltFeed.SlotToFree(new[] { "Iron", "iron" }, new[] { 5, 9 }, new[] { "brass" }));
+    }
+}

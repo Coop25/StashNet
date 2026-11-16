@@ -174,3 +174,13 @@ the melt row should use the game's own names.
 - **Refill keeps 100, not a stack:** block property `StashNetFuelRefill` (100 on the three fuel
   stations; default 100), at most one stack (`FuelRefill.Want`). Owner: "maybe ten... maybe a hundred";
   Claude picked 100.
+
+## Revision 3 (2026-11-16, owner)
+- **One slot per metal with several melt targets.** Owner: a single melt target may fill both ore slots, but
+  with two or more targets each metal gets one slot ("clay and iron, not clay and clay"). The count is the
+  forge's melt targets (owner-allowed), not only the ones needing feeding right now (`MeltFeed.SlotsPerMetal`).
+  If a metal already fills two slots (e.g. from before a second target was set, or while the other metal was
+  at its target) and a metal that needs feeding, with raw items in storage, holds none, the smaller of the two
+  stacks goes back to storage (`MeltFeed.SlotToFree`, `StationAutomation.FreeSlotForWaitingMetal`). Only
+  plain items go back; anything storage can't take stays. With three targets and two slots, the earliest
+  targets in the list get the slots; the third waits for a slot to finish.

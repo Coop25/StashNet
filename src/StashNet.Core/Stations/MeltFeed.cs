@@ -56,6 +56,37 @@ namespace StashNet.Core.Stations
             return plan;
         }
 
+        /// <summary>Most ore slots one metal may fill: all of them with a single melt target, one each with several (owner, 2026-11-16).</summary>
+        public static int SlotsPerMetal(int meltTargets, int oreSlots) => meltTargets >= 2 ? 1 : oreSlots;
+
+        /// <summary>
+        /// The ore slot to hand back to storage so a waiting metal gets its own slot: only when no slot is
+        /// empty and some wanting metal holds none, the smallest stack of a metal that fills more than one
+        /// slot. <paramref name="slotMetals"/>: each slot's metal, null = empty. Returns -1 for none.
+        /// </summary>
+        public static int SlotToFree(IReadOnlyList<string> slotMetals, IReadOnlyList<int> slotCounts, IEnumerable<string> wantingMetals)
+        {
+            var held = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (string m in slotMetals)
+            {
+                if (m == null) return -1; // an empty slot is free already
+                held.TryGetValue(m, out int n);
+                held[m] = n + 1;
+            }
+            bool someoneWaits = false;
+            foreach (string w in wantingMetals)
+                if (w != null && !held.ContainsKey(w)) { someoneWaits = true; break; }
+            if (!someoneWaits) return -1;
+
+            int best = -1;
+            for (int i = 0; i < slotMetals.Count; i++)
+            {
+                if (held[slotMetals[i]] < 2) continue;
+                if (best < 0 || slotCounts[i] < slotCounts[best]) best = i;
+            }
+            return best;
+        }
+
         /// <summary>
         /// Splits <paramref name="count"/> items over ore slots (their current counts of this item, 0 = empty)
         /// so the slots end up as even as possible: each item goes to the lowest slot (ties: first slot),

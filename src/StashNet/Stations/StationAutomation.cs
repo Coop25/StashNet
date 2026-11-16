@@ -234,15 +234,18 @@ namespace StashNet.Stations
                 if (wanted > 0) wanting.Add((melt, unit, rawNames, wanted));
             }
 
-            bool changed = false;
+            // One melt target may fill every ore slot; with several, each metal gets one slot (owner,
+            // 2026-11-16), so a forge never melts clay + clay while iron waits.
+            int targets = settings.Melts.Count(m => OwnerAllowed(net, m.Owner));
+            int perMetal = MeltFeed.SlotsPerMetal(targets, rawCount);
+            bool changed = perMetal < rawCount && FreeSlotForWaitingMetal(te, rawCount, wanting.Where(w => HasStoredRaw(net, w.Raws)).Select(w => w.Melt.Metal), net);
+
             for (int k = 0; k < wanting.Count; k++)
             {
                 var (melt, _, rawNames, wanted) = wanting[k];
                 int emptySlots = Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
-                bool hasSlot = Enumerable.Range(0, rawCount).Any(i => IsMetal(te.input[i], melt.Metal));
-                int othersWithoutSlot = wanting.Skip(k + 1).Count(w => !Enumerable.Range(0, rawCount).Any(i => IsMetal(te.input[i], w.Melt.Metal)));
-                int usableEmpty = Math.Max(0, emptySlots - othersWithoutSlot);
-                if (usableEmpty == 0 && !hasSlot && emptySlots > 0) usableEmpty = 1;
+                int mine = Enumerable.Range(0, rawCount).Count(i => IsMetal(te.input[i], melt.Metal));
+                int usableEmpty = Math.Min(emptySlots, Math.Max(0, perMetal - mine));
 
                 var raws = new List<MeltRaw>();
                 foreach (string name in rawNames)
@@ -275,6 +278,45 @@ namespace StashNet.Stations
                 }
             }
             return changed;
+        }
+
+        private static bool HasStoredRaw(StationStock net, string[] rawNames) =>
+            rawNames.Any(n => net.Stored(n, plainOnly: true) > 0);
+
+        /// <summary>
+        /// With several melt targets: when every ore slot is full and a metal that can be fed holds none,
+        /// the smaller stack of a metal filling two slots goes back to storage (MeltFeed.SlotToFree).
+        /// What storage can't take stays in the slot.
+        /// </summary>
+        private static bool FreeSlotForWaitingMetal(TileEntityWorkstation te, int rawCount, IEnumerable<string> waitingMetals, StationStock net)
+        {
+            var metals = new string[rawCount];
+            var counts = new int[rawCount];
+            for (int i = 0; i < rawCount; i++)
+            {
+                ItemStack s = te.input[i];
+                if (s == null || s.IsEmpty()) continue;
+                metals[i] = s.itemValue.ItemClass?.MadeOfMaterial?.ForgeCategory ?? s.itemValue.ItemClass?.GetItemName();
+                counts[i] = s.count;
+            }
+            int slot = MeltFeed.SlotToFree(metals, counts, waitingMetals);
+            if (slot < 0) return false;
+
+            ItemStack stack = te.input[slot];
+            // Only plain items go back (storage takes them by name); a quality or modded item a player put
+            // in by hand stays where it is.
+            if (!Drives.ItemCodec.IsPlain(stack.itemValue)) return false;
+            int back = net.Insert(stack.itemValue.ItemClass.GetItemName(), stack.count);
+            if (back <= 0) return false;
+            net.SaveDirty();
+            if (back >= stack.count) te.input[slot] = ItemStack.Empty.Clone();
+            else
+            {
+                ItemStack c = stack.Clone();
+                c.count -= back;
+                te.input[slot] = c;
+            }
+            return true;
         }
 
         private static bool IsMetal(ItemStack s, string metal) =>
