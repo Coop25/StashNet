@@ -91,11 +91,11 @@ stashnetKeptHere,UI,XUi,,,Kept at this station:
 stashnetFireLabel,UI,XUi,,,Fire:
 stashnetFuelManualTip,UI,XUi,,,"You light it yourself, like a normal {0}."
 stashnetFuelAutoTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle. Uses the fuel you put in."
-stashnetFuelItemTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle, and refills {0} from storage (one stack)."
+stashnetFuelItemTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle, and keeps {1} {0} in the fuel slots from storage."
 stashnetRefillLabel,UI,XUi,,,Refill:
 stashnetRefillNone,UI,XUi,,,none
 stashnetRefillNoneTip,UI,XUi,,,"Don't refill: it burns the fuel you put in yourself."
-stashnetRefillTip,UI,XUi,,,"Refill {0} from storage (one stack). {1} stored."
+stashnetRefillTip,UI,XUi,,,"Keep {2} {0} in the fuel slots from storage. {1} stored."
 stashnetMeltLabel,UI,XUi,,,Keep melted:
 stashnetMeltedRow,UI,XUi,,,{0} (melted)
 stashnetAddMeltTip,UI,XUi,,,"Feeds raw scrap from storage into the forge (scrap iron, brass, lead; broken glass, then crushed sand; small stones; clay) until this much is melted. Nothing else is ever melted."

@@ -255,8 +255,8 @@ namespace StashNet.UI
             List<(string Name, int Count)> fuels = FuelChoices();
             for (int i = 0; i < fuelCells.Length; i++)
             {
-                if (i < fuels.Count) fuelCells[i].Show(fuels[i].Name, fuels[i].Count, fuels[i].Name == CurrentFuelMode);
-                else fuelCells[i].Show(null, 0, false);
+                if (i < fuels.Count) fuelCells[i].Show(fuels[i].Name, fuels[i].Count, fuels[i].Name == CurrentFuelMode, RefillAmount());
+                else fuelCells[i].Show(null, 0, false, 0);
             }
             RefreshBindingsSelfAndChildren(); // rows and cells have their own bindings
             // Its showingredients/... bindings follow TabOpen. Only when that changed: dirtying the recipe box
@@ -494,7 +494,7 @@ namespace StashNet.UI
                     string mode = CurrentFuelMode;
                     if (mode == FuelModes.Manual) value = string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
                     else if (mode == FuelModes.Auto) value = Localization.Get("stashnetFuelAutoTip");
-                    else value = string.Format(Localization.Get("stashnetFuelItemTip"), ItemClass.GetItemClass(mode)?.GetLocalizedItemName() ?? mode);
+                    else value = string.Format(Localization.Get("stashnetFuelItemTip"), ItemClass.GetItemClass(mode)?.GetLocalizedItemName() ?? mode, RefillAmount());
                     return true;
                 case "stashnet_outputtip":
                     value = Localization.Get(s != null && !s.OutputOn ? "stashnetOutputOffTip" : "stashnetOutputOnTip");
@@ -508,6 +508,12 @@ namespace StashNet.UI
                 default:
                     return base.GetBindingValueInternal(ref value, bindingName);
             }
+        }
+
+        private int RefillAmount()
+        {
+            TileEntityWorkstation te = OpenStation();
+            return StationRules.FuelRefillAmount(te == null ? null : GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block);
         }
 
         private static int EntryCount() => (CraftingNetwork.Settings?.Rules.Count ?? 0) + (CraftingNetwork.Settings?.Melts.Count ?? 0);
@@ -572,6 +578,7 @@ namespace StashNet.UI
         private string fuel;
         private int count;
         private bool chosen;
+        private int refill;
 
         public override void Init()
         {
@@ -580,11 +587,12 @@ namespace StashNet.UI
             if (button != null) button.OnPress += (_sender, _button) => { if (fuel != null) Picked?.Invoke(fuel); };
         }
 
-        public void Show(string name, int stored, bool isChosen)
+        public void Show(string name, int stored, bool isChosen, int refillAmount)
         {
             fuel = name;
             count = stored;
             chosen = isChosen;
+            refill = refillAmount;
         }
 
         public override bool GetBindingValueInternal(ref string value, string bindingName)
@@ -606,7 +614,7 @@ namespace StashNet.UI
                     value = ic == null ? "" : count.ToString();
                     return true;
                 case "stashnet_fuelname":
-                    value = ic == null ? "" : string.Format(Localization.Get("stashnetRefillTip"), ic.GetLocalizedItemName(), count);
+                    value = ic == null ? "" : string.Format(Localization.Get("stashnetRefillTip"), ic.GetLocalizedItemName(), count, refill);
                     return true;
                 case "stashnet_fuelbg":
                     value = chosen ? "70,105,70,255" : "48,48,48,255";

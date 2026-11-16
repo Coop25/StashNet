@@ -212,25 +212,31 @@ namespace StashNet.Stations
             if (rawCount <= 0) return false;
             Dictionary<string, string[]> feed = StationRules.MeltFeed(block);
 
-            bool changed = false;
+            // Targets that need feeding right now, in order. Each one may spread over every empty ore slot
+            // (both slots melt at once), except that later targets with no slot yet keep one each.
+            var wanting = new List<(MeltTarget Melt, ItemClass Unit, string[] Raws, int Wanted)>();
             foreach (MeltTarget melt in settings.Melts)
             {
                 if (!OwnerAllowed(net, melt.Owner)) continue;
                 int metalIndex = Array.FindIndex(te.materialNames, m => m.Equals(melt.Metal, StringComparison.OrdinalIgnoreCase));
                 ItemClass unit = StationRules.UnitOf(melt.Metal);
                 if (metalIndex < 0 || unit == null || !feed.TryGetValue(melt.Metal, out string[] rawNames)) continue;
-
                 int tally = te.input[rawCount + metalIndex]?.count ?? 0;
-                int pending = 0, emptySlots = 0;
-                for (int i = 0; i < rawCount; i++)
-                {
-                    ItemStack s = te.input[i];
-                    if (s == null || s.IsEmpty()) { emptySlots++; continue; }
-                    ItemClass ic = s.itemValue.ItemClass;
-                    if (melt.Metal.Equals(ic?.MadeOfMaterial?.ForgeCategory, StringComparison.OrdinalIgnoreCase)) pending += s.count * ic.GetWeight();
-                }
+                int pending = Enumerable.Range(0, rawCount).Where(i => IsMetal(te.input[i], melt.Metal))
+                    .Sum(i => te.input[i].count * te.input[i].itemValue.ItemClass.GetWeight());
                 int wanted = MeltFeed.UnitsWanted(tally, pending, melt.Target, unit.MaxCount);
-                if (wanted <= 0) continue;
+                if (wanted > 0) wanting.Add((melt, unit, rawNames, wanted));
+            }
+
+            bool changed = false;
+            for (int k = 0; k < wanting.Count; k++)
+            {
+                var (melt, _, rawNames, wanted) = wanting[k];
+                int emptySlots = Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
+                bool hasSlot = Enumerable.Range(0, rawCount).Any(i => IsMetal(te.input[i], melt.Metal));
+                int othersWithoutSlot = wanting.Skip(k + 1).Count(w => !Enumerable.Range(0, rawCount).Any(i => IsMetal(te.input[i], w.Melt.Metal)));
+                int usableEmpty = Math.Max(0, emptySlots - othersWithoutSlot);
+                if (usableEmpty == 0 && !hasSlot && emptySlots > 0) usableEmpty = 1;
 
                 var raws = new List<MeltRaw>();
                 foreach (string name in rawNames)
@@ -244,12 +250,16 @@ namespace StashNet.Stations
                     int partial = te.input.Take(rawCount).Where(s => s != null && !s.IsEmpty() && s.itemValue.type == iv.type).Sum(s => Math.Max(0, stack - s.count));
                     raws.Add(new MeltRaw(name, ic.GetWeight(), StoredCount(net, name, plainOnly: true), stack, partial));
                 }
-                foreach (var (name, count) in MeltFeed.Plan(wanted, raws, emptySlots))
+                foreach (var (name, count) in MeltFeed.Plan(wanted, raws, usableEmpty))
                 {
                     int got = net.Storage.Extract(name, null, count);
                     if (got <= 0) continue;
-                    net.SaveDirty(); // drives first: a failure after this duplicates, never loses
-                    int left = PutIntoOreSlots(te, rawCount, ItemClass.GetItem(name), got);
+                    // Drives are saved with the items taken out; they go into the slots right below (in memory,
+                    // no failure point in between), and whatever doesn't fit goes straight back.
+                    net.SaveDirty();
+                    int usedBefore = Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
+                    int left = PutIntoOreSlots(te, rawCount, ItemClass.GetItem(name), got, usableEmpty);
+                    usableEmpty -= usedBefore - Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
                     if (left > 0)
                     {
                         net.Storage.Insert(name, null, left);
@@ -261,30 +271,45 @@ namespace StashNet.Stations
             return changed;
         }
 
-        /// <summary>Adds to partial stacks of the item in the raw ore slots, then empty ones. Returns what didn't fit.</summary>
-        private static int PutIntoOreSlots(TileEntityWorkstation te, int rawCount, ItemValue item, int count)
+        private static bool IsMetal(ItemStack s, string metal) =>
+            s != null && !s.IsEmpty() && metal.Equals(s.itemValue.ItemClass?.MadeOfMaterial?.ForgeCategory, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Spreads the items evenly over the ore slots already holding this item plus up to
+        /// <paramref name="usableEmpty"/> empty ones (MeltFeed.Spread), so several slots melt at once.
+        /// Returns what didn't fit.
+        /// </summary>
+        private static int PutIntoOreSlots(TileEntityWorkstation te, int rawCount, ItemValue item, int count, int usableEmpty)
         {
             int stack = Math.Max(1, item.ItemClass.Stacknumber.Value);
-            int left = count;
-            for (int i = 0; i < rawCount && left > 0; i++)
+            var slots = new List<int>();
+            for (int i = 0; i < rawCount; i++)
             {
                 ItemStack s = te.input[i];
-                if (s == null || s.IsEmpty() || s.itemValue.type != item.type) continue;
-                int add = Math.Min(left, stack - s.count);
-                if (add <= 0) continue;
-                ItemStack c = s.Clone();
-                c.count += add;
-                te.input[i] = c;
-                left -= add;
+                if (s != null && !s.IsEmpty() && s.itemValue.type == item.type) slots.Add(i);
             }
-            for (int i = 0; i < rawCount && left > 0; i++)
+            for (int i = 0; i < rawCount && usableEmpty > 0; i++)
             {
                 if (te.input[i] != null && !te.input[i].IsEmpty()) continue;
-                int add = Math.Min(left, stack);
-                te.input[i] = new ItemStack(item.Clone(), add);
-                left -= add;
+                slots.Add(i);
+                usableEmpty--;
             }
-            return left;
+            int[] add = MeltFeed.Spread(count, slots.Select(i => te.input[i] == null || te.input[i].IsEmpty() ? 0 : te.input[i].count).ToArray(), stack);
+            int placed = 0;
+            for (int j = 0; j < slots.Count; j++)
+            {
+                if (add[j] <= 0) continue;
+                ItemStack s = te.input[slots[j]];
+                if (s == null || s.IsEmpty()) te.input[slots[j]] = new ItemStack(item.Clone(), add[j]);
+                else
+                {
+                    ItemStack c = s.Clone();
+                    c.count += add[j];
+                    te.input[slots[j]] = c;
+                }
+                placed += add[j];
+            }
+            return count - placed;
         }
 
         // ---------------------------------------------------------------- auto-fuel / auto-fire
@@ -354,7 +379,7 @@ namespace StashNet.Stations
             return false;
         }
 
-        /// <summary>Top the fuel slots up to one full stack of the chosen fuel. Never moves other fuel.</summary>
+        /// <summary>Top the chosen fuel up to the station's refill amount (StashNetFuelRefill, at most a stack). Never moves other fuel.</summary>
         private static bool Refuel(TileEntityWorkstation te, string fuelName, StashNetNetwork net)
         {
             ItemValue fuel = ItemClass.GetItem(fuelName);
@@ -364,7 +389,8 @@ namespace StashNet.Stations
             ItemStack[] slots = te.fuel;
             int loaded = slots.Where(s => s != null && !s.IsEmpty() && s.itemValue.type == fuel.type).Sum(s => s.count);
             int room = slots.Sum(s => s == null || s.IsEmpty() ? stackSize : s.itemValue.type == fuel.type ? Math.Max(0, stackSize - s.count) : 0);
-            int want = Math.Min(stackSize - loaded, room);
+            int refill = StationRules.FuelRefillAmount(GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block);
+            int want = FuelRefill.Want(loaded, room, refill, stackSize);
             if (want <= 0) return false;
 
             int got = net.Storage.Extract(fuelName, null, want);

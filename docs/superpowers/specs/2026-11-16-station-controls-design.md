@@ -166,3 +166,11 @@ the melt row should use the game's own names.
   now use alpha 3/255.
 - **Metal names** = the forge window's own labels (`lbl<metal>`: Iron, Brass, Lead, Sand, Stone, Clay),
   like `XUiC_WorkstationMaterialInputWindow`.
+
+## Revision 2 (2026-11-16, owner)
+- **Use both ore slots:** melt feeding spreads each metal's raw items evenly over the slots already holding
+  that item plus the empty ones (`MeltFeed.Spread`), so both slots melt at once. When several targets
+  need feeding, each later target with no slot yet keeps one empty slot (two metals = one slot each).
+- **Refill keeps 100, not a stack:** block property `StashNetFuelRefill` (100 on the three fuel
+  stations; default 100), at most one stack (`FuelRefill.Want`). Owner: "maybe ten... maybe a hundred";
+  Claude picked 100.

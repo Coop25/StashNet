@@ -42,6 +42,16 @@ namespace StashNet.Stations
                 .Split(',').Select(m => m.Trim().ToLowerInvariant()).Where(m => m.Length > 0).ToArray();
         }
 
+        public const string FuelRefillProperty = "StashNetFuelRefill";
+        public const int DefaultFuelRefill = 100;
+
+        /// <summary>How much of the chosen fuel automation keeps in the fuel slots (block property StashNetFuelRefill, default 100).</summary>
+        public static int FuelRefillAmount(Block block)
+        {
+            if (block == null || !block.Properties.Contains(FuelRefillProperty)) return DefaultFuelRefill;
+            return int.TryParse(block.Properties.GetString(FuelRefillProperty), out int n) && n > 0 ? n : DefaultFuelRefill;
+        }
+
         public const string MeltFeedProperty = "StashNetMeltFeed";
 
         /// <summary>

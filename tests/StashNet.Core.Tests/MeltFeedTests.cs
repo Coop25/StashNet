@@ -88,3 +88,65 @@ namespace StashNet.Core.Tests
         }
     }
 }
+
+namespace StashNet.Core.Tests
+{
+    public class MeltSpreadTests
+    {
+        [Fact]
+        public void SplitsEvenlyIntoTwoEmptySlots()
+        {
+            Assert.Equal(new[] { 50, 50 }, MeltFeed.Spread(100, new[] { 0, 0 }, 6000));
+        }
+
+        [Fact]
+        public void EvensOutAnExistingStackFirst()
+        {
+            // Slot 0 already holds 40 of this item, slot 1 is empty: end with 70 / 70.
+            Assert.Equal(new[] { 30, 70 }, MeltFeed.Spread(100, new[] { 40, 0 }, 6000));
+        }
+
+        [Fact]
+        public void OddAmountGoesToTheFirstSlots()
+        {
+            Assert.Equal(new[] { 51, 50 }, MeltFeed.Spread(101, new[] { 0, 0 }, 6000));
+        }
+
+        [Fact]
+        public void RespectsStackSize()
+        {
+            Assert.Equal(new[] { 10, 20 }, MeltFeed.Spread(30, new[] { 90, 80 }, 100));
+        }
+
+        [Fact]
+        public void LeftoverWhenNoRoom()
+        {
+            int[] add = MeltFeed.Spread(50, new[] { 95 }, 100);
+            Assert.Equal(new[] { 5 }, add);
+        }
+
+        [Fact]
+        public void PlanCanUseEverySharedEmptySlot()
+        {
+            // The plan itself is unchanged: empty slots are room; the forge decides which slots to spread over.
+            var plan = MeltFeed.Plan(100, new List<MeltRaw> { new MeltRaw("resourceScrapIron", 1, 1000, 6000, 0) }, 2);
+            Assert.Equal(new[] { ("resourceScrapIron", 100) }, plan);
+        }
+    }
+
+    public class FuelRefillTests
+    {
+        [Fact]
+        public void TopsUpToTheRefillAmount() => Assert.Equal(70, FuelRefill.Want(loaded: 30, room: 5000, refillAmount: 100, stackSize: 1000));
+
+        [Fact]
+        public void NothingWhenAlreadyEnough() => Assert.Equal(0, FuelRefill.Want(loaded: 120, room: 5000, refillAmount: 100, stackSize: 1000));
+
+        [Fact]
+        public void NeverMoreThanAStackOrTheRoom()
+        {
+            Assert.Equal(50, FuelRefill.Want(loaded: 0, room: 5000, refillAmount: 100, stackSize: 50));
+            Assert.Equal(20, FuelRefill.Want(loaded: 0, room: 20, refillAmount: 100, stackSize: 1000));
+        }
+    }
+}

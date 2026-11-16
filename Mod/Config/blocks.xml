@@ -326,6 +326,8 @@
 			<property name="StashNetCraftingTerminal" value="true" />
 			<!-- Recipe category tabs: the vanilla station's list (ui_display.xml), see Crafting/StationCategoryPatch.cs. -->
 			<property name="StashNetCategories" value="forge" />
+			<!-- Refill (Station tab): how much of the chosen fuel automation keeps in the fuel slots. -->
+			<property name="StashNetFuelRefill" value="100" />
 			<!-- Raw items automation may feed into the forge per metal, in priority order (melt targets, Stations/StationAutomation.cs). Nothing else is ever melted automatically. -->
 			<property name="StashNetMeltFeed" value="iron:resourceScrapIron;brass:resourceScrapBrass;lead:resourceScrapLead;glass:resourceBrokenGlass,resourceCrushedSand;stone:resourceRockSmall;clay:resourceClayLump" />
 			<property name="WorkstationWindow" value="workstation_forge" />
@@ -342,6 +344,8 @@
 			<property name="StashNetCraftingTerminal" value="true" />
 			<!-- Recipe category tabs: the vanilla station's list (ui_display.xml), see Crafting/StationCategoryPatch.cs. -->
 			<property name="StashNetCategories" value="chemistryStation" />
+			<!-- Refill (Station tab): how much of the chosen fuel automation keeps in the fuel slots. -->
+			<property name="StashNetFuelRefill" value="100" />
 			<property name="WorkstationWindow" value="workstation_chemistryStation" />
 			<property class="Workstation">
 				<property name="CraftingAreaRecipes" value="chemistryStation" />
@@ -356,6 +360,8 @@
 			<property name="StashNetCraftingTerminal" value="true" />
 			<!-- Recipe category tabs: the vanilla station's list (ui_display.xml), see Crafting/StationCategoryPatch.cs. -->
 			<property name="StashNetCategories" value="campfire" />
+			<!-- Refill (Station tab): how much of the chosen fuel automation keeps in the fuel slots. -->
+			<property name="StashNetFuelRefill" value="100" />
 			<property name="WorkstationWindow" value="workstation_campfire" />
 			<property class="Workstation">
 				<property name="CraftingAreaRecipes" value="campfire" />

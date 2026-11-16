@@ -55,6 +55,39 @@ namespace StashNet.Core.Stations
             }
             return plan;
         }
+
+        /// <summary>
+        /// Splits <paramref name="count"/> items over ore slots (their current counts of this item, 0 = empty)
+        /// so the slots end up as even as possible: each item goes to the lowest slot (ties: first slot),
+        /// never past the stack size. Returns what to add per slot; anything that doesn't fit is left out.
+        /// More filled slots = more melting at once.
+        /// </summary>
+        public static int[] Spread(int count, int[] slotCounts, int stackSize)
+        {
+            int[] now = (int[])slotCounts.Clone();
+            int[] add = new int[now.Length];
+            int stack = Math.Max(1, stackSize);
+            for (int left = count; left > 0; left--)
+            {
+                int best = -1;
+                for (int i = 0; i < now.Length; i++)
+                {
+                    if (now[i] >= stack) continue;
+                    if (best < 0 || now[i] < now[best]) best = i;
+                }
+                if (best < 0) break;
+                now[best]++;
+                add[best]++;
+            }
+            return add;
+        }
+    }
+
+    /// <summary>How much fuel the refill moves: top the chosen fuel up to the refill amount (at most a stack).</summary>
+    public static class FuelRefill
+    {
+        public static int Want(int loaded, int room, int refillAmount, int stackSize) =>
+            Math.Max(0, Math.Min(Math.Min(refillAmount, Math.Max(1, stackSize)) - loaded, room));
     }
 
     /// <summary>Which stored quality items (no mods) a craft uses: lowest quality first.</summary>

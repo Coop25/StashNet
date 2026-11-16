@@ -7,6 +7,7 @@ the recipe box. At Network stations it opens by itself when no recipe is selecte
 ## 0. New in v0.22.0 / v0.22.1 (two tabs: lightning = Stock, fire = Station)
 - [ ] **Tab without a recipe:** open the Network Forge without clicking a recipe. The recipe box shows with the Stock tab open (or the Station tab, if that was the last one you used at a forge this game). Stock: "Select a recipe to keep in stock", Keep melted, the list. Station (fire icon): Finished items, Fire, Refill, each with a line saying what it does. Click a backpack item: its info shows instead (like vanilla); click a recipe: the box comes back.
 - [ ] **Melt names** match the forge window: Iron, Brass, Lead, Sand (= glass), Stone, Clay.
+- [ ] **Both ore slots:** with an Iron target and both ore slots empty, scrap iron goes into BOTH slots (about half each) and both melt at once. With Iron and Clay targets and both slots empty, each gets one slot.
 - [ ] Click a recipe: the box switches to Ingredients by itself (the tab only opened because nothing was selected). Click the lightning icon yourself, then pick other recipes: it stays on Automation.
 - [ ] Ingredients / Description buttons do nothing until a recipe is picked; with a recipe they work as before.
 - [ ] With no recipe selected, type an amount into the melt box: the box keeps your typing (doesn't lose focus every second or two).
@@ -30,7 +31,7 @@ the recipe box. At Network stations it opens by itself when no recipe is selecte
 ## 2. Auto-fire
 - [ ] **Fire: Myself:** nothing changes compared to before. You light it yourself, and it keeps burning when idle.
 - [ ] **Auto:** put fuel in the slots, queue a craft and close the screen. The fire lights by itself within about 5 seconds. When the craft finishes, the fire goes out within about 5 seconds.
-- [ ] **Auto + Refill Coal:** empty the fuel slots, queue a craft and close the screen. Coal from storage fills the fuel slots (one stack in total), the fire lights, and it goes out when idle.
+- [ ] **Auto + Refill Coal:** empty the fuel slots, queue a craft and close the screen. Coal from storage fills the fuel slots up to 100 (not a whole stack), the fire lights, and it goes out when idle.
 - [ ] **Forge smelting:** in Auto, put ore in the forge and close the screen. It lights and keeps burning until all the ore has melted, then goes out, even though the melted metal stays inside.
 - [ ] Other fuel already in the slots (wood while Refill is Coal) is left alone.
 
