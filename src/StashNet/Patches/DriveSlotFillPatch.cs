@@ -16,7 +16,7 @@ namespace StashNet.Patches
     {
         public static void Postfix(XUiC_ItemStack __instance, ref string _value, string _bindingName, ref bool __result)
         {
-            if (_bindingName == null || !_bindingName.StartsWith("stashnet")) return;
+            if (_bindingName == null || !_bindingName.StartsWith("stashnet", System.StringComparison.Ordinal)) return;
 
             ItemStack stack = __instance.ItemStack;
             DriveFill fill = stack != null && !stack.IsEmpty() && DriveRules.IsDrive(stack.itemValue)

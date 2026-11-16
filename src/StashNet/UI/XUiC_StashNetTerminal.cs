@@ -41,6 +41,9 @@ namespace StashNet.UI
         private int page;
         private float refreshTimer;
         private int lastActionRequestId = -1;
+        // Amounts already asked for since the last listing, per stored member (name, variant), so a
+        // quick second click on a grouped cell asks the members that still hold something.
+        private readonly Dictionary<(string, string), int> pendingTaken = new Dictionary<(string, string), int>();
         private bool isOpen;
         private string usage = "";
         private string status = "";
@@ -224,6 +227,8 @@ namespace StashNet.UI
                 listing.Clear();
                 listing.AddRange(response.Listing);
                 listingLoaded = true;
+                // Request ids only grow, so a listing for the last action (or later) already shows its takes.
+                if (response.RequestId >= lastActionRequestId) pendingTaken.Clear();
                 SetupCategories();
                 usage = string.Format(Localization.Get("stashnetUsage"), response.DistinctItems, response.UsedStacks, response.MaxStacks, response.Drives);
             }
@@ -242,8 +247,21 @@ namespace StashNet.UI
         {
             if (group == null || count <= 0) return;
             TerminalRequest request = NewRequest(TerminalOp.Withdraw);
-            request.Items.AddRange(ListingGroups.Split(group.Members, count));
-            if (request.Items.Count > 0) SendAction(request);
+            var left = new List<ItemAmount>(group.Members.Count);
+            foreach (ItemAmount m in group.Members)
+            {
+                pendingTaken.TryGetValue((m.Name, m.Variant ?? ""), out int asked);
+                left.Add(new ItemAmount(m.Name, m.Variant, m.Count - asked));
+            }
+            request.Items.AddRange(ListingGroups.Split(left, count));
+            if (request.Items.Count == 0) return;
+            foreach (ItemAmount s in request.Items)
+            {
+                var key = (s.Name, s.Variant ?? "");
+                pendingTaken.TryGetValue(key, out int asked);
+                pendingTaken[key] = asked + s.Count;
+            }
+            SendAction(request);
         }
 
         // ---- Selection + info panel (v0.19.0, owner 2026-11-14) ----

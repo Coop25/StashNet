@@ -21,9 +21,9 @@
 				<label depth="4" name="sortLabel" pos="0,-4" width="176" height="24" font_size="20" justify="center" text="{stashnet_sort}" />
 			</rect>
 
-			<!-- Category tabs (All + the game's own item categories, as in the backpack filter). Filled in code. -->
-			<grid depth="3" name="categories" pos="24,-99" rows="1" cols="11" cell_width="42" cell_height="34" repeat_content="true" controller="CategoryList" allow_key_paging="false" hide_gamepad_callouts="true">
-				<category_icon size="30" collider_scale="1" />
+			<!-- Category tabs (All + the game's own item categories, as in the backpack filter). 14 slots = All + the 13 vanilla trader categories. Filled in code. -->
+			<grid depth="3" name="categories" pos="6,-99" rows="1" cols="14" cell_width="34" cell_height="34" repeat_content="true" controller="CategoryList" allow_key_paging="false" hide_gamepad_callouts="true">
+				<category_icon size="28" collider_scale="1" />
 			</grid>
 
 			<label depth="2" name="usage" pos="10,-116" width="466" height="24" font_size="20" text="{stashnet_usage}" />

@@ -19,6 +19,7 @@ namespace StashNet.Skins
         public Renderer[] Renderers;
         public Material[][] Originals;
         internal readonly List<AudioPlayer> Silenced = new List<AudioPlayer>();
+        internal readonly List<AudioSource> Muted = new List<AudioSource>();
         private readonly Dictionary<Material, (Texture tex, Vector2 scale, Vector2 offset)> screens =
             new Dictionary<Material, (Texture, Vector2, Vector2)>();
 
@@ -61,6 +62,13 @@ namespace StashNet.Skins
             if (Renderers != null)
                 for (int i = 0; i < Renderers.Length; i++)
                     if (Renderers[i] != null) Renderers[i].sharedMaterials = Originals[i];
+            RestoreSound();
+            foreach (Material m in new List<Material>(screens.Keys)) RestoreScreen(m);
+        }
+
+        /// <summary>Undoes the mute: sound players back on LightLOD, players re-enabled, sources unmuted.</summary>
+        internal void RestoreSound()
+        {
             foreach (KeyValuePair<LightLOD, (AudioPlayer player, string cycling)> l in lights)
                 if (l.Key != null)
                 {
@@ -70,7 +78,8 @@ namespace StashNet.Skins
             lights.Clear();
             foreach (AudioPlayer p in Silenced) if (p != null) p.enabled = true;
             Silenced.Clear();
-            foreach (Material m in new List<Material>(screens.Keys)) RestoreScreen(m);
+            foreach (AudioSource a in Muted) if (a != null) a.mute = false;
+            Muted.Clear();
         }
 
         /// <summary>Does the world still hold this StashNet block at this model's spot?</summary>

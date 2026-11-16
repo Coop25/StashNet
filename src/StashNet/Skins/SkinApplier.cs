@@ -56,7 +56,16 @@ namespace StashNet.Skins
                     if (p.enabled) owner.Silenced.Add(p);
                     p.enabled = false;
                 }
-                foreach (AudioSource a in owner.GetComponentsInChildren<AudioSource>(true)) a.mute = true;
+                foreach (AudioSource a in owner.GetComponentsInChildren<AudioSource>(true))
+                {
+                    if (a.mute) continue;
+                    owner.Muted.Add(a);
+                    a.mute = true;
+                }
+            }
+            else
+            {
+                owner.RestoreSound(); // mute switched off by a reload, or the block isn't painted
             }
         }
 

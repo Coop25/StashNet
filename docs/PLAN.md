@@ -178,6 +178,8 @@ Each milestone ends with something you can load and try in-game. A detailed step
 - **More stations** in the Crafting Terminal (forge, chem station).
 - **Autocrafting** — recipe cartridges, crafting queue, sub-recipes.
 - **Custom 3D models and textures.**
+- **Speed follow-ups from the pre-1.0 review (2026-11-16):** the drive fill cache keys on the drive's whole data text (`UI/DriveFillCache.cs`), and the terminal re-sorts the whole listing on every page/scroll (`XUiC_StashNetTerminal.Render`). Only matters with very large networks; fix if anyone reports UI hitches. Also: the Repair button's enabled state can lag behind network stock while a terminal stays open (clicking just does nothing).
+- **Mod compatibility API (task, owner asked 2026-11-16).** A public way for other mods to use StashNet: e.g. read a network's contents, insert/take items, react to changes. It must go through the server-side path (`TerminalServer` / `StashNetNetwork.TryOpen`) so the no-dupe / never-lose-items rules hold. Open questions before design: who the users are (a specific mod or modders in general) and what they'd build. Also check the owner's other storage mods (WraithsStorageSolutions, DarkfireAutoSortChest) for conflicts or integration chances.
 - **Running cost (balance lever).** Decide after playtesting M8 whether the network needs an ongoing cost to stay balanced: fuel the Core burns while the network is used, or electricity (generator/solar). Raised by the owner 2026-11-13; parked so M8 could ship with prices and heat first.
 - ~~**Selling a full drive to a trader** destroys its contents.~~ Guarded in v0.17.0: a drive that holds items can't be sold to a trader (unload it first). Stocking your own vending machine still works and keeps the contents.
 
