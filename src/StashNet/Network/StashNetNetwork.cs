@@ -28,8 +28,8 @@ namespace StashNet.Network
 
         private StashNetNetwork() { }
 
-        /// <summary>Every bay seen by this read (null storage = open, skipped), for the shared summary.</summary>
-        private readonly List<(Vector3i Pos, TEFeatureStorage Storage)> bays = new List<(Vector3i, TEFeatureStorage)>();
+        /// <summary>Every bay seen by this read (null storage = open, skipped; Ours false = another Core's), for the shared summary.</summary>
+        private readonly List<(Vector3i Pos, TEFeatureStorage Storage, bool Ours)> bays = new List<(Vector3i, TEFeatureStorage, bool)>();
         private int radius;
 
         public Vector3i CorePos { get; private set; }
@@ -88,18 +88,18 @@ namespace StashNet.Network
                 if (!IsOwner(cores, te.ToWorldPos(), corePos))
                 {
                     net.OtherCoreBays++;
-                    net.bays.Add((te.ToWorldPos(), storage)); // seen, so its changes are noticed
+                    net.bays.Add((te.ToWorldPos(), null, false)); // not ours: the bay check ignores it here
                     continue;
                 }
 
                 net.BayCount++;
-                if (!storage.IsUserAccessing()) net.bays.Add((te.ToWorldPos(), storage));
                 if (storage.IsUserAccessing())
                 {
                     net.SkippedBays++;
-                    net.bays.Add((te.ToWorldPos(), null)); // open: re-checked once it closes
+                    net.bays.Add((te.ToWorldPos(), null, true)); // open: re-checked once it closes
                     continue;
                 }
+                net.bays.Add((te.ToWorldPos(), storage, true));
                 for (int i = 0; i < storage.ItemGrid.Length; i++)
                 {
                     ItemValue drive = storage.ItemGrid[i].itemValue;

@@ -61,3 +61,10 @@ the recipe box. At Network stations it opens by itself when no recipe is selecte
 
 ## Log
 After testing, I'll check the newest `output_log_client__*.txt` for `[StashNet]` warnings, such as "automation at ...".
+
+## 6. Shared network summary (v0.23.0)
+- [ ] Everything above still works the same (keep in stock, melting, refill, finished items to storage).
+- [ ] With 2+ forges at their melt targets and nothing to do, `sn perf reset`, wait a minute, `sn perf`: "Real network reads" is low (about 1 per minute per network from the backstop, plus any terminal use), and "Answered from the shared summary" counts up.
+- [ ] Put scrap iron into storage through a Storage Terminal while a forge's Iron target is short: it feeds within ~5 s.
+- [ ] Take a drive holding scrap iron out of a bay by hand, then put it back: the forge notices within a few seconds both ways ("Summary rebuilds (drives changed)" in `sn perf`).
+- [ ] Storage completely full but some arrows already stored: finished arrows at a Network station still move into storage.

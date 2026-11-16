@@ -16,6 +16,7 @@ namespace StashNet.Stations
         private readonly World world;
         private readonly Vector3i stationPos;
         private readonly NetworkSummary summary;
+        private readonly Vector3i corePos;
         private StashNetNetwork net;
         private bool opened;
 
@@ -24,6 +25,7 @@ namespace StashNet.Stations
             this.world = world;
             this.stationPos = stationPos;
             this.summary = summary;
+            this.corePos = corePos;
             CoreLock = NetworkLock.GetCoreLock(world, corePos);
         }
 
@@ -53,7 +55,11 @@ namespace StashNet.Stations
         {
             if (opened) return net != null;
             opened = true;
-            if (!StashNetNetwork.TryOpen(world, stationPos, out net, out _, "station takes items")) net = null;
+            // Reuse the read a summary rebuild just did this frame; else a fresh read. Never a different Core
+            // than the one whose summary (and lock) this check used.
+            net = NetworkSummaryCache.TakeFresh(corePos);
+            if (net == null && !StashNetNetwork.TryOpen(world, stationPos, out net, out _, "station takes items")) net = null;
+            if (net != null && net.CorePos != corePos) net = null;
             return net != null;
         }
     }

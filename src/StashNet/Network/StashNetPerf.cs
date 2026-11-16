@@ -44,7 +44,7 @@ namespace StashNet.Network
         {
             float secs = System.Math.Max(1f, UnityEngine.Time.time - since);
             float mins = secs / 60f;
-            yield return $"Since {secs:0} s ago (sn perf reset to restart):";
+            yield return $"Server numbers (on a joined client these stay near 0; run it in the server console). Since {secs:0} s ago (sn perf reset to restart):";
             yield return $"  Real network reads: {reads} ({reads / mins:0.0}/min), {readMs:0.0} ms total, {(reads > 0 ? readMs / reads : 0):0.00} ms avg, {maxReadMs:0.00} ms max.";
             foreach (var kv in readsBy) yield return $"    by {kv.Key}: {kv.Value}";
             yield return $"  Answered from the shared summary (no read): {hits} ({hits / mins:0.0}/min).";

@@ -25,6 +25,13 @@ namespace StashNet.Blocks
         /// SERVER: tells the shared network summary when this bay's drives change outside StashNet
         /// (cheap slot-reference compare every 2 s, nothing decoded; free when no station uses a summary).
         /// </summary>
+        /// <summary>SERVER: a removed bay takes its drives out of the network; its summary must be rebuilt.</summary>
+        public override void OnRemove(World _world)
+        {
+            base.OnRemove(_world);
+            if (SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer) NetworkSummaryCache.BayRemoved(Parent.ToWorldPos());
+        }
+
         public override void UpdateTick(World _world)
         {
             base.UpdateTick(_world);
