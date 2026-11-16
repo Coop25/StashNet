@@ -23,12 +23,12 @@ namespace StashNet.UI
 
         private static readonly AutomationTabState State = new AutomationTabState();
 
-        private const int RowsPerPage = 6;
+        private const int RowsPerPage = 10;
         private const float LiveRefreshSeconds = 1f;
         private const string ChosenColor = "70,105,70,255", OtherColor = "48,48,48,255";
 
         private XUiC_CraftingInfoWindow infoWindow;
-        private XUiController tabButton;
+        private XUiController tabButton, stationTabButton;
         private XUiC_Counter amount, meltAmount;
         private XUiC_StashNetRuleRow[] rows = new XUiC_StashNetRuleRow[0];
         private XUiC_StashNetFuelChoice[] fuelCells = new XUiC_StashNetFuelChoice[0];
@@ -48,7 +48,9 @@ namespace StashNet.UI
                 base.Init();
                 infoWindow = GetParentByType<XUiC_CraftingInfoWindow>();
                 tabButton = GetChildById("btnAutomationTab");
-                if (tabButton != null) tabButton.OnPress += (_s, _b) => OpenTab();
+                if (tabButton != null) tabButton.OnPress += (_s, _b) => OpenTab(AutomationTab.Stock);
+                stationTabButton = GetChildById("btnStationTab");
+                if (stationTabButton != null) stationTabButton.OnPress += (_s, _b) => OpenTab(AutomationTab.Station);
                 // The vanilla tab buttons close ours. Looked up by id: the info window only fills its
                 // button fields after its children (us) have run Init.
                 foreach (string id in new[] { "ingredientsButton", "descriptionButton", "showunlocksButton" })
@@ -131,15 +133,15 @@ namespace StashNet.UI
         /// <summary>Re-highlight the vanilla tab that is really showing (we turned them all off).</summary>
         private void RestoreVanillaSelection()
         {
-            SetSelected(tabButton, false);
+            SetOurTabsSelected(false);
             if (infoWindow?.ingredientsButton != null && infoWindow.descriptionButton != null && infoWindow.unlockedByButton != null)
                 infoWindow.SetSelectedButtonByType(infoWindow.TabType);
         }
 
-        private void OpenTab()
+        private void OpenTab(AutomationTab tab)
         {
             if (broken) return;
-            State.OpenByPlayer(AtNetworkStation());
+            State.OpenByPlayer(tab, AtNetworkStation(), StationKey());
             if (TabOpen) SelectTabButtons();
             Refresh();
         }
@@ -153,7 +155,7 @@ namespace StashNet.UI
                 SelectTabButtons();
                 return;
             }
-            SetSelected(tabButton, false);
+            SetOurTabsSelected(false);
             Refresh();
         }
 
@@ -164,7 +166,7 @@ namespace StashNet.UI
         public void RecipeChanged(bool hasRecipe)
         {
             if (State.RecipeSelected(hasRecipe)) SelectTabButtons();
-            else SetSelected(tabButton, false);
+            else SetOurTabsSelected(false);
             Refresh();
         }
 
@@ -172,7 +174,21 @@ namespace StashNet.UI
         public void SelectTabButtons()
         {
             foreach (XUiController b in VanillaTabButtons()) SetSelected(b, false);
-            SetSelected(tabButton, true);
+            SetSelected(tabButton, State.Current == AutomationTab.Stock);
+            SetSelected(stationTabButton, State.Current == AutomationTab.Station);
+        }
+
+        private void SetOurTabsSelected(bool selected)
+        {
+            SetSelected(tabButton, selected && State.Current == AutomationTab.Stock);
+            SetSelected(stationTabButton, selected && State.Current == AutomationTab.Station);
+        }
+
+        /// <summary>The open station's block name: the last-used tab is remembered per kind of station.</summary>
+        private string StationKey()
+        {
+            TileEntityWorkstation te = OpenStation();
+            return te == null ? null : GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block?.GetBlockName();
         }
 
         private static void SetSelected(XUiController button, bool selected)
@@ -208,7 +224,7 @@ namespace StashNet.UI
             if (!station && !shownStation && !TabOpen) return; // backpack crafting / vanilla stations: nothing to watch
             Recipe selected = SelectedRecipe();
             bool was = TabOpen;
-            State.Update(station, selected != null);
+            State.Update(station, selected != null, StationKey());
             if (was && !TabOpen) RestoreVanillaSelection();
             if (!was && TabOpen) SelectTabButtons();
             liveTimer += _dt;
@@ -336,7 +352,9 @@ namespace StashNet.UI
             Refresh();
         }
 
-        private static string MetalName(string metal) => StationRules.UnitOf(metal)?.GetLocalizedItemName() ?? metal;
+        /// <summary>The forge window's own name for a metal ("lbl" + metal, e.g. glass = "Sand"), like vanilla XUiC_WorkstationMaterialInputWindow.</summary>
+        private static string MetalName(string metal) =>
+            Localization.Exists("lbl" + metal) ? Localization.Get("lbl" + metal) : (metal.Length > 0 ? char.ToUpperInvariant(metal[0]) + metal.Substring(1) : metal);
 
         /// <summary>The melted tally shown in the open forge's window (approximate; the window melts while open).</summary>
         private int Tally(string metal)
@@ -419,6 +437,12 @@ namespace StashNet.UI
                 case "stashnet_tabopen":
                     value = TabOpen ? "true" : "false";
                     return true;
+                case "stashnet_stocktab":
+                    value = State.Current == AutomationTab.Stock ? "true" : "false";
+                    return true;
+                case "stashnet_stationtab":
+                    value = State.Current == AutomationTab.Station ? "true" : "false";
+                    return true;
                 case "stashnet_hasrecipe":
                     value = shownRecipe != null ? "true" : "false";
                     return true;
@@ -466,8 +490,14 @@ namespace StashNet.UI
                 case "stashnet_sel_none":
                     value = CurrentFuelMode == FuelModes.Auto ? ChosenColor : OtherColor;
                     return true;
-                case "stashnet_myselftip":
-                    value = string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
+                case "stashnet_firetip":
+                    string mode = CurrentFuelMode;
+                    if (mode == FuelModes.Manual) value = string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
+                    else if (mode == FuelModes.Auto) value = Localization.Get("stashnetFuelAutoTip");
+                    else value = string.Format(Localization.Get("stashnetFuelItemTip"), ItemClass.GetItemClass(mode)?.GetLocalizedItemName() ?? mode);
+                    return true;
+                case "stashnet_outputtip":
+                    value = Localization.Get(s != null && !s.OutputOn ? "stashnetOutputOffTip" : "stashnetOutputOnTip");
                     return true;
                 case "stashnet_sel_outon":
                     value = s == null || s.OutputOn ? ChosenColor : OtherColor;

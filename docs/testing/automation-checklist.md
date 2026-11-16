@@ -1,11 +1,12 @@
-# Station automation checklist (v0.22.0)
+# Station automation checklist (v0.22.1)
 
 Use your StashNet test world. You need a Core with drives, and Network stations near it
 (Network Workbench, Network Forge, Network Campfire at least). Automation is the **lightning tab** in
 the recipe box. At Network stations it opens by itself when no recipe is selected.
 
-## 0. New in v0.22.0
-- [ ] **Tab without a recipe:** open the Network Forge without clicking a recipe. The recipe box shows with the Automation tab open: "Select a recipe to keep in stock", the melt row, the list, Fire, Refill, Finished items. Click a backpack item: its info shows instead (like vanilla); click a recipe: the box comes back.
+## 0. New in v0.22.0 / v0.22.1 (two tabs: lightning = Stock, fire = Station)
+- [ ] **Tab without a recipe:** open the Network Forge without clicking a recipe. The recipe box shows with the Stock tab open (or the Station tab, if that was the last one you used at a forge this game). Stock: "Select a recipe to keep in stock", Keep melted, the list. Station (fire icon): Finished items, Fire, Refill, each with a line saying what it does. Click a backpack item: its info shows instead (like vanilla); click a recipe: the box comes back.
+- [ ] **Melt names** match the forge window: Iron, Brass, Lead, Sand (= glass), Stone, Clay.
 - [ ] Click a recipe: the box switches to Ingredients by itself (the tab only opened because nothing was selected). Click the lightning icon yourself, then pick other recipes: it stays on Automation.
 - [ ] Ingredients / Description buttons do nothing until a recipe is picked; with a recipe they work as before.
 - [ ] With no recipe selected, type an amount into the melt box: the box keeps your typing (doesn't lose focus every second or two).

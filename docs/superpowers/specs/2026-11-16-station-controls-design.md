@@ -152,3 +152,17 @@ The ⚡ tab at a forge:
   / `XUiC_CraftingInfoWindow` + `emptyInfoWindow`), and making vanilla bindings safe with a null recipe.
 - Exact XUi layout, icons, colors, localization text.
 - Op shapes, test list, checklist steps for the owner.
+
+## Revision 1 (2026-11-16, after the owner's first look at v0.22.0)
+Owner: "the UI is getting a bit crowded", the Fire / Refill / Finished items buttons didn't respond, and
+the melt row should use the game's own names.
+- **Two tabs** (owner OK'd the split): ⚡ **Stock** = keep in stock, keep melted, the list (10 rows per
+  page); 🔥 **Station** = Finished items (+ a line saying what it does), Fire (+ explanation line, back
+  from tooltips), Refill (2 rows, up to 14 fuels). Finished items is first, so the Workbench and Cement
+  Mixer (no fire) show it at the top. With no recipe, the tab last used at that kind of station (block
+  name, this game run) opens, else Stock (`AutomationTabState`).
+- **Buttons fixed:** the click buttons over the highlight sprites were fully transparent; NGUI skips
+  widgets with alpha < 0.001 when deciding what was clicked (`UICamera`), so they never got clicks. They
+  now use alpha 3/255.
+- **Metal names** = the forge window's own labels (`lbl<metal>`: Iron, Brass, Lead, Sand, Stone, Clay),
+  like `XUiC_WorkstationMaterialInputWindow`.

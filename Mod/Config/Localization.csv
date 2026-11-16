@@ -85,11 +85,13 @@ stashnetRuleRefused,UI,XUi,,,That can't be automated at this station.
 stashnetRulesFull,UI,XUi,,,This station already keeps {0} items in stock. Remove one first.
 stashnetMeltsFull,UI,XUi,,,This forge already keeps {0} metals melted. Remove one first.
 stashnetRuleCantAuto,UI,XUi,,,"This recipe can't be kept in stock (locked, or it uses tools or weapons as ingredients)."
-stashnetAutomationTab,UI,XUi,,,"Automation: keep items in stock, keep metals melted, run the fire, and choose where finished items go"
+stashnetAutomationTab,UI,XUi,,,"Stock: keep items in stock and metals melted"
+stashnetStationTab,UI,XUi,,,"Station: where finished items go, the fire and its fuel"
 stashnetKeptHere,UI,XUi,,,Kept at this station:
 stashnetFireLabel,UI,XUi,,,Fire:
 stashnetFuelManualTip,UI,XUi,,,"You light it yourself, like a normal {0}."
 stashnetFuelAutoTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle. Uses the fuel you put in."
+stashnetFuelItemTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle, and refills {0} from storage (one stack)."
 stashnetRefillLabel,UI,XUi,,,Refill:
 stashnetRefillNone,UI,XUi,,,none
 stashnetRefillNoneTip,UI,XUi,,,"Don't refill: it burns the fuel you put in yourself."
