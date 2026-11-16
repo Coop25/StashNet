@@ -306,7 +306,7 @@
 			<property name="StashNetCraftingTerminal" value="true" />
 			<!-- Recipe category tabs: the vanilla station's list (ui_display.xml), see Crafting/StationCategoryPatch.cs. -->
 			<property name="StashNetCategories" value="workbench" />
-			<!-- Our subclass of the vanilla Workstation class: same workbench, plus the salvage look (Mod/Skins). -->
+			<!-- Our subclass of the vanilla Workstation class (tracked by the skin code; no paint entry since 2026-11-16, so it looks vanilla). -->
 			<property name="Class" value="StashNet.Blocks.StashNetCraftingTerminal, StashNet" />
 			<!-- Do NOT set WorkstationName: the game files workstation data under it but looks it up by
 			     block name, so the screen wouldn't open (v0.7.0 bug). Recipes come from the inherited

@@ -113,22 +113,5 @@
     </texture>
   </block>
 
-  <!-- Crafting Terminal: the workbench (lighter touch on the wood) and its toolbox. -->
-  <block name="stashnetCraftingTerminal">
-    <!-- No stencil: the two front drawers share one spot, mirrored on the lower one (v0.10.5). -->
-    <!-- Owner (2026-11-13): network gear on the bench. Pegboard behind the bench shows C5-D5 upside down
-         (owner's top-down grid shot); first try, tune live. -->
-    <texture name="woodWorkBench" tint="4A503F" strength="0.4" damage="1.0" seed="41">
-      <stamp sprite="portPanel" u="0.31" v="0.29" w="0.08" h="0.028" rot="180" />
-      <!-- Owner: STASHNET on the bench. The green cutting mat is A-C rows 5-6, upside down (u ~0.02-0.28,
-           v ~0.28 back edge to ~0.45 front edge); the name goes along its front-left edge, beside the vanilla print. -->
-      <!-- Moved left of the big gear (it hid the middle of the word, owner's shot): starts near the mat's left edge. -->
-      <stamp sprite="stencilStashnet" u="0.236" v="0.43" w="0.075" h="0.015" rot="180" />
-    </texture>
-    <!-- Owner: the name on the toolbox. Its front shows B1 B2 B3 left to right with the glyphs turned on their
-         side: across the front = v going down from ~0.98 to ~0.63, up the front = u (column B). -->
-    <texture name="metalToolBox_d" tint="4A503F" strength="0.7" damage="1.0" seed="42">
-      <stamp sprite="stencilStashnet" u="0.1875" v="0.8125" w="0.28" h="0.04" rot="270" />
-    </texture>
-  </block>
+  <!-- Network Workbench (stashnetCraftingTerminal): no skin, plain vanilla workbench look (owner, 2026-11-16). -->
 </paint>
