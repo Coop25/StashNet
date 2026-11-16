@@ -173,7 +173,7 @@ namespace StashNet.Network
         /// <summary>The recipe is one this station crafts, and every item named exists in this game.</summary>
         private static bool ValidRule(Block block, StockRule rule)
         {
-            Recipe recipe = StationRules.FindRecipe(block, rule.Recipe);
+            Recipe recipe = StationRules.FindRecipe(block, rule);
             if (recipe == null) return false;
             ItemClass output = recipe.GetOutputItemClass();
             if (output == null || output.GetItemName() != rule.Item) return false;
@@ -213,7 +213,7 @@ namespace StashNet.Network
         }
 
         /// <summary>Request refused before anything was stored: hand back whatever the client gave up.</summary>
-        private static void Refund(EntityPlayer player, TerminalRequest req, TerminalResponse resp)
+        internal static void Refund(EntityPlayer player, TerminalRequest req, TerminalResponse resp)
         {
             if (req.Op == TerminalOp.Deposit) resp.Give.AddRange(req.Items);
             if (req.Op == TerminalOp.DriveUnload) resp.ReturnToDrive.AddRange(req.Items);

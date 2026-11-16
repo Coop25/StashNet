@@ -75,12 +75,36 @@ namespace StashNet.Stations
         /// <summary>The melted-metal tally's item (unit_iron ...) for a metal, or null.</summary>
         public static ItemClass UnitOf(string metal) => ItemClass.GetItemClass("unit_" + metal);
 
-        /// <summary>The server's own recipe with this name that this station crafts, or null.</summary>
-        public static Recipe FindRecipe(Block block, string recipeName)
+        /// <summary>
+        /// The server's own recipe for this rule: same name, crafted at this station, and (several recipes can
+        /// share a name, e.g. with and without a cooking pot) the one using the rule's ingredients. Null when
+        /// none fits or the rule's amounts/output aren't believable for it (RulePlausibility).
+        /// </summary>
+        public static Recipe FindRecipe(Block block, Core.Stations.StockRule rule) => FindRecipes(block, rule).FirstOrDefault();
+
+        /// <summary>Every recipe FindRecipe would accept, in the game's order (automation prefers one whose tool is present).</summary>
+        public static IEnumerable<Recipe> FindRecipes(Block block, Core.Stations.StockRule rule)
         {
             HashSet<string> areas = CraftingAreas(block);
-            List<Recipe> all = CraftingManager.GetAllRecipes(recipeName);
-            return all?.FirstOrDefault(r => r != null && !r.IsScrap && areas.Contains(r.craftingArea ?? ""));
+            List<Recipe> all = CraftingManager.GetAllRecipes(rule.Recipe);
+            if (all == null) yield break;
+            foreach (Recipe r in all)
+            {
+                if (r == null || r.IsScrap || !areas.Contains(r.craftingArea ?? "")) continue;
+                if (Core.Stations.RulePlausibility.Plausible(r.count, Ingredients(r), rule)) yield return r;
+            }
+        }
+
+        /// <summary>A recipe's ingredients by name (empty slots skipped).</summary>
+        public static List<(string Name, int Amount)> Ingredients(Recipe r)
+        {
+            var list = new List<(string Name, int Amount)>();
+            foreach (ItemStack s in r.ingredients)
+            {
+                if (s == null || s.itemValue == null || s.itemValue.type == 0 || s.itemValue.ItemClass == null) continue;
+                list.Add((s.itemValue.ItemClass.GetItemName(), s.count));
+            }
+            return list;
         }
     }
 }

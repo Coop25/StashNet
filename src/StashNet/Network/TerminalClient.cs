@@ -39,8 +39,16 @@ namespace StashNet.Network
             // (deposit, drive unload, overflow) go straight back, exactly as a server refusal would.
             if (!VersionCheck.ClientMayUse(out string versionProblem))
             {
+                if (request.Op == TerminalOp.Return)
+                {
+                    // Overflow that already didn't fit the backpack: giving it back would overflow into another
+                    // Return forever. Vanilla loot bag at the player's feet instead (a vanilla message, not ours).
+                    DropInLootBag(request.Items);
+                    pendingPositions.Remove(request.RequestId);
+                    return;
+                }
                 var refund = new TerminalResponse { RequestId = request.RequestId };
-                if (request.Op == TerminalOp.Deposit || request.Op == TerminalOp.Return) refund.Give.AddRange(request.Items);
+                if (request.Op == TerminalOp.Deposit) refund.Give.AddRange(request.Items);
                 if (request.Op == TerminalOp.DriveUnload) refund.ReturnToDrive.AddRange(request.Items);
                 refund.Messages.Add(new TerminalMessage("stashnetVersionBlocked", -1));
                 Log.Warning("[StashNet] Request not sent: " + versionProblem);
@@ -132,6 +140,22 @@ namespace StashNet.Network
 
             Log.Warning("[StashNet] Unloaded drive not found in backpack/toolbelt; leftovers go to the backpack instead.");
             return false;
+        }
+
+        /// <summary>Items in a vanilla loot bag at the local player's feet (the game sends it to the server itself).</summary>
+        private static void DropInLootBag(List<ItemAmount> items)
+        {
+            EntityPlayerLocal player = GameManager.Instance.World?.GetPrimaryPlayer();
+            var stacks = new List<ItemStack>();
+            foreach (ItemAmount a in items)
+            {
+                if (!ItemCodec.TryDecode(a.Name, a.Variant, out ItemValue iv, out _)) continue;
+                int max = System.Math.Max(1, iv.ItemClass.Stacknumber.Value);
+                for (int left = a.Count; left > 0; left -= max) stacks.Add(new ItemStack(iv.Clone(), System.Math.Min(left, max)));
+            }
+            if (player == null || stacks.Count == 0) return;
+            GameManager.Instance.DropContentInLootContainerServer(player.entityId, "DroppedLootContainer", player.position, stacks.ToArray());
+            Log.Warning($"[StashNet] Overflow put in a loot bag at your feet ({stacks.Count} stack(s)): the server's StashNet version isn't confirmed.");
         }
 
         private static bool HasToken(ItemStack stack, string token) =>

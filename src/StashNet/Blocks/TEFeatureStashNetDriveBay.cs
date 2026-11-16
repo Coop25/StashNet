@@ -22,10 +22,6 @@ namespace StashNet.Blocks
         {
         }
 
-        /// <summary>
-        /// SERVER: tells the shared network summary when this bay's drives change outside StashNet
-        /// (cheap slot-reference compare every 2 s, nothing decoded; free when no station uses a summary).
-        /// </summary>
         /// <summary>SERVER: a removed bay takes its drives out of the network; its summary must be rebuilt.</summary>
         public override void OnRemove(World _world)
         {
@@ -33,6 +29,11 @@ namespace StashNet.Blocks
             if (SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer) NetworkSummaryCache.BayRemoved(Parent.ToWorldPos());
         }
 
+        /// <summary>
+        /// SERVER: tells the shared network summary when this bay's drives change outside StashNet (slot
+        /// VALUES compared every 2 s via BaySlotPrint, because the game edits slot items in place; nothing
+        /// decoded), and moves non-drive items out of a closed bay (EjectNonDrives).
+        /// </summary>
         public override void UpdateTick(World _world)
         {
             base.UpdateTick(_world);

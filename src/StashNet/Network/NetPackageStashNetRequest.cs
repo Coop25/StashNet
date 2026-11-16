@@ -24,7 +24,7 @@ namespace StashNet.Network
             {
                 request = TerminalCodec.ReadRequest(_reader);
             }
-            catch (FormatException e)
+            catch (Exception e) // FormatException, or EndOfStream from another StashNet version's format
             {
                 request = null;
                 Log.Warning("[StashNet] Ignored malformed terminal request: " + e.Message);
@@ -45,14 +45,21 @@ namespace StashNet.Network
                 Log.Warning("[StashNet] Terminal request from a client with no player entity; ignored.");
                 return;
             }
-            if (!VersionCheck.ClientConfirmed(Sender))
+            TerminalResponse response;
+            if (VersionCheck.ClientConfirmed(Sender))
             {
-                // Not confirmed as the same StashNet version (VersionCheck): never touch storage for it.
-                // A matching game never sends before confirming; others are removed by VersionCheck.
-                Log.Warning($"[StashNet] Ignored a request from {Sender}: StashNet version not confirmed.");
-                return;
+                response = TerminalServer.Handle(_world, player, request);
             }
-            TerminalResponse response = TerminalServer.Handle(_world, player, request);
+            else
+            {
+                // Not confirmed as the same StashNet version (VersionCheck): storage is never touched. Items the
+                // player's game already took out of its backpack are handed back, like any refused request
+                // (an older StashNet in the seconds before it is removed). A matching game never sends early.
+                Log.Warning($"[StashNet] Refused a request from {Sender}: StashNet version not confirmed; items handed back.");
+                response = new TerminalResponse { RequestId = request.RequestId };
+                TerminalServer.Refund(player, request, response);
+                response.Messages.Add(new TerminalMessage("stashnetVersionBlocked", -1));
+            }
             SingletonMonoBehaviour<ConnectionManager>.Instance.SendPackage(
                 NetPackageManager.GetPackage<NetPackageStashNetResponse>().Setup(response),
                 _onlyClientsAttachedToAnEntity: false,

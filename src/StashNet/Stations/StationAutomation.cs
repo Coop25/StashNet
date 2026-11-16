@@ -61,7 +61,10 @@ namespace StashNet.Stations
             }
             catch (Exception e)
             {
-                Log.Warning($"[StashNet] automation at {pos}: {e.Message}");
+                // An earlier step may already have moved items into this station (and saved the drives), so
+                // make sure the station itself is saved too.
+                te.SetModified();
+                Log.Warning($"[StashNet] automation at {pos}: {e}");
             }
         }
 
@@ -74,8 +77,9 @@ namespace StashNet.Stations
             {
                 if (FreeQueueSlots(te) <= FreeSlotsKept) break;
                 if (!OwnerAllowed(net, rule.Owner)) continue;
-                Recipe serverRecipe = StationRules.FindRecipe(block, rule.Recipe);
-                if (serverRecipe == null || !HasTool(te, serverRecipe.craftingToolType)) continue;
+                // Same-name recipes (e.g. with and without a cooking pot): the first one this station has the tool for.
+                Recipe serverRecipe = StationRules.FindRecipes(block, rule).FirstOrDefault(r => HasTool(te, r.craftingToolType));
+                if (serverRecipe == null) continue;
                 if (TryQueue(te, rule, serverRecipe, net)) changed = true;
             }
             return changed;
@@ -125,7 +129,8 @@ namespace StashNet.Stations
                 taken.Add((s.Name, got));
                 if (got < want)
                 {
-                    foreach (var (name, count) in taken) net.Insert(name, count);
+                    foreach (var (name, count) in taken) net.PutBack(name, count);
+                    net.SaveDirty();
                     return false;
                 }
             }
@@ -133,10 +138,11 @@ namespace StashNet.Stations
             int index = HighestFreeSlot(te);
             if (index < 0)
             {
-                foreach (var (name, count) in taken) net.Insert(name, count);
+                foreach (var (name, count) in taken) net.PutBack(name, count);
+                net.SaveDirty();
                 return false;
             }
-            net.SaveDirty();
+            // Drives are saved only after the craft is queued (below), so a failure in between leaves them untouched.
             foreach (var s in sources.Where(s => s.TallySlot >= 0))
             {
                 ItemStack tally = te.input[s.TallySlot].Clone();
@@ -167,6 +173,7 @@ namespace StashNet.Stations
                 Quality = (byte)rule.Tier,
                 StartingEntityId = -1, // no crafting XP for automatic crafts
             };
+            net.SaveDirty();
             return true;
         }
 
@@ -261,19 +268,17 @@ namespace StashNet.Stations
                 }
                 foreach (var (name, count) in MeltFeed.Plan(wanted, raws, usableEmpty))
                 {
+                    ItemValue rawItem = ItemClass.GetItem(name);
+                    if (rawItem == null || rawItem.IsEmpty() || rawItem.ItemClass == null) continue;
                     int got = net.Extract(name, count);
                     if (got <= 0) continue;
-                    // Drives are saved with the items taken out; they go into the slots right below (in memory,
-                    // no failure point in between), and whatever doesn't fit goes straight back.
-                    net.SaveDirty();
+                    // Into the ore slots, leftovers back, THEN save: the drives are never saved while items are
+                    // in neither place (a failure before the save leaves the drives as they were).
                     int usedBefore = Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
-                    int left = PutIntoOreSlots(te, rawCount, ItemClass.GetItem(name), got, usableEmpty);
+                    int left = PutIntoOreSlots(te, rawCount, rawItem, got, usableEmpty);
                     usableEmpty -= usedBefore - Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
-                    if (left > 0)
-                    {
-                        net.Insert(name, left);
-                        net.SaveDirty();
-                    }
+                    net.PutBack(name, left);
+                    net.SaveDirty();
                     if (left < got) changed = true;
                 }
             }
@@ -444,8 +449,8 @@ namespace StashNet.Stations
             if (net.Stored(fuelName, plainOnly: true) <= 0) return false; // none stored: no need to read the drives
             int got = net.Extract(fuelName, want);
             if (got <= 0) return false;
-            net.SaveDirty();
 
+            // Into the fuel slots first, then leftovers back, then save (never save with items in between).
             int left = got;
             for (int i = 0; i < slots.Length && left > 0; i++) // partial stacks of this fuel first
             {
@@ -465,11 +470,8 @@ namespace StashNet.Stations
                 slots[i] = new ItemStack(fuel.Clone(), add);
                 left -= add;
             }
-            if (left > 0)
-            {
-                net.Insert(fuelName, left);
-                net.SaveDirty();
-            }
+            net.PutBack(fuelName, left);
+            net.SaveDirty();
             return true;
         }
     }
