@@ -12,6 +12,8 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 
 **Version 1.0.0.** Tested on 7 Days to Die **V3.4 (b10)**, in single-player and on a multiplayer server.
 
+**[⬇ Download StashNet 1.0.0](https://github.com/Coop25/StashNet/releases/latest)** (the `StashNet-v1.0.0.zip` file under *Assets*).
+
 ---
 
 ## Requirements
@@ -22,12 +24,20 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 
 ## Install
 
-1. Download `StashNet-v<version>.zip` from the GitHub Releases page (or get it from whoever runs your server). Everyone on a server, the server included, needs the same version.
+1. Download `StashNet-v1.0.0.zip` from the [latest release](https://github.com/Coop25/StashNet/releases/latest) (or get it from whoever runs your server). Everyone on a server, the server included, needs the same version.
 2. Extract it into your game's `Mods` folder, so you end up with `7 Days To Die\Mods\StashNet\ModInfo.xml`. (Steam: right-click the game → Manage → Browse local files.)
 3. Start the game **with EasyAntiCheat turned off** (in the game's launcher, switch off EasyAntiCheat before pressing Play).
-4. In the console (F1) you should see `[StashNet] Loaded v<version>` with the version you installed.
+4. In the console (F1) you should see `[StashNet] Loaded v1.0.0`.
 
 **Dedicated server:** put the same `StashNet` folder in the server's `Mods` folder, and set `<property name="EACEnabled" value="false"/>` in its `serverconfig.xml`.
+
+## Updating
+
+1. Close the game (and stop the server).
+2. **Delete** the old `Mods\StashNet` folder, then extract the new zip in its place. (Extracting over the old folder can leave old files behind.)
+3. Do the same on the server and for every player: everyone must be on the same version, or the server removes the odd one out when they join.
+
+Your worlds, drives and everything on them carry over, including from the earlier test releases (0.17 and later).
 
 ## ⚠️ Removing the mod
 
