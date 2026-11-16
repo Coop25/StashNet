@@ -108,6 +108,7 @@ namespace StashNet.Crafting
 
         public static void OpenForRepair(Vector3i terminalPos)
         {
+            if (!Network.VersionCheck.ClientMayUse(out _)) return; // different StashNet on the server: storage stays off
             stationPos = terminalPos;
             RepairMode = true;
             ClearStock();
@@ -131,6 +132,14 @@ namespace StashNet.Crafting
 
         public static void Open(Vector3i pos, XUiController group)
         {
+            // Different StashNet on the server (or not confirmed yet): the station works as a plain vanilla
+            // one, with no storage and no automation, so nothing is ever sent.
+            if (!Network.VersionCheck.ClientMayUse(out string problem))
+            {
+                EntityPlayerLocal p = GameManager.Instance.World?.GetPrimaryPlayer();
+                if (p != null) GameManager.ShowTooltip(p, problem, string.Empty, "ui_denied");
+                return;
+            }
             stationPos = pos;
             windowGroup = group;
             Active = true;

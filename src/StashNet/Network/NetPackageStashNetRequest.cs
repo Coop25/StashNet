@@ -45,6 +45,13 @@ namespace StashNet.Network
                 Log.Warning("[StashNet] Terminal request from a client with no player entity; ignored.");
                 return;
             }
+            if (!VersionCheck.ClientConfirmed(Sender))
+            {
+                // Not confirmed as the same StashNet version (VersionCheck): never touch storage for it.
+                // A matching game never sends before confirming; others are removed by VersionCheck.
+                Log.Warning($"[StashNet] Ignored a request from {Sender}: StashNet version not confirmed.");
+                return;
+            }
             TerminalResponse response = TerminalServer.Handle(_world, player, request);
             SingletonMonoBehaviour<ConnectionManager>.Instance.SendPackage(
                 NetPackageManager.GetPackage<NetPackageStashNetResponse>().Setup(response),

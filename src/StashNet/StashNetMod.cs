@@ -6,7 +6,7 @@ namespace StashNet
     /// <summary>Entry point. The game finds this class and calls InitMod once at startup.</summary>
     public class StashNetMod : IModApi
     {
-        public const string Version = "0.23.4";
+        public const string Version = "0.23.5";
 
         /// <summary>This mod's folder (Mods/StashNet), for files read at runtime such as Skins/.</summary>
         public static string ModPath { get; private set; }
@@ -16,6 +16,7 @@ namespace StashNet
             ModPath = modInstance.Path;
             var harmony = new Harmony("com.coop25.stashnet");
             harmony.PatchAll(typeof(StashNetMod).Assembly);
+            Network.VersionCheck.Init();
             Log.Out($"[StashNet] Loaded v{Version} ({harmony.GetPatchedMethods().Count()} methods patched)");
         }
     }

@@ -34,6 +34,20 @@ namespace StashNet.Network
             pendingPositions[request.RequestId] = new Vector3i(request.X, request.Y, request.Z);
             if (unloadToken != null) pendingUnloads[request.RequestId] = unloadToken;
 
+            // Last line of defence (the windows don't open on a version mismatch): never send to a server whose
+            // StashNet version isn't confirmed the same. Items this request already took from the backpack
+            // (deposit, drive unload, overflow) go straight back, exactly as a server refusal would.
+            if (!VersionCheck.ClientMayUse(out string versionProblem))
+            {
+                var refund = new TerminalResponse { RequestId = request.RequestId };
+                if (request.Op == TerminalOp.Deposit || request.Op == TerminalOp.Return) refund.Give.AddRange(request.Items);
+                if (request.Op == TerminalOp.DriveUnload) refund.ReturnToDrive.AddRange(request.Items);
+                refund.Messages.Add(new TerminalMessage("stashnetVersionBlocked", -1));
+                Log.Warning("[StashNet] Request not sent: " + versionProblem);
+                Apply(refund);
+                return;
+            }
+
             ConnectionManager cm = SingletonMonoBehaviour<ConnectionManager>.Instance;
             if (cm.IsServer)
             {

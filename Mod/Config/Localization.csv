@@ -104,3 +104,6 @@ stashnetOutputOn,UI,XUi,,,To storage
 stashnetOutputOff,UI,XUi,,,Stay here
 stashnetOutputOnTip,UI,XUi,,,"Finished items and cancelled crafts go into storage."
 stashnetOutputOffTip,UI,XUi,,,"Finished items stay in Output for you to take; cancelled crafts go back to your backpack."
+stashnetVersionUnknown,UI,XUi,,,StashNet: waiting for the server to confirm its StashNet version. If this stays, the server runs an older StashNet (or none).
+stashnetVersionMismatch,UI,XUi,,,StashNet is off here: the server runs StashNet {0} and you have {1}. Everyone needs the same version.
+stashnetVersionBlocked,UI,XUi,,,Not sent: the server's StashNet version doesn't match yours. Your items stayed with you.

@@ -58,6 +58,11 @@ namespace StashNet.Blocks
 
         public override bool OnBlockActivated(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
         {
+            if (!VersionCheck.ClientMayUse(out string versionProblem))
+            {
+                GameManager.ShowTooltip(_player, versionProblem, string.Empty, "ui_denied");
+                return true;
+            }
             if (CoreLookupCache.LockedForLocalPlayer(GameManager.Instance.World, _blockPos, out _))
             {
                 GameManager.ShowTooltip(_player, Localization.Get("stashnetNetworkLocked"), string.Empty, "ui_denied");
