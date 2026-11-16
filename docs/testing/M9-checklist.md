@@ -127,3 +127,26 @@ Your friend needs the same mods, StashNet included, with EasyAntiCheat off. They
 ---
 
 When done, send me what passed or failed, plus the **server's log**: the newest `output_log` file in the server folder's `7DaysToDieServer_Data`. I'll also check your game's log.
+
+---
+
+## Part C: 1.0 safety check (v0.23.6, needs the server + one friend)
+Put v0.23.6 on the server, your game and your friend's game.
+
+### C1. Version check
+- [ ] Both of you join normally: no message, terminals and stations work.
+- [ ] Your friend joins with an **older** StashNet (e.g. v0.23.2): within about 30 seconds they're removed with a message naming both versions. (Optional: anything they deposited in those seconds comes back to them.)
+
+### C2. Open Drive Bay (the item-loss fix)
+- [ ] Your friend opens a Drive Bay and leaves it open. You deposit and take items at a Terminal on the same network: the terminal shows that bay's drives as skipped / those items missing while it's open.
+- [ ] Your friend closes the bay. Everything is back, and nothing your friend sees in the bay later is out of date. Take a drive out of the bay and put it in another: its items are all there, none doubled.
+
+### C3. Same item at once
+- [ ] Both click the last stack of the same item at the same moment: one of you gets it, the other gets nothing. Count it: no duplicate.
+
+### C4. Full everything
+- [ ] Fill your backpack, then take a big stack from a terminal while storage is full too: what doesn't fit lands in a **loot bag** at your feet (not loose items), and it's still there after 2 minutes.
+
+### C5. Forge and vehicles
+- [ ] A forge with Clay, Iron and Brass targets never has the same metal in both ore slots.
+- [ ] With engines and car batteries only in storage, a 4x4 truck shows as craftable at the Network Workbench and crafts (lowest-quality batteries used).
