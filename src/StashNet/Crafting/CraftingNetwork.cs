@@ -137,6 +137,7 @@ namespace StashNet.Crafting
         /// </summary>
         private static void MoveOutputToNetwork()
         {
+            if (!OutputToStorage) return;
             XUiC_WorkstationOutputGrid grid = windowGroup?.GetChildByType<XUiC_WorkstationOutputGrid>();
             if (grid == null) return;
             ItemStack[] slots = grid.GetSlots();
@@ -163,13 +164,25 @@ namespace StashNet.Crafting
         /// <summary>Cancelled-craft refund: send it to the network instead of the backpack.</summary>
         public static bool TryRefundToNetwork(ItemStack stack)
         {
-            if (!Active || stack == null || stack.IsEmpty() || !Storable(stack.itemValue)) return false;
+            if (!Active || !OutputToStorage || stack == null || stack.IsEmpty() || !Storable(stack.itemValue)) return false;
             var request = NewRequest(TerminalOp.Deposit);
             request.Items.Add(new ItemAmount(Drives.ItemCodec.NameOf(stack.itemValue), Drives.ItemCodec.EncodeVariant(stack.itemValue), stack.count));
             TerminalClient.Send(request);
             RequestListing();
             return true;
         }
+
+        /// <summary>
+        /// The output switch says "to storage". False until the server's first reply (settings unknown):
+        /// nothing goes to storage before we know (v0.19 rule).
+        /// </summary>
+        public static bool OutputToStorage => Settings != null && Settings.OutputOn;
+
+        public static void SendOutput(bool on) => SendSettings(TerminalOp.SetOutput, on ? "on" : "off");
+
+        public static void SendMeltTarget(MeltTarget melt) => SendSettings(TerminalOp.SetMeltTarget, melt.ToLine(false));
+
+        public static void SendRemoveMelt(string metal) => SendSettings(TerminalOp.RemoveMeltTarget, metal);
 
         private static bool Storable(ItemValue iv) =>
             iv != null && !Blocks.DriveRules.IsDrive(iv) && Drives.ItemCodec.CanStore(iv);

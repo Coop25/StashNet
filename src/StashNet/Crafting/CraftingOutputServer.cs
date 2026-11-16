@@ -30,6 +30,7 @@ namespace StashNet.Crafting
             float now = UnityEngine.Time.time;
             if (nextTry.TryGetValue(pos, out float t) && now < t) return;
             nextTry[pos] = now + RetrySeconds;
+            if (!Stations.StationSettingsStore.Get(pos, world.GetBlock(pos).Block).OutputOn) return; // "Stay here": vanilla output
 
             if (!StashNetNetwork.TryOpen(world, pos, out StashNetNetwork net, out _)) return;
 
