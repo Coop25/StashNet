@@ -28,6 +28,10 @@ namespace StashNet.Network
 
         private StashNetNetwork() { }
 
+        /// <summary>Every bay seen by this read (null storage = open, skipped), for the shared summary.</summary>
+        private readonly List<(Vector3i Pos, TEFeatureStorage Storage)> bays = new List<(Vector3i, TEFeatureStorage)>();
+        private int radius;
+
         public Vector3i CorePos { get; private set; }
         /// <summary>The Core's vanilla lock; null for Cores placed before Milestone 4 (= unlocked).</summary>
         public TEFeatureLockable CoreLock { get; private set; }
@@ -45,7 +49,21 @@ namespace StashNet.Network
         public static bool IsCore(Block block) => block != null && block.Properties.Contains(PropRadius);
 
         /// <param name="problemKey">On failure, a Localization key describing why (translated on the client).</param>
-        public static bool TryOpen(World world, Vector3i terminalPos, out StashNetNetwork network, out string problemKey)
+        /// <param name="by">Who is reading, for `sn perf`.</param>
+        public static bool TryOpen(World world, Vector3i terminalPos, out StashNetNetwork network, out string problemKey, string by = "terminal")
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            bool ok = TryOpenTimed(world, terminalPos, out network, out problemKey);
+            watch.Stop();
+            if (ok)
+            {
+                StashNetPerf.Read(watch.Elapsed.TotalMilliseconds, by);
+                NetworkSummaryCache.Record(network, network.bays, network.radius);
+            }
+            return ok;
+        }
+
+        private static bool TryOpenTimed(World world, Vector3i terminalPos, out StashNetNetwork network, out string problemKey)
         {
             network = null;
             problemKey = null;
@@ -56,7 +74,7 @@ namespace StashNet.Network
                 return false;
             }
 
-            var net = new StashNetNetwork { CorePos = corePos, CoreLock = NetworkLock.GetCoreLock(world, corePos) };
+            var net = new StashNetNetwork { CorePos = corePos, CoreLock = NetworkLock.GetCoreLock(world, corePos), radius = radius };
             // Every Core that could claim a bay within this Core's reach, gathered once (M8).
             List<CoreSite> cores = CoresNear(world, corePos, radius + MaxCoreRadius());
 
@@ -70,13 +88,16 @@ namespace StashNet.Network
                 if (!IsOwner(cores, te.ToWorldPos(), corePos))
                 {
                     net.OtherCoreBays++;
+                    net.bays.Add((te.ToWorldPos(), storage)); // seen, so its changes are noticed
                     continue;
                 }
 
                 net.BayCount++;
+                if (!storage.IsUserAccessing()) net.bays.Add((te.ToWorldPos(), storage));
                 if (storage.IsUserAccessing())
                 {
                     net.SkippedBays++;
+                    net.bays.Add((te.ToWorldPos(), null)); // open: re-checked once it closes
                     continue;
                 }
                 for (int i = 0; i < storage.ItemGrid.Length; i++)
@@ -105,10 +126,12 @@ namespace StashNet.Network
         /// <summary>SERVER ONLY. Writes changed drives back into their bay slots.</summary>
         public void SaveDirty()
         {
+            bool saved = false;
             foreach (NetworkDrive d in Storage.Drives)
             {
                 var slot = (Slot)d.Tag;
                 if (!d.Dirty && !slot.ClearStamp) continue;
+                saved = true;
                 ItemStack current = slot.Bay.ItemGrid[slot.Index];
                 ItemValue updated = current.itemValue.Clone();
                 if (d.Dirty) DriveItem.Save(updated, d.Contents);
@@ -117,6 +140,9 @@ namespace StashNet.Network
                 slot.Bay.SetModified();
                 slot.ClearStamp = false;
             }
+            // The shared summary follows StashNet's own changes at once, from memory (no read). Re-recording
+            // the bays' new slot references also keeps the bay check from seeing these saves as outside changes.
+            if (saved) NetworkSummaryCache.Record(this, bays, radius);
         }
 
         /// <summary>

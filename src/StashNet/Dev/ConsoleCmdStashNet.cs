@@ -20,7 +20,7 @@ namespace StashNet.Dev
 
         public override string[] getCommands() => new[] { "stashnet", "sn" };
 
-        public override string getDescription() => "StashNet developer tools (info, heat, drive, skin reload/grid/dump/inspect, metatest, metacheck, metaclear).";
+        public override string getDescription() => "StashNet developer tools (info, heat, perf [reset], drive, skin reload/grid/dump/inspect, metatest, metacheck, metaclear).";
 
         public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
         {
@@ -44,6 +44,14 @@ namespace StashNet.Dev
                     return;
                 case "metaclear":
                     MetaClear();
+                    return;
+                case "perf":
+                    if (_params.Count > 1 && _params[1].Equals("reset", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        Network.StashNetPerf.Reset();
+                        Out("Perf counters reset.");
+                    }
+                    else foreach (string line in Network.StashNetPerf.Report()) Out(line);
                     return;
                 case "heat":
                     Heat.HeatCommand.Run(Out);

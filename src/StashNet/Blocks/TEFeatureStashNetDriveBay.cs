@@ -21,6 +21,16 @@ namespace StashNet.Blocks
         {
         }
 
+        /// <summary>
+        /// SERVER: tells the shared network summary when this bay's drives change outside StashNet
+        /// (cheap slot-reference compare every 2 s, nothing decoded; free when no station uses a summary).
+        /// </summary>
+        public override void UpdateTick(World _world)
+        {
+            base.UpdateTick(_world);
+            NetworkSummaryCache.CheckBay(_world, Parent);
+        }
+
         public override void InitBlockActivationCommands(Action<BlockActivationCommand, TileEntityComposite.EBlockCommandOrder, TileEntityFeatureData> _addCallback)
         {
             base.InitBlockActivationCommands(_addCallback);
