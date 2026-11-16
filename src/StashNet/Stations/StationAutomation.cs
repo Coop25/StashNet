@@ -22,6 +22,7 @@ namespace StashNet.Stations
         private const int FreeSlotsKept = 1;
 
         private static readonly Dictionary<Vector3i, float> nextRun = new Dictionary<Vector3i, float>();
+        private static readonly System.Random stagger = new System.Random();
 
         public static void Tick(World world, TileEntityWorkstation te)
         {
@@ -31,7 +32,13 @@ namespace StashNet.Stations
 
             Vector3i pos = te.ToWorldPos();
             float now = UnityEngine.Time.time;
-            if (nextRun.TryGetValue(pos, out float t) && now < t) return;
+            if (!nextRun.TryGetValue(pos, out float t))
+            {
+                // First check after load: a random 0-5 s offset, so many stations never check in the same frame.
+                nextRun[pos] = now + (float)stagger.NextDouble() * IntervalSeconds;
+                return;
+            }
+            if (now < t) return;
             nextRun[pos] = now + IntervalSeconds;
 
             Block block = world.GetBlock(pos).Block;
@@ -41,9 +48,10 @@ namespace StashNet.Stations
                 StationSettings settings = StationSettingsStore.Get(pos, block);
                 if (settings.IsDefault) return;
 
-                StashNetNetwork net = null;
+                StationStock net = null;
                 bool needsNetwork = settings.Rules.Count > 0 || settings.Melts.Count > 0 || FuelModes.IsFuelItem(settings.FuelMode);
-                if (needsNetwork && !StashNetNetwork.TryOpen(world, pos, out net, out _)) net = null;
+                // The shared live summary answers "anything to do?"; the real drives are read only to take items.
+                if (needsNetwork) net = StationStock.For(world, pos);
 
                 bool changed = false;
                 if (net != null) changed |= RunStockRules(world, te, block, settings, net);
@@ -59,7 +67,7 @@ namespace StashNet.Stations
 
         // ---------------------------------------------------------------- auto-stock
 
-        private static bool RunStockRules(World world, TileEntityWorkstation te, Block block, StationSettings settings, StashNetNetwork net)
+        private static bool RunStockRules(World world, TileEntityWorkstation te, Block block, StationSettings settings, StationStock net)
         {
             bool changed = false;
             foreach (StockRule rule in settings.Rules)
@@ -73,7 +81,7 @@ namespace StashNet.Stations
             return changed;
         }
 
-        private static bool OwnerAllowed(StashNetNetwork net, string owner)
+        private static bool OwnerAllowed(StationStock net, string owner)
         {
             if (!NetworkLock.IsLocked(net.CoreLock)) return true;
             if (string.IsNullOrEmpty(owner) || !PlatformUserIdentifierAbs.TryFromCombinedString(owner, out PlatformUserIdentifierAbs id)) return false;
@@ -87,10 +95,10 @@ namespace StashNet.Stations
             return tools != null && tools.Any(s => s != null && !s.IsEmpty() && s.itemValue.type == toolType);
         }
 
-        private static bool TryQueue(TileEntityWorkstation te, StockRule rule, Recipe serverRecipe, StashNetNetwork net)
+        private static bool TryQueue(TileEntityWorkstation te, StockRule rule, Recipe serverRecipe, StationStock net)
         {
             int outputType = serverRecipe.itemValueType;
-            int have = StoredCount(net, rule.Item) + QueuedCount(te, outputType) + OutputCount(te, outputType);
+            int have = net.Stored(rule.Item) + QueuedCount(te, outputType) + OutputCount(te, outputType);
             int needed = StockMath.CraftsNeeded(rule.Target, have, rule.OutputCount);
             if (needed <= 0) return false;
 
@@ -100,7 +108,7 @@ namespace StashNet.Stations
             foreach (var (name, amount) in rule.Ingredients)
             {
                 int slot = TallySlot(te, name);
-                int stored = slot >= 0 ? te.input[slot].count : StoredCount(net, name, plainOnly: true);
+                int stored = slot >= 0 ? te.input[slot].count : net.Stored(name, plainOnly: true);
                 sources.Add((name, amount, slot, stored));
             }
             int crafts = Math.Min(needed, StockMath.CraftsAffordable(sources.Select(s => (s.PerCraft, s.Stored))));
@@ -113,11 +121,11 @@ namespace StashNet.Stations
             foreach (var s in sources.Where(s => s.TallySlot < 0))
             {
                 int want = s.PerCraft * crafts;
-                int got = net.Storage.Extract(s.Name, null, want);
+                int got = net.Extract(s.Name, want);
                 taken.Add((s.Name, got));
                 if (got < want)
                 {
-                    foreach (var (name, count) in taken) net.Storage.Insert(name, null, count);
+                    foreach (var (name, count) in taken) net.Insert(name, count);
                     return false;
                 }
             }
@@ -125,7 +133,7 @@ namespace StashNet.Stations
             int index = HighestFreeSlot(te);
             if (index < 0)
             {
-                foreach (var (name, count) in taken) net.Storage.Insert(name, null, count);
+                foreach (var (name, count) in taken) net.Insert(name, count);
                 return false;
             }
             net.SaveDirty();
@@ -176,8 +184,6 @@ namespace StashNet.Stations
             return -1;
         }
 
-        private static int StoredCount(StashNetNetwork net, string name, bool plainOnly = false) =>
-            net.Storage.Aggregate().Where(i => i.Name == name && (!plainOnly || i.Variant == null)).Sum(i => i.Count);
 
         private static int QueuedCount(TileEntityWorkstation te, int type) =>
             te.queue.Where(q => !SlotFree(q) && q.Recipe.itemValueType == type).Sum(q => q.Multiplier * q.Recipe.count);
@@ -204,7 +210,7 @@ namespace StashNet.Stations
         /// Forge: for each melt target, pull only the listed raw items (StashNetMeltFeed) from storage
         /// into the ore slots, just enough that the melted tally reaches the target. Stops on its own.
         /// </summary>
-        private static bool RunMelts(TileEntityWorkstation te, Block block, StationSettings settings, StashNetNetwork net)
+        private static bool RunMelts(TileEntityWorkstation te, Block block, StationSettings settings, StationStock net)
         {
             if (settings.Melts.Count == 0 || XUiM_Recipes.DisableSmelter) return false;
             if (!te.isModuleUsed[MaterialInputModule] || te.materialNames == null || te.input == null) return false;
@@ -248,11 +254,11 @@ namespace StashNet.Stations
                     if (!melt.Metal.Equals(ic.MadeOfMaterial?.ForgeCategory, StringComparison.OrdinalIgnoreCase)) continue;
                     int stack = Math.Max(1, ic.Stacknumber.Value);
                     int partial = te.input.Take(rawCount).Where(s => s != null && !s.IsEmpty() && s.itemValue.type == iv.type).Sum(s => Math.Max(0, stack - s.count));
-                    raws.Add(new MeltRaw(name, ic.GetWeight(), StoredCount(net, name, plainOnly: true), stack, partial));
+                    raws.Add(new MeltRaw(name, ic.GetWeight(), net.Stored(name, plainOnly: true), stack, partial));
                 }
                 foreach (var (name, count) in MeltFeed.Plan(wanted, raws, usableEmpty))
                 {
-                    int got = net.Storage.Extract(name, null, count);
+                    int got = net.Extract(name, count);
                     if (got <= 0) continue;
                     // Drives are saved with the items taken out; they go into the slots right below (in memory,
                     // no failure point in between), and whatever doesn't fit goes straight back.
@@ -262,7 +268,7 @@ namespace StashNet.Stations
                     usableEmpty -= usedBefore - Enumerable.Range(0, rawCount).Count(i => te.input[i] == null || te.input[i].IsEmpty());
                     if (left > 0)
                     {
-                        net.Storage.Insert(name, null, left);
+                        net.Insert(name, left);
                         net.SaveDirty();
                     }
                     if (left < got) changed = true;
@@ -316,7 +322,7 @@ namespace StashNet.Stations
 
         private const int FuelModule = 3, MaterialInputModule = 4;
 
-        private static bool RunFire(TileEntityWorkstation te, StationSettings settings, StashNetNetwork net)
+        private static bool RunFire(TileEntityWorkstation te, StationSettings settings, StationStock net)
         {
             bool hasFuelModule = te.isModuleUsed[FuelModule];
             if (!hasFuelModule || settings.FuelMode == FuelModes.Manual) return false;
@@ -380,7 +386,7 @@ namespace StashNet.Stations
         }
 
         /// <summary>Top the chosen fuel up to the station's refill amount (StashNetFuelRefill, at most a stack). Never moves other fuel.</summary>
-        private static bool Refuel(TileEntityWorkstation te, string fuelName, StashNetNetwork net)
+        private static bool Refuel(TileEntityWorkstation te, string fuelName, StationStock net)
         {
             ItemValue fuel = ItemClass.GetItem(fuelName);
             if (fuel == null || fuel.IsEmpty() || ItemClass.GetFuelValue(fuel) <= 0) return false;
@@ -393,7 +399,8 @@ namespace StashNet.Stations
             int want = FuelRefill.Want(loaded, room, refill, stackSize);
             if (want <= 0) return false;
 
-            int got = net.Storage.Extract(fuelName, null, want);
+            if (net.Stored(fuelName, plainOnly: true) <= 0) return false; // none stored: no need to read the drives
+            int got = net.Extract(fuelName, want);
             if (got <= 0) return false;
             net.SaveDirty();
 
@@ -418,7 +425,7 @@ namespace StashNet.Stations
             }
             if (left > 0)
             {
-                net.Storage.Insert(fuelName, null, left);
+                net.Insert(fuelName, left);
                 net.SaveDirty();
             }
             return true;

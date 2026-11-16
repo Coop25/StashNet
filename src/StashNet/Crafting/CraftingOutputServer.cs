@@ -32,7 +32,9 @@ namespace StashNet.Crafting
             nextTry[pos] = now + RetrySeconds;
             if (!Stations.StationSettingsStore.Get(pos, world.GetBlock(pos).Block).OutputOn) return; // "Stay here": vanilla output
 
-            if (!StashNetNetwork.TryOpen(world, pos, out StashNetNetwork net, out _)) return;
+            // Storage full per the shared live summary: don't read the drives just to find no room.
+            if (!NetworkSummaryCache.TryGet(world, pos, out _, out Core.Network.NetworkSummary summary) || summary.FreeStacks <= 0) return;
+            if (!StashNetNetwork.TryOpen(world, pos, out StashNetNetwork net, out _, "finished items")) return;
 
             bool moved = false;
             for (int i = 0; i < output.Length; i++)

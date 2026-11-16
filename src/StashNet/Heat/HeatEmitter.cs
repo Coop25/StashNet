@@ -23,7 +23,7 @@ namespace StashNet.Heat
         }
 
         /// <summary>
-        /// Heat one report of this Core's network is worth. Counts every drive in its bays, readable
+        /// Heat one report of this Core's network is worth, from the shared live summary (no drive reads). Counts every drive in its bays, readable
         /// or not, by heat weight (bigger drives run hotter, M8). Drives in a bay someone has open are
         /// skipped for this one report (acceptable).
         /// </summary>
@@ -36,8 +36,8 @@ namespace StashNet.Heat
             float cap = GetFloat(core, PropHeatCap);
             if (perDrive <= 0f || cap <= 0f) return 0f;
             // A Core finds itself at distance 0, so this opens exactly this Core's network.
-            if (!StashNetNetwork.TryOpen(world, corePos, out StashNetNetwork net, out _)) return 0f;
-            drives = net.Storage.Drives.Count + net.SkippedDrives;
+            if (!NetworkSummaryCache.TryGet(world, corePos, out _, out Core.Network.NetworkSummary net)) return 0f;
+            drives = net.DriveCount;
             weight = net.HeatWeight;
             return NetworkHeat.PerReport(weight, perDrive, cap);
         }
