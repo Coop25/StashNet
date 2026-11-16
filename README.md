@@ -10,7 +10,7 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 - **Tiers**: bigger drives, tougher bays that hold more drives, and Cores that reach farther. You upgrade bays and Cores in place with a hammer.
 - **Heat**: a big hoard runs hot and draws screamers, just like a forge does.
 
-**Version 0.20.0.** Tested on 7 Days to Die **V3.4 (b10)**, in single-player and on a multiplayer server.
+**Version 1.0.0.** Tested on 7 Days to Die **V3.4 (b10)**, in single-player and on a multiplayer server.
 
 ---
 
@@ -18,14 +18,14 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 
 - 7 Days to Die **V3.4**. Other versions may not work.
 - **EasyAntiCheat must be off**, because the mod includes a DLL.
-- **Multiplayer:** the server **and every player** need the same version of StashNet installed.
+- **Multiplayer:** the server **and every player** need the **exact same version** of StashNet. The server checks this when you join: a player with a different (or older) version is removed with a message naming both versions, before StashNet can touch any items.
 
 ## Install
 
 1. Download `StashNet-v<version>.zip` from the GitHub Releases page (or get it from whoever runs your server). Everyone on a server, the server included, needs the same version.
 2. Extract it into your game's `Mods` folder, so you end up with `7 Days To Die\Mods\StashNet\ModInfo.xml`. (Steam: right-click the game → Manage → Browse local files.)
 3. Start the game **with EasyAntiCheat turned off** (in the game's launcher, switch off EasyAntiCheat before pressing Play).
-4. In the console (F1) you should see `[StashNet] Loaded v0.9.1`.
+4. In the console (F1) you should see `[StashNet] Loaded v<version>` with the version you installed.
 
 **Dedicated server:** put the same `StashNet` folder in the server's `Mods` folder, and set `<property name="EACEnabled" value="false"/>` in its `serverconfig.xml`.
 
@@ -40,7 +40,7 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 1. **Craft** (from your backpack): a **Scrap Storage Core**, a **Drive Bay**, a few **48-Stack Drives**, and a **Storage Terminal**.
 2. **Place the Core**, then place the Drive Bay and the Terminal **within 6 blocks** of it.
 3. **Put drives in the Drive Bay.** A bay only accepts drives.
-4. **Use the Terminal**: click an item to take one (shift-click for a full stack), shift-click items in your backpack to store them (or pick a stack up and click it onto the terminal's items; right-click drops in just one), or use the backpack's "move all" button to store everything. Tabs under the search box show one kind of item at a time; only kinds you have get a tab.
+4. **Use the Terminal**: click an item to take one (shift-click for a full stack), shift-click items in your backpack to store them (or pick a stack up and click it onto the terminal's items; right-click drops in just one), or use the backpack's "move all" button to store everything. Tabs under the search box show one kind of item at a time; only kinds you have get a tab. **Hold Shift** to freeze the grid while you shift-click stacks out: nothing slides around until you let go.
 5. **Lock it**: hold E on the Core and set a code. Everyone else needs the code to open your bays and terminals. The Core's owner always gets in.
 
 ### Crafting from storage
@@ -50,11 +50,11 @@ Craft a **Network Workbench** (it needs a workbench and a Storage Terminal) and 
 Every Network station (Workbench, Forge, Chemistry Station, Campfire, Cement Mixer) has an **Automation** tab (the lightning icon) in the recipe box. It opens by itself when no recipe is selected:
 
 - **Keep in stock:** select a recipe, set an amount and click Keep. While someone is nearby, the station crafts from stored ingredients whenever storage holds less than that. Up to 8 items per station. Automatic crafts give no crafting XP.
-- **Keep melted** (Forge): pick a metal and an amount. The forge pulls raw scrap from storage (scrap iron, brass and lead; broken glass, then crushed sand; small stones; clay) until that much is melted, then stops. Nothing else is ever melted.
+- **Keep melted** (Forge): pick a metal and an amount. The forge pulls raw scrap from storage (scrap iron, brass and lead; broken glass, then crushed sand; small stones; clay) until that much is melted, then stops. Nothing else is ever melted. With one metal it uses both ore slots; with several, each metal gets one slot, and they take turns when there are more metals than slots.
 - **Fire** (Forge, Campfire, Chemistry Station): *Myself* is the normal game. *Auto* lights the fire when there's something to craft or smelt and puts it out when idle. **Refill** picks a fuel from storage (shown with its icon and count) to keep 100 of it in the fuel slots.
 - **Finished items:** *To storage* (the default) or *Stay here*, which leaves them in Output and refunds cancelled crafts to your backpack, like a normal station.
 
-Crafting at a Network station can also use stored items that have a quality level, such as vehicle engines and batteries, as long as nothing is attached to them. It takes the lowest quality first.
+Crafting at a Network station can also use stored parts such as vehicle engines and batteries, as long as nothing is attached to them. Batteries and other items with a quality level are taken lowest quality first.
 
 ### Bigger drives
 | Drive | Holds | Made at |
@@ -79,6 +79,12 @@ Craft the next tier at a workbench. Then hold a hammer (or stone axe, or nail gu
 
 ### Heat
 The Core gives off heat that builds up in its area, the same way a forge or campfire does, and enough heat brings screamers. Bigger drives give off more heat (a 5184-stack drive counts as 8 of the 48-stack ones), and better Cores run cooler. A small early network alone never brings screamers. Heat is capped, so even a huge base only draws them now and then. Type `sn heat` in the console (F1) next to a Core to see the numbers.
+
+### Keeping your items safe
+- StashNet never deletes items to make room. Anything that fits nowhere (storage full and your backpack full) goes into a **loot bag** at your feet, never a loose item that despawns.
+- While someone has a Drive Bay open, the network leaves that bay's drives alone until it's closed again.
+- When two players take the same item at the same moment, whoever reaches the server first gets it. Nothing is ever duplicated.
+- A Drive Bay only holds drives. Anything else that ends up in one is moved into a loot bag beside it.
 
 ---
 
