@@ -19,7 +19,9 @@ namespace StashNet.UI
     public class XUiC_StashNetAutomation : XUiController
     {
         /// <summary>Our tab is showing (only ever true at a Network station).</summary>
-        public static bool TabOpen { get; private set; }
+        public static bool TabOpen => State.Open;
+
+        private static readonly AutomationTabState State = new AutomationTabState();
 
         private const int RowsPerPage = 6;
         private const float LiveRefreshSeconds = 1f;
@@ -109,7 +111,7 @@ namespace StashNet.UI
         {
             base.OnOpen();
             if (TabOpen) RestoreVanillaSelection();
-            TabOpen = false;
+            State.Reset();
             shownVersion = -1;
             page = 0;
             metalIndex = 0;
@@ -123,7 +125,7 @@ namespace StashNet.UI
         {
             base.OnClose();
             if (TabOpen) RestoreVanillaSelection();
-            TabOpen = false;
+            State.Reset();
         }
 
         /// <summary>Re-highlight the vanilla tab that is really showing (we turned them all off).</summary>
@@ -136,23 +138,33 @@ namespace StashNet.UI
 
         private void OpenTab()
         {
-            if (broken || !AtNetworkStation()) return;
-            TabOpen = true;
-            SelectTabButtons();
+            if (broken) return;
+            State.OpenByPlayer(AtNetworkStation());
+            if (TabOpen) SelectTabButtons();
             Refresh();
         }
 
+        /// <summary>A vanilla tab button was pressed. With no recipe ours stays (theirs have nothing to show).</summary>
         private void CloseTab()
         {
             if (!TabOpen) return;
-            if (SelectedRecipe() == null)
+            if (!State.VanillaTabPressed(SelectedRecipe() != null))
             {
-                // No recipe: the vanilla tabs have nothing to show, so ours stays.
                 SelectTabButtons();
                 return;
             }
-            TabOpen = false;
             SetSelected(tabButton, false);
+            Refresh();
+        }
+
+        /// <summary>
+        /// Vanilla selected or cleared a recipe (SetRecipe postfix; vanilla has just re-selected Ingredients).
+        /// A tab that opened by itself hands back to Ingredients; one the player opened stays.
+        /// </summary>
+        public void RecipeChanged(bool hasRecipe)
+        {
+            if (State.RecipeSelected(hasRecipe)) SelectTabButtons();
+            else SetSelected(tabButton, false);
             Refresh();
         }
 
@@ -169,18 +181,23 @@ namespace StashNet.UI
         }
 
         /// <summary>
-        /// Called after vanilla's recipe box Update (AutomationTabPatches): at a Network station with no
-        /// recipe selected, the recipe box takes the empty info panel's place so the tab can be used.
-        /// The item info panel (a clicked backpack item) still wins, as in vanilla.
+        /// At a Network station with no recipe selected, the recipe box takes the empty info panel's place
+        /// so the tab can be used (AutomationTabPatches). The item info panel (a clicked backpack item)
+        /// still wins, as in vanilla.
         /// </summary>
+        public static bool OwnsEmptySlot(XUiC_CraftingInfoWindow window)
+        {
+            if (window?.ViewComponent == null || window.windowGroup == null || !window.windowGroup.isShowing) return false;
+            XUiC_StashNetAutomation tab = window.GetChildByType<XUiC_StashNetAutomation>();
+            return tab != null && !tab.broken && tab.AtNetworkStation() && tab.SelectedRecipe() == null;
+        }
+
+        /// <summary>After vanilla's Update: show the recipe box if the empty panel (or nothing) is in its place.</summary>
         public static void KeepRecipeBoxShown(XUiC_CraftingInfoWindow window)
         {
-            if (window?.ViewComponent == null || window.windowGroup == null || !window.windowGroup.isShowing) return;
-            XUiC_StashNetAutomation tab = window.GetChildByType<XUiC_StashNetAutomation>();
-            if (tab == null || tab.broken || !tab.AtNetworkStation() || tab.SelectedRecipe() != null) return;
-            bool emptyShown = window.emptyInfoWindow?.ViewComponent?.IsVisible == true;
+            if (!OwnsEmptySlot(window)) return;
             bool itemShown = window.itemInfoWindow?.ViewComponent?.IsVisible == true;
-            if (!window.ViewComponent.IsVisible && (emptyShown || !itemShown)) window.ViewComponent.IsVisible = true;
+            if (!window.ViewComponent.IsVisible && !itemShown) window.ViewComponent.IsVisible = true;
         }
 
         public override void Update(float _dt)
@@ -188,16 +205,12 @@ namespace StashNet.UI
             base.Update(_dt);
             if (broken) return;
             bool station = AtNetworkStation();
-            if (!station && TabOpen)
-            {
-                RestoreVanillaSelection();
-                TabOpen = false;
-                SetSelected(tabButton, false);
-                Refresh();
-            }
-            if (!station && !shownStation) return; // backpack crafting / vanilla stations: nothing to watch
+            if (!station && !shownStation && !TabOpen) return; // backpack crafting / vanilla stations: nothing to watch
             Recipe selected = SelectedRecipe();
-            if (station && selected == null && !TabOpen) OpenTab();
+            bool was = TabOpen;
+            State.Update(station, selected != null);
+            if (was && !TabOpen) RestoreVanillaSelection();
+            if (!was && TabOpen) SelectTabButtons();
             liveTimer += _dt;
             bool live = TabOpen && liveTimer >= LiveRefreshSeconds; // melted tallies change while open
             if (!live && shownVersion == CraftingNetwork.Version && shownTab == TabOpen && shownStation == station && shownRecipe == selected) return;
@@ -208,6 +221,7 @@ namespace StashNet.UI
         {
             liveTimer = 0f;
             shownVersion = CraftingNetwork.Version;
+            bool tabChanged = shownTab != TabOpen;
             shownTab = TabOpen;
             shownStation = AtNetworkStation();
             shownRecipe = SelectedRecipe();
@@ -229,7 +243,9 @@ namespace StashNet.UI
                 else fuelCells[i].Show(null, 0, false);
             }
             RefreshBindingsSelfAndChildren(); // rows and cells have their own bindings
-            if (infoWindow != null) infoWindow.IsDirty = true; // its showingredients/... bindings follow TabOpen
+            // Its showingredients/... bindings follow TabOpen. Only when that changed: dirtying the recipe box
+            // makes vanilla re-run its whole Update (and re-show the empty panel).
+            if (infoWindow != null && tabChanged) infoWindow.IsDirty = true;
         }
 
         private sealed class Entry

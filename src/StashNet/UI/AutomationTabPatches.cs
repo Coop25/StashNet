@@ -20,13 +20,33 @@ namespace StashNet.UI
         }
     }
 
+
     /// <summary>
-    /// At a Network station with no recipe selected, vanilla shows the empty info panel in the recipe box's
-    /// place. Show the recipe box instead (same frame, so no flicker), so the Automation tab is reachable.
+    /// At a Network station with no recipe selected, vanilla's Update shows the backpack's empty info panel
+    /// in the recipe box's place (info panels are mutually exclusive). The prefix points vanilla's
+    /// emptyInfoWindow at the recipe box itself for that Update, so vanilla "shows" what is already showing
+    /// and nothing is switched off and on (that would drop text-box focus). The postfix brings the recipe box
+    /// in when the window opens. Restored in the finalizer.
     /// </summary>
     [HarmonyPatch(typeof(XUiC_CraftingInfoWindow), nameof(XUiC_CraftingInfoWindow.Update))]
     public static class AutomationRecipeBoxShownPatch
     {
+        public static void Prefix(XUiC_CraftingInfoWindow __instance, out XUiC_InfoWindow __state)
+        {
+            __state = null;
+            if (!Crafting.CraftingNetwork.Active) return;
+            try
+            {
+                if (!XUiC_StashNetAutomation.OwnsEmptySlot(__instance) || __instance.ViewComponent?.IsVisible != true) return;
+                __state = __instance.emptyInfoWindow ?? __instance; // non-null marks "swapped"
+                __instance.emptyInfoWindow = __instance;
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning($"[StashNet] automation tab: {e.Message}");
+            }
+        }
+
         public static void Postfix(XUiC_CraftingInfoWindow __instance)
         {
             if (!Crafting.CraftingNetwork.Active) return;
@@ -39,19 +59,25 @@ namespace StashNet.UI
                 Log.Warning($"[StashNet] automation tab: {e.Message}");
             }
         }
+
+        public static void Finalizer(XUiC_CraftingInfoWindow __instance, XUiC_InfoWindow __state)
+        {
+            if (__state == null) return;
+            __instance.emptyInfoWindow = __state == __instance ? null : __state;
+        }
     }
 
     /// <summary>
-    /// Selecting another recipe makes vanilla switch back to Ingredients. With our tab open, keep it open
-    /// (you pick the recipe to keep in stock while on it) and keep its button the selected one.
+    /// Selecting another recipe makes vanilla switch back to Ingredients. A tab the player opened stays open
+    /// (they pick the recipe to keep in stock while on it); one that opened by itself (no recipe) hands back.
     /// </summary>
     [HarmonyPatch(typeof(XUiC_CraftingInfoWindow), nameof(XUiC_CraftingInfoWindow.SetRecipe))]
     public static class AutomationTabRecipePatch
     {
-        public static void Postfix(XUiC_CraftingInfoWindow __instance)
+        public static void Postfix(XUiC_CraftingInfoWindow __instance, XUiC_RecipeEntry _recipeEntry)
         {
             if (!XUiC_StashNetAutomation.TabOpen) return;
-            __instance.GetChildByType<XUiC_StashNetAutomation>()?.SelectTabButtons();
+            __instance.GetChildByType<XUiC_StashNetAutomation>()?.RecipeChanged(_recipeEntry?.Recipe != null);
         }
     }
 }
