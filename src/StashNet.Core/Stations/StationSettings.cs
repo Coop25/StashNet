@@ -92,15 +92,71 @@ namespace StashNet.Core.Stations
         }
     }
 
-    /// <summary>One Network station's automation settings: fuel mode and up to 8 stock rules.</summary>
+    /// <summary>
+    /// Forge: keep this metal's melted amount (the unit_&lt;metal&gt; tally) at Target by feeding raw
+    /// scrap from storage, plus who set it (for the Core lock, like stock rules).
+    /// </summary>
+    public sealed class MeltTarget
+    {
+        public const int MaxTarget = 1000000;
+
+        public string Metal;
+        public int Target;
+        public string Owner = "";
+
+        /// <summary>melt|metal|target|owner</summary>
+        public string ToLine(bool includeOwner = true) =>
+            string.Join("|", new[] { "melt", Metal, Target.ToString(CultureInfo.InvariantCulture), includeOwner ? Owner ?? "" : "" });
+
+        public MeltTarget Clone() => new MeltTarget { Metal = Metal, Target = Target, Owner = Owner };
+
+        public static bool TryParseLine(string line, out MeltTarget melt, out string error)
+        {
+            melt = null;
+            error = null;
+            string[] f = (line ?? "").Split('|');
+            if (f.Length != 4 || f[0] != "melt") { error = "not a melt line"; return false; }
+            if (!StockRule.ValidName(f[1])) { error = "bad metal"; return false; }
+            if (!int.TryParse(f[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int target) || target < 1 || target > MaxTarget)
+            {
+                error = "bad target";
+                return false;
+            }
+            if (f[3].Length > 256 || f[3].IndexOfAny(new[] { ';', '*', '\n', '\r' }) >= 0) { error = "bad owner"; return false; }
+            melt = new MeltTarget { Metal = f[1], Target = target, Owner = f[3] };
+            return true;
+        }
+    }
+
+    /// <summary>One Network station's settings: fuel mode, up to 8 stock rules, the output switch, up to 6 melt targets.</summary>
     public sealed class StationSettings
     {
         public const int MaxRules = 8;
+        public const int MaxMelts = 6;
 
         public string FuelMode = FuelModes.Manual;
         public List<StockRule> Rules = new List<StockRule>();
+        /// <summary>Finished crafts and cancel refunds go into storage (true, default) or stay in the station.</summary>
+        public bool OutputOn = true;
+        public List<MeltTarget> Melts = new List<MeltTarget>();
 
-        public bool IsDefault => FuelMode == FuelModes.Manual && Rules.Count == 0;
+        public bool IsDefault => FuelMode == FuelModes.Manual && Rules.Count == 0 && OutputOn && Melts.Count == 0;
+
+        /// <summary>Adds the target, or replaces the one for the same metal. False when 6 exist already.</summary>
+        public bool SetMelt(MeltTarget melt)
+        {
+            int i = Melts.FindIndex(m => m.Metal == melt.Metal);
+            if (i >= 0)
+            {
+                Melts[i] = melt;
+                return true;
+            }
+            if (Melts.Count >= MaxMelts) return false;
+            Melts.Add(melt);
+            return true;
+        }
+
+        public bool RemoveMelt(string metal) => Melts.RemoveAll(m => m.Metal == metal) > 0;
 
         /// <summary>Adds the rule, or replaces the rule for the same item. False when 8 rules exist already.</summary>
         public bool SetRule(StockRule rule)
@@ -118,15 +174,23 @@ namespace StashNet.Core.Stations
 
         public bool RemoveRule(string item) => Rules.RemoveAll(r => r.Item == item) > 0;
 
-        public StationSettings Clone() => new StationSettings { FuelMode = FuelMode, Rules = Rules.Select(r => r.Clone()).ToList() };
+        public StationSettings Clone() => new StationSettings
+        {
+            FuelMode = FuelMode,
+            Rules = Rules.Select(r => r.Clone()).ToList(),
+            OutputOn = OutputOn,
+            Melts = Melts.Select(m => m.Clone()).ToList(),
+        };
 
-        /// <summary>"fuel &lt;mode&gt;" then one rule line each.</summary>
+        /// <summary>"fuel &lt;mode&gt;", one rule line each, "output off" when off, one melt line each.</summary>
         /// <param name="includeOwners">False for text sent to clients (see StockRule.ToLine).</param>
         public string Serialize(bool includeOwners = true)
         {
             var sb = new StringBuilder();
             sb.Append("fuel ").Append(FuelMode).Append('\n');
             foreach (StockRule r in Rules) sb.Append(r.ToLine(includeOwners)).Append('\n');
+            if (!OutputOn) sb.Append("output off\n");
+            foreach (MeltTarget m in Melts) sb.Append(m.ToLine(includeOwners)).Append('\n');
             return sb.ToString();
         }
 
@@ -143,6 +207,15 @@ namespace StashNet.Core.Stations
                     string mode = line.Substring(5);
                     if (!StockRule.ValidName(mode)) throw new FormatException("Bad fuel mode.");
                     s.FuelMode = mode;
+                }
+                else if (line == "output off" || line == "output on")
+                {
+                    s.OutputOn = line == "output on";
+                }
+                else if (line.StartsWith("melt|", StringComparison.Ordinal))
+                {
+                    if (!MeltTarget.TryParseLine(line, out MeltTarget melt, out string meltError)) throw new FormatException("Bad melt line: " + meltError);
+                    if (!s.SetMelt(melt)) throw new FormatException("Too many melt targets.");
                 }
                 else if (StockRule.TryParseLine(line, out StockRule rule, out string error))
                 {
