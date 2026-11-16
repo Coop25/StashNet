@@ -6,7 +6,9 @@ the recipe box. At Network stations it opens by itself when no recipe is selecte
 
 ## 0. New in v0.22.0
 - [ ] **Tab without a recipe:** open the Network Forge without clicking a recipe. The recipe box shows with the Automation tab open: "Select a recipe to keep in stock", the melt row, the list, Fire, Refill, Finished items. Click a backpack item: its info shows instead (like vanilla); click a recipe: the box comes back.
+- [ ] Click a recipe: the box switches to Ingredients by itself (the tab only opened because nothing was selected). Click the lightning icon yourself, then pick other recipes: it stays on Automation.
 - [ ] Ingredients / Description buttons do nothing until a recipe is picked; with a recipe they work as before.
+- [ ] With no recipe selected, type an amount into the melt box: the box keeps your typing (doesn't lose focus every second or two).
 - [ ] **Fire:** Myself / Auto buttons, the chosen one highlighted. Hover shows what each does.
 - [ ] **Refill** (only with Fire = Auto): "none" plus the fuels in storage with their icons and counts. Click Coal: it's highlighted and refills like v0.21.0's Coal mode. Click "none": back to plain Auto. Run the coal out of storage: Coal still shows (count 0) while it's chosen.
 - [ ] **Melt targets (Network Forge):** pick Iron with ◄ ►, set 2000, click Keep. "Iron (melted)  N / 2000" appears. Put scrap iron in storage, close the screen: within about 5 seconds scrap iron moves into the ore slots, only as much as needed, and (Fire = Auto) the forge lights. It stops at 2000 and the fire goes out.
