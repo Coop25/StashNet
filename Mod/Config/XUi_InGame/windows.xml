@@ -61,10 +61,13 @@
 
 	</append>
 
-	<!-- v0.21.0: AUTOMATION tab in the recipe box (vanilla craftingInfoPanel), next to Ingredients / Description.
-	     Only at Network stations (the controller hides the tab button elsewhere). While open it replaces the
-	     ingredient area: keep-in-stock for the selected recipe, this station's rules, and the fuel mode with an
-	     explanation. Controller: src/StashNet/UI/XUiC_StashNetAutomation.cs; tab switching: UI/AutomationTabPatches.cs -->
+	<!-- v0.22.0: AUTOMATION tab in the recipe box (vanilla craftingInfoPanel), next to Ingredients / Description.
+	     Only at Network stations (the controller hides the tab button elsewhere). At those stations the recipe
+	     box also takes the empty info panel's place, so this tab opens without a selected recipe
+	     (UI/AutomationTabPatches.cs). Rows: keep the selected recipe in stock; keep a metal melted (forge); the
+	     list of both; Fire Myself/Auto and Refill (fuel stations); Finished items to storage / stay here.
+	     Controller: src/StashNet/UI/XUiC_StashNetAutomation.cs. Choice backgrounds are sprites whose colour is
+	     bound (stashnet_sel_*), so the selected choice is highlighted. -->
 	<append xpath="/windows/window[@name='craftingInfoPanel']/rect[@name='contentCraftingInfo']">
 		<rect name="stashnetAutomation" depth="2" pos="0,0" width="604" height="348" controller="StashNet.UI.XUiC_StashNetAutomation, StashNet">
 			<button depth="5" name="btnAutomationTab" style="icon30px, press" pos="303,-22" sprite="ui_game_symbol_electric_power" pivot="center" tooltip_key="stashnetAutomationTab" sound="[paging_click]" visible="{stashnet_atstation}" />
@@ -75,35 +78,95 @@
 
 				<!-- Keep the selected recipe in stock. -->
 				<label depth="4" name="keepLabel" pos="8,-9" width="236" height="26" font_size="20" text="{stashnet_keeplabel}" />
-				<rect name="amount" depth="4" pos="248,-6" width="110" height="30" controller="Counter">
+				<rect name="amount" depth="4" pos="248,-6" width="110" height="30" controller="Counter" visible="{stashnet_hasrecipe}">
 					<button depth="4" name="countDown" style="icon30px, press, held" pos="0,-13" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" />
 					<textfield name="count_input" depth="4" pos="16,0" width="66" height="28" character_limit="7" validation="integer" virtual_keyboard_prompt="vkPromptCount" />
 					<button depth="4" name="countUp" style="icon30px, press, held" pos="96,-13" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" />
 					<!-- The vanilla Counter requires countMax (v0.20.0 crash without it). Hidden: max would be 1,000,000. -->
 					<button depth="4" name="countMax" style="icon30px, press" pos="96,-13" sprite="ui_game_symbol_arrow_max" pivot="center" visible="false" />
 				</rect>
-				<rect name="addRow" depth="4" pos="362,-6" width="80" height="30">
+				<rect name="addRow" depth="4" pos="362,-6" width="80" height="30" visible="{stashnet_hasrecipe}">
 					<button depth="4" name="btnAddRule" width="80" height="30" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetAddRuleTip" />
 					<label depth="5" name="addLabel" pos="0,-4" width="80" height="24" font_size="20" justify="center" text="{stashnet_addlabel}" />
 				</rect>
 
-				<!-- This station's rules (up to 8). -->
-				<label depth="4" name="keptHeader" pos="8,-44" width="430" height="22" font_size="18" color="[lightGrey]" text_key="stashnetKeptHere" />
-				<label depth="4" name="noRules" pos="16,-70" width="420" height="22" font_size="18" color="[lightGrey]" text_key="stashnetNoRules" visible="{stashnet_norules}" />
-				<grid depth="4" name="rules" pos="4,-68" rows="8" cols="1" cell_width="439" cell_height="21" repeat_content="true">
-					<rect controller="StashNet.UI.XUiC_StashNetRuleRow, StashNet" width="439" height="21">
-						<label depth="5" name="ruleText" pos="12,-1" width="400" height="20" font_size="18" color="{stashnet_rulecolor}" text="{stashnet_rule}" visible="{stashnet_hasrule}" />
+				<!-- Forge: keep a metal melted at an amount. -->
+				<rect name="meltRow" depth="4" pos="0,-38" width="447" height="32" visible="{stashnet_hasmelt}">
+					<label depth="5" name="meltCaption" pos="8,-5" width="110" height="26" font_size="20" text_key="stashnetMeltLabel" />
+					<button depth="5" name="btnMetalPrev" style="icon30px, press" pos="128,-15" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" />
+					<label depth="5" name="metalName" pos="142,-5" width="76" height="26" font_size="20" justify="center" text="{stashnet_metal}" />
+					<button depth="5" name="btnMetalNext" style="icon30px, press" pos="232,-15" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" />
+					<rect name="meltAmount" depth="5" pos="248,-2" width="110" height="30" controller="Counter">
+						<button depth="5" name="countDown" style="icon30px, press, held" pos="0,-13" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" />
+						<textfield name="count_input" depth="5" pos="16,0" width="66" height="28" character_limit="5" validation="integer" virtual_keyboard_prompt="vkPromptCount" />
+						<button depth="5" name="countUp" style="icon30px, press, held" pos="96,-13" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" />
+						<button depth="5" name="countMax" style="icon30px, press" pos="96,-13" sprite="ui_game_symbol_arrow_max" pivot="center" visible="false" />
+					</rect>
+					<rect name="meltAddRow" depth="5" pos="362,-2" width="80" height="30">
+						<button depth="5" name="btnAddMelt" width="80" height="30" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetAddMeltTip" />
+						<label depth="6" name="meltAddLabel" pos="0,-4" width="80" height="24" font_size="20" justify="center" text="{stashnet_meltaddlabel}" />
+					</rect>
+				</rect>
+
+				<!-- What this station keeps: stock rules, then melt targets (6 per page). -->
+				<label depth="4" name="keptHeader" pos="8,-74" width="330" height="22" font_size="18" color="[lightGrey]" text_key="stashnetKeptHere" />
+				<button depth="4" name="btnPagePrev" style="icon30px, press" pos="372,-84" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" visible="{stashnet_paging}" />
+				<label depth="4" name="pageLabel" pos="384,-74" width="44" height="22" font_size="16" justify="center" color="[lightGrey]" text="{stashnet_page}" visible="{stashnet_paging}" />
+				<button depth="4" name="btnPageNext" style="icon30px, press" pos="438,-84" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" visible="{stashnet_paging}" />
+				<label depth="4" name="noRules" pos="16,-98" width="420" height="22" font_size="18" color="[lightGrey]" text_key="stashnetNoRules" visible="{stashnet_norules}" />
+				<grid depth="4" name="rules" pos="4,-96" rows="6" cols="1" cell_width="439" cell_height="20" repeat_content="true">
+					<rect controller="StashNet.UI.XUiC_StashNetRuleRow, StashNet" width="439" height="20">
+						<label depth="5" name="ruleText" pos="12,-1" width="400" height="19" font_size="18" color="{stashnet_rulecolor}" text="{stashnet_rule}" visible="{stashnet_hasrule}" />
 						<button depth="5" name="btnRemove" pos="425,-10" width="18" height="18" pivot="center" sprite="ui_game_symbol_x" defaultcolor="[lightGrey]" hovercolor="[white]" style="press, hover" sound="[paging_click]" tooltip_key="stashnetRemoveRuleTip" visible="{stashnet_hasrule}" />
 					</rect>
 				</grid>
 
-				<!-- Fuel mode (forge, campfire, chemistry station), with what the current mode does. -->
-				<rect name="fuelRow" depth="4" pos="8,-240" width="432" height="60" visible="{stashnet_hasfuel}">
-					<label depth="5" name="fuelCaption" pos="0,-2" width="70" height="26" font_size="20" text_key="stashnetFuelLabelShort" />
-					<button depth="5" name="btnFuelPrev" style="icon30px, press" pos="84,-14" sprite="ui_game_symbol_arrow_left" pivot="center" sound="[paging_click]" />
-					<label depth="5" name="fuelMode" pos="100,-2" width="170" height="26" font_size="20" justify="center" text="{stashnet_fuelmode}" />
-					<button depth="5" name="btnFuelNext" style="icon30px, press" pos="286,-14" sprite="ui_game_symbol_arrow_right" pivot="center" sound="[paging_click]" />
-					<label depth="5" name="fuelTip" pos="0,-28" width="432" height="34" font_size="16" color="[lightGrey]" text="{stashnet_fueltip}" />
+				<!-- Fire: Myself / Auto (fuel stations). -->
+				<rect name="fireRow" depth="4" pos="0,-218" width="447" height="26" visible="{stashnet_hasfuel}">
+					<label depth="5" name="fireCaption" pos="8,-2" width="80" height="24" font_size="20" text_key="stashnetFireLabel" />
+					<rect name="fireMyself" depth="5" pos="92,0" width="120" height="26">
+						<sprite depth="5" name="bg" sprite="menu_empty" type="sliced" width="120" height="26" color="{stashnet_sel_myself}" />
+						<button depth="6" name="btnFireMyself" width="120" height="26" sprite="menu_empty" defaultcolor="0,0,0,0" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip="{stashnet_myselftip}" />
+						<label depth="7" name="lbl" pos="0,-2" width="120" height="24" font_size="18" justify="center" text_key="stashnetFireMyself" />
+					</rect>
+					<rect name="fireAuto" depth="5" pos="218,0" width="120" height="26">
+						<sprite depth="5" name="bg" sprite="menu_empty" type="sliced" width="120" height="26" color="{stashnet_sel_auto}" />
+						<button depth="6" name="btnFireAuto" width="120" height="26" sprite="menu_empty" defaultcolor="0,0,0,0" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetFuelAutoTip" />
+						<label depth="7" name="lbl" pos="0,-2" width="120" height="24" font_size="18" justify="center" text_key="stashnetFireAuto" />
+					</rect>
+				</rect>
+
+				<!-- Refill from storage (Fire = Auto): none, or one of the fuels in storage (icon + count). -->
+				<rect name="refillRow" depth="4" pos="0,-246" width="447" height="32" visible="{stashnet_showrefill}">
+					<label depth="5" name="refillCaption" pos="8,-5" width="80" height="24" font_size="20" text_key="stashnetRefillLabel" />
+					<rect name="refillNone" depth="5" pos="92,-2" width="50" height="30">
+						<sprite depth="5" name="bg" sprite="menu_empty" type="sliced" width="50" height="30" color="{stashnet_sel_none}" />
+						<button depth="6" name="btnRefillNone" width="50" height="30" sprite="menu_empty" defaultcolor="0,0,0,0" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetRefillNoneTip" />
+						<label depth="7" name="lbl" pos="0,-4" width="50" height="24" font_size="18" justify="center" text_key="stashnetRefillNone" />
+					</rect>
+					<grid depth="5" name="fuels" pos="148,-2" rows="1" cols="7" cell_width="42" cell_height="30" repeat_content="true">
+						<rect controller="StashNet.UI.XUiC_StashNetFuelChoice, StashNet" width="40" height="30">
+							<sprite depth="5" name="bg" sprite="menu_empty" type="sliced" width="40" height="30" color="{stashnet_fuelbg}" visible="{stashnet_hasfuelitem}" />
+							<sprite depth="6" name="icon" atlas="ItemIconAtlas" sprite="{stashnet_fuelicon}" color="{stashnet_fueliconcolor}" pos="6,-1" width="28" height="28" foregroundlayer="true" visible="{stashnet_hasfuelitem}" />
+							<label depth="7" name="count" pos="0,-16" width="38" height="14" font_size="13" justify="right" effect="outline" text="{stashnet_fuelcount}" visible="{stashnet_hasfuelitem}" />
+							<button depth="8" name="btnFuel" width="40" height="30" sprite="menu_empty" defaultcolor="0,0,0,0" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip="{stashnet_fuelname}" visible="{stashnet_hasfuelitem}" />
+						</rect>
+					</grid>
+				</rect>
+
+				<!-- Finished items: to storage / stay here. -->
+				<rect name="outputRow" depth="4" pos="0,-278" width="447" height="24">
+					<label depth="5" name="outputCaption" pos="8,-1" width="150" height="22" font_size="18" text_key="stashnetOutputLabel" />
+					<rect name="outputOn" depth="5" pos="160,0" width="136" height="24">
+						<sprite depth="5" name="bg" sprite="menu_empty" type="sliced" width="136" height="24" color="{stashnet_sel_outon}" />
+						<button depth="6" name="btnOutputOn" width="136" height="24" sprite="menu_empty" defaultcolor="0,0,0,0" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetOutputOnTip" />
+						<label depth="7" name="lbl" pos="0,-2" width="136" height="22" font_size="18" justify="center" text_key="stashnetOutputOn" />
+					</rect>
+					<rect name="outputOff" depth="5" pos="302,0" width="136" height="24">
+						<sprite depth="5" name="bg" sprite="menu_empty" type="sliced" width="136" height="24" color="{stashnet_sel_outoff}" />
+						<button depth="6" name="btnOutputOff" width="136" height="24" sprite="menu_empty" defaultcolor="0,0,0,0" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" sound="[paging_click]" tooltip_key="stashnetOutputOffTip" />
+						<label depth="7" name="lbl" pos="0,-2" width="136" height="22" font_size="18" justify="center" text_key="stashnetOutputOff" />
+					</rect>
 				</rect>
 			</rect>
 		</rect>

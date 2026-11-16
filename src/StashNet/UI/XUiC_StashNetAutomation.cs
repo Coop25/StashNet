@@ -9,10 +9,11 @@ namespace StashNet.UI
 {
     /// <summary>
     /// The AUTOMATION tab in the recipe box (vanilla craftingInfoPanel, Mod/Config/XUi_InGame/windows.xml),
-    /// next to Ingredients / Description. The tab button only shows at Network stations. While the tab is
-    /// open (<see cref="TabOpen"/>), AutomationTabPatches hides the vanilla tab contents.
-    /// Keep in stock: the selected recipe + amount → Keep/Update; one row per rule with a remove button.
-    /// Fuel (fuel stations only): ◄ Manual / Auto / each fuel in storage ►, with what the mode does.
+    /// next to Ingredients / Description. Only at Network stations, where the recipe box also shows with no
+    /// recipe selected (AutomationTabPatches), and then this tab is open. While the tab is open
+    /// (<see cref="TabOpen"/>), AutomationTabPatches hides the vanilla tab contents.
+    /// Rows: keep the selected recipe in stock; keep a metal melted (forge); the list of both (6 per page);
+    /// Fire Myself / Auto and Refill none / a stored fuel (fuel stations); Finished items to storage / stay here.
     /// The server holds the settings; this shows what the last reply said.
     /// </summary>
     public class XUiC_StashNetAutomation : XUiController
@@ -20,14 +21,21 @@ namespace StashNet.UI
         /// <summary>Our tab is showing (only ever true at a Network station).</summary>
         public static bool TabOpen { get; private set; }
 
+        private const int RowsPerPage = 6;
+        private const float LiveRefreshSeconds = 1f;
+        private const string Selected = "70,105,70,255", Unselected = "48,48,48,255";
+
         private XUiC_CraftingInfoWindow infoWindow;
         private XUiController tabButton;
-        private XUiC_Counter amount;
+        private XUiC_Counter amount, meltAmount;
         private XUiC_StashNetRuleRow[] rows = new XUiC_StashNetRuleRow[0];
+        private XUiC_StashNetFuelChoice[] fuelCells = new XUiC_StashNetFuelChoice[0];
         private bool broken;
         private int shownVersion = -1;
         private bool shownTab, shownStation;
         private Recipe shownRecipe;
+        private int page, metalIndex;
+        private float liveTimer;
 
         public override void Init()
         {
@@ -47,6 +55,9 @@ namespace StashNet.UI
                     if (b != null) b.OnPress += (_s, _b) => CloseTab();
                 }
                 rows = GetChildrenByType<XUiC_StashNetRuleRow>();
+                fuelCells = GetChildrenByType<XUiC_StashNetFuelChoice>();
+                foreach (XUiC_StashNetFuelChoice cell in fuelCells) cell.Picked += name => CraftingNetwork.SendFuelMode(name);
+
                 amount = GetChildById("amount") as XUiC_Counter;
                 if (amount != null)
                 {
@@ -54,9 +65,24 @@ namespace StashNet.UI
                     amount.Step = 10;
                     amount.Count = 100;
                 }
+                meltAmount = GetChildById("meltAmount") as XUiC_Counter;
+                if (meltAmount != null)
+                {
+                    meltAmount.MaxCount = 30000;
+                    meltAmount.Step = 100;
+                    meltAmount.Count = 1000;
+                }
                 Hook("btnAddRule", AddRule);
-                Hook("btnFuelPrev", () => CycleFuel(-1));
-                Hook("btnFuelNext", () => CycleFuel(1));
+                Hook("btnAddMelt", AddMelt);
+                Hook("btnMetalPrev", () => StepMetal(-1));
+                Hook("btnMetalNext", () => StepMetal(1));
+                Hook("btnPagePrev", () => StepPage(-1));
+                Hook("btnPageNext", () => StepPage(1));
+                Hook("btnFireMyself", () => CraftingNetwork.SendFuelMode(FuelModes.Manual));
+                Hook("btnFireAuto", () => { if (CurrentFuelMode == FuelModes.Manual) CraftingNetwork.SendFuelMode(FuelModes.Auto); });
+                Hook("btnRefillNone", () => CraftingNetwork.SendFuelMode(FuelModes.Auto));
+                Hook("btnOutputOn", () => CraftingNetwork.SendOutput(true));
+                Hook("btnOutputOff", () => CraftingNetwork.SendOutput(false));
             }
             catch (Exception e)
             {
@@ -85,8 +111,11 @@ namespace StashNet.UI
             if (TabOpen) RestoreVanillaSelection();
             TabOpen = false;
             shownVersion = -1;
+            page = 0;
+            metalIndex = 0;
             if (broken) return;
             amount?.ForceTextRefresh();
+            meltAmount?.ForceTextRefresh();
             Refresh();
         }
 
@@ -116,6 +145,12 @@ namespace StashNet.UI
         private void CloseTab()
         {
             if (!TabOpen) return;
+            if (SelectedRecipe() == null)
+            {
+                // No recipe: the vanilla tabs have nothing to show, so ours stays.
+                SelectTabButtons();
+                return;
+            }
             TabOpen = false;
             SetSelected(tabButton, false);
             Refresh();
@@ -133,6 +168,21 @@ namespace StashNet.UI
             if (button?.ViewComponent is XUiV_Button v) v.Selected = selected;
         }
 
+        /// <summary>
+        /// Called after vanilla's recipe box Update (AutomationTabPatches): at a Network station with no
+        /// recipe selected, the recipe box takes the empty info panel's place so the tab can be used.
+        /// The item info panel (a clicked backpack item) still wins, as in vanilla.
+        /// </summary>
+        public static void KeepRecipeBoxShown(XUiC_CraftingInfoWindow window)
+        {
+            if (window?.ViewComponent == null || window.windowGroup == null || !window.windowGroup.isShowing) return;
+            XUiC_StashNetAutomation tab = window.GetChildByType<XUiC_StashNetAutomation>();
+            if (tab == null || tab.broken || !tab.AtNetworkStation() || tab.SelectedRecipe() != null) return;
+            bool emptyShown = window.emptyInfoWindow?.ViewComponent?.IsVisible == true;
+            bool itemShown = window.itemInfoWindow?.ViewComponent?.IsVisible == true;
+            if (!window.ViewComponent.IsVisible && (emptyShown || !itemShown)) window.ViewComponent.IsVisible = true;
+        }
+
         public override void Update(float _dt)
         {
             base.Update(_dt);
@@ -141,36 +191,100 @@ namespace StashNet.UI
             if (!station && TabOpen)
             {
                 RestoreVanillaSelection();
-                CloseTab();
+                TabOpen = false;
+                SetSelected(tabButton, false);
+                Refresh();
             }
             if (!station && !shownStation) return; // backpack crafting / vanilla stations: nothing to watch
             Recipe selected = SelectedRecipe();
-            if (shownVersion == CraftingNetwork.Version && shownTab == TabOpen && shownStation == station && shownRecipe == selected) return;
+            if (station && selected == null && !TabOpen) OpenTab();
+            liveTimer += _dt;
+            bool live = TabOpen && liveTimer >= LiveRefreshSeconds; // melted tallies change while open
+            if (!live && shownVersion == CraftingNetwork.Version && shownTab == TabOpen && shownStation == station && shownRecipe == selected) return;
             Refresh();
         }
 
         private void Refresh()
         {
+            liveTimer = 0f;
             shownVersion = CraftingNetwork.Version;
             shownTab = TabOpen;
             shownStation = AtNetworkStation();
             shownRecipe = SelectedRecipe();
 
-            List<StockRule> rules = CraftingNetwork.Settings?.Rules ?? new List<StockRule>();
+            List<Entry> entries = Entries();
+            int pages = Math.Max(1, (entries.Count + RowsPerPage - 1) / RowsPerPage);
+            page = Math.Max(0, Math.Min(page, pages - 1));
             for (int i = 0; i < rows.Length; i++)
             {
-                StockRule r = i < rules.Count ? rules[i] : null;
-                rows[i].Show(r, r == null ? 0 : Stored(r.Item));
+                int k = page * RowsPerPage + i;
+                Entry e = k < entries.Count ? entries[k] : null;
+                rows[i].Show(e?.Text, e != null && e.Done, e?.Remove);
             }
-            RefreshBindingsSelfAndChildren(); // rows have their own bindings
+
+            List<(string Name, int Count)> fuels = FuelChoices();
+            for (int i = 0; i < fuelCells.Length; i++)
+            {
+                if (i < fuels.Count) fuelCells[i].Show(fuels[i].Name, fuels[i].Count, fuels[i].Name == CurrentFuelMode);
+                else fuelCells[i].Show(null, 0, false);
+            }
+            RefreshBindingsSelfAndChildren(); // rows and cells have their own bindings
             if (infoWindow != null) infoWindow.IsDirty = true; // its showingredients/... bindings follow TabOpen
         }
+
+        private sealed class Entry
+        {
+            public string Text;
+            public bool Done;
+            public Action Remove;
+        }
+
+        /// <summary>Stock rules, then melt targets.</summary>
+        private List<Entry> Entries()
+        {
+            var list = new List<Entry>();
+            StationSettings s = CraftingNetwork.Settings;
+            if (s == null) return list;
+            foreach (StockRule r in s.Rules)
+            {
+                int stored = Stored(r.Item);
+                string item = r.Item;
+                list.Add(new Entry
+                {
+                    Text = $"{ItemClass.GetItemClass(r.Item)?.GetLocalizedItemName() ?? r.Item}   {stored} / {r.Target}",
+                    Done = stored >= r.Target,
+                    Remove = () => CraftingNetwork.SendRemoveRule(item),
+                });
+            }
+            foreach (MeltTarget m in s.Melts)
+            {
+                int tally = Tally(m.Metal);
+                string metal = m.Metal;
+                list.Add(new Entry
+                {
+                    Text = $"{string.Format(Localization.Get("stashnetMeltedRow"), MetalName(m.Metal))}   {tally} / {m.Target}",
+                    Done = tally >= m.Target,
+                    Remove = () => CraftingNetwork.SendRemoveMelt(metal),
+                });
+            }
+            return list;
+        }
+
+        private void StepPage(int by)
+        {
+            page += by;
+            Refresh();
+        }
+
+        /// <summary>The open station's workstation tile entity (client copy), or null.</summary>
+        private TileEntityWorkstation OpenStation() =>
+            (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.WorkstationData?.TileEntity;
 
         /// <summary>The recipe box belongs to an open Network station (not backpack crafting, not a vanilla station).</summary>
         private bool AtNetworkStation()
         {
             if (!CraftingNetwork.Active) return false;
-            TileEntityWorkstation te = (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.WorkstationData?.TileEntity;
+            TileEntityWorkstation te = OpenStation();
             if (te == null) return false;
             return CraftingNetwork.IsCraftingTerminal(GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block);
         }
@@ -180,15 +294,75 @@ namespace StashNet.UI
         private Recipe SelectedRecipe() =>
             windowGroup?.Controller?.GetChildByType<XUiC_RecipeList>()?.SelectedEntry?.Recipe;
 
-        private void CycleFuel(int direction)
+        // ------------------------------------------------------------ melt targets
+
+        /// <summary>Metals the open station melts (its InputMaterials), empty when it doesn't smelt.</summary>
+        private string[] Metals()
         {
-            if (!CraftingNetwork.Active || !CraftingNetwork.HasFuel) return;
-            List<string> fuels = CraftingNetwork.Listing
+            TileEntityWorkstation te = OpenStation();
+            return te == null ? new string[0] : StationRules.MeltMetals(GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block);
+        }
+
+        private string CurrentMetal()
+        {
+            string[] metals = Metals();
+            if (metals.Length == 0) return null;
+            metalIndex = ((metalIndex % metals.Length) + metals.Length) % metals.Length;
+            return metals[metalIndex];
+        }
+
+        private void StepMetal(int by)
+        {
+            metalIndex += by;
+            string metal = CurrentMetal();
+            MeltTarget existing = CraftingNetwork.Settings?.Melts.FirstOrDefault(m => m.Metal == metal);
+            if (existing != null && meltAmount != null) meltAmount.Count = existing.Target;
+            Refresh();
+        }
+
+        private static string MetalName(string metal) => StationRules.UnitOf(metal)?.GetLocalizedItemName() ?? metal;
+
+        /// <summary>The melted tally shown in the open forge's window (approximate; the window melts while open).</summary>
+        private int Tally(string metal)
+        {
+            TileEntityWorkstation te = OpenStation();
+            ItemStack[] slots = (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.inputWindow?.GetSlots() ?? te?.input;
+            if (te?.materialNames == null || slots == null) return 0;
+            int j = Array.FindIndex(te.materialNames, m => m.Equals(metal, StringComparison.OrdinalIgnoreCase));
+            int slot = slots.Length - te.materialNames.Length + j;
+            return j < 0 || slot < 0 || slot >= slots.Length || slots[slot] == null ? 0 : slots[slot].count;
+        }
+
+        private void AddMelt()
+        {
+            string metal = CurrentMetal();
+            if (metal == null) return;
+            int target = Math.Max(1, Math.Min(MeltTarget.MaxTarget, meltAmount?.Count ?? 1000));
+            CraftingNetwork.SendMeltTarget(new MeltTarget { Metal = metal, Target = target });
+        }
+
+        // ------------------------------------------------------------ fuel
+
+        private static string CurrentFuelMode => CraftingNetwork.Settings?.FuelMode ?? FuelModes.Manual;
+
+        /// <summary>Up to 7 fuels: the chosen one first (even when none is stored), then the most stored.</summary>
+        private List<(string Name, int Count)> FuelChoices()
+        {
+            var fuels = CraftingNetwork.Listing
                 .Where(a => a.Variant == null && IsFuel(a.Name))
-                .Select(a => a.Name)
+                .GroupBy(a => a.Name)
+                .Select(g => (Name: g.Key, Count: g.Sum(a => a.Count)))
+                .OrderByDescending(f => f.Count).ThenBy(f => f.Name, StringComparer.Ordinal)
                 .ToList();
-            string current = CraftingNetwork.Settings?.FuelMode ?? FuelModes.Manual;
-            CraftingNetwork.SendFuelMode(direction < 0 ? FuelModes.Previous(current, fuels) : FuelModes.Next(current, fuels));
+            string chosen = CurrentFuelMode;
+            if (FuelModes.IsFuelItem(chosen))
+            {
+                int i = fuels.FindIndex(f => f.Name == chosen);
+                var c = i >= 0 ? fuels[i] : (Name: chosen, Count: 0);
+                if (i >= 0) fuels.RemoveAt(i);
+                fuels.Insert(0, c);
+            }
+            return fuels.Take(fuelCells.Length).ToList();
         }
 
         private static bool IsFuel(string name)
@@ -196,6 +370,8 @@ namespace StashNet.UI
             ItemValue iv = ItemClass.GetItem(name);
             return iv != null && !iv.IsEmpty() && ItemClass.GetFuelValue(iv) > 0;
         }
+
+        // ------------------------------------------------------------ keep in stock
 
         private void AddRule()
         {
@@ -218,6 +394,7 @@ namespace StashNet.UI
 
         public override bool GetBindingValueInternal(ref string value, string bindingName)
         {
+            StationSettings s = CraftingNetwork.Settings;
             switch (bindingName)
             {
                 case "stashnet_atstation":
@@ -226,14 +403,8 @@ namespace StashNet.UI
                 case "stashnet_tabopen":
                     value = TabOpen ? "true" : "false";
                     return true;
-                case "stashnet_hasfuel":
-                    value = CraftingNetwork.Active && CraftingNetwork.HasFuel ? "true" : "false";
-                    return true;
-                case "stashnet_fuelmode":
-                    value = FuelName(CurrentFuelMode);
-                    return true;
-                case "stashnet_fueltip":
-                    value = FuelTip(CurrentFuelMode);
+                case "stashnet_hasrecipe":
+                    value = shownRecipe != null ? "true" : "false";
                     return true;
                 case "stashnet_keeplabel":
                     value = shownRecipe == null
@@ -241,38 +412,64 @@ namespace StashNet.UI
                         : string.Format(Localization.Get("stashnetKeepInStock"), shownRecipe.GetOutputItemClass()?.GetLocalizedItemName() ?? shownRecipe.GetName());
                     return true;
                 case "stashnet_addlabel":
-                    bool exists = shownRecipe != null && CraftingNetwork.Settings != null
-                        && CraftingNetwork.Settings.Rules.Any(r => r.Item == shownRecipe.GetOutputItemClass()?.GetItemName());
+                    bool exists = shownRecipe != null && s != null && s.Rules.Any(r => r.Item == shownRecipe.GetOutputItemClass()?.GetItemName());
                     value = Localization.Get(exists ? "stashnetUpdateRule" : "stashnetAddRule");
                     return true;
+                case "stashnet_hasmelt":
+                    value = !broken && AtNetworkStation() && Metals().Length > 0 ? "true" : "false";
+                    return true;
+                case "stashnet_metal":
+                    string metal = CurrentMetal();
+                    value = metal == null ? "" : MetalName(metal);
+                    return true;
+                case "stashnet_meltaddlabel":
+                    string cur = CurrentMetal();
+                    value = Localization.Get(s != null && s.Melts.Any(m => m.Metal == cur) ? "stashnetUpdateRule" : "stashnetAddRule");
+                    return true;
+                case "stashnet_paging":
+                    value = EntryCount() > RowsPerPage ? "true" : "false";
+                    return true;
+                case "stashnet_page":
+                    value = $"{page + 1}/{Math.Max(1, (EntryCount() + RowsPerPage - 1) / RowsPerPage)}";
+                    return true;
                 case "stashnet_norules":
-                    value = (CraftingNetwork.Settings?.Rules.Count ?? 0) == 0 ? "true" : "false";
+                    value = EntryCount() == 0 ? "true" : "false";
+                    return true;
+                case "stashnet_hasfuel":
+                    value = CraftingNetwork.Active && CraftingNetwork.HasFuel ? "true" : "false";
+                    return true;
+                case "stashnet_showrefill":
+                    value = CraftingNetwork.Active && CraftingNetwork.HasFuel && CurrentFuelMode != FuelModes.Manual ? "true" : "false";
+                    return true;
+                case "stashnet_sel_myself":
+                    value = CurrentFuelMode == FuelModes.Manual ? Selected : Unselected;
+                    return true;
+                case "stashnet_sel_auto":
+                    value = CurrentFuelMode != FuelModes.Manual ? Selected : Unselected;
+                    return true;
+                case "stashnet_sel_none":
+                    value = CurrentFuelMode == FuelModes.Auto ? Selected : Unselected;
+                    return true;
+                case "stashnet_myselftip":
+                    value = string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
+                    return true;
+                case "stashnet_sel_outon":
+                    value = s == null || s.OutputOn ? Selected : Unselected;
+                    return true;
+                case "stashnet_sel_outoff":
+                    value = s != null && !s.OutputOn ? Selected : Unselected;
                     return true;
                 default:
                     return base.GetBindingValueInternal(ref value, bindingName);
             }
         }
 
-        private static string CurrentFuelMode => CraftingNetwork.Settings?.FuelMode ?? FuelModes.Manual;
-
-        private static string FuelName(string mode)
-        {
-            if (mode == FuelModes.Manual) return Localization.Get("stashnetFuelManual");
-            if (mode == FuelModes.Auto) return Localization.Get("stashnetFuelAuto");
-            return ItemClass.GetItemClass(mode)?.GetLocalizedItemName() ?? mode;
-        }
-
-        private string FuelTip(string mode)
-        {
-            if (mode == FuelModes.Manual) return string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
-            if (mode == FuelModes.Auto) return Localization.Get("stashnetFuelAutoTip");
-            return string.Format(Localization.Get("stashnetFuelItemTip"), FuelName(mode));
-        }
+        private static int EntryCount() => (CraftingNetwork.Settings?.Rules.Count ?? 0) + (CraftingNetwork.Settings?.Melts.Count ?? 0);
 
         /// <summary>"Forge", "Campfire"...: the vanilla station this one copies (StashNetCategories), for "like a normal forge".</summary>
         private string VanillaStationName()
         {
-            TileEntityWorkstation te = (windowGroup?.Controller as XUiC_WorkstationWindowGroup)?.WorkstationData?.TileEntity;
+            TileEntityWorkstation te = OpenStation();
             Block block = te == null ? null : GameManager.Instance.World?.GetBlock(te.ToWorldPos()).Block;
             string vanilla = block != null && block.Properties.Contains(StationCategoryPatch.Property)
                 ? block.Properties.GetString(StationCategoryPatch.Property)
@@ -281,23 +478,25 @@ namespace StashNet.UI
         }
     }
 
-    /// <summary>One stock rule row: "Concrete Mix  312 / 500" and a remove button.</summary>
+    /// <summary>One list row: a stock rule ("Concrete Mix  312 / 500") or a melt target, and a remove button.</summary>
     public class XUiC_StashNetRuleRow : XUiController
     {
-        private StockRule rule;
-        private int stored;
+        private string text;
+        private bool done;
+        private Action remove;
 
         public override void Init()
         {
             base.Init();
-            XUiController remove = GetChildById("btnRemove");
-            if (remove != null) remove.OnPress += (_sender, _button) => { if (rule != null) CraftingNetwork.SendRemoveRule(rule.Item); };
+            XUiController button = GetChildById("btnRemove");
+            if (button != null) button.OnPress += (_sender, _button) => remove?.Invoke();
         }
 
-        public void Show(StockRule r, int storedNow)
+        public void Show(string rowText, bool reached, Action onRemove)
         {
-            rule = r;
-            stored = storedNow;
+            text = rowText;
+            done = reached;
+            remove = onRemove;
         }
 
         public override bool GetBindingValueInternal(ref string value, string bindingName)
@@ -305,13 +504,66 @@ namespace StashNet.UI
             switch (bindingName)
             {
                 case "stashnet_hasrule":
-                    value = rule != null ? "true" : "false";
+                    value = text != null ? "true" : "false";
                     return true;
                 case "stashnet_rule":
-                    value = rule == null ? "" : $"{ItemClass.GetItemClass(rule.Item)?.GetLocalizedItemName() ?? rule.Item}   {stored} / {rule.Target}";
+                    value = text ?? "";
                     return true;
                 case "stashnet_rulecolor":
-                    value = rule != null && stored >= rule.Target ? "150,220,150,255" : "210,210,210,255"; // green once stocked
+                    value = text != null && done ? "150,220,150,255" : "210,210,210,255"; // green once reached
+                    return true;
+                default:
+                    return base.GetBindingValueInternal(ref value, bindingName);
+            }
+        }
+    }
+
+    /// <summary>One fuel in the Refill row: icon, stored count, highlighted when chosen. Click = refill with it.</summary>
+    public class XUiC_StashNetFuelChoice : XUiController
+    {
+        public event Action<string> Picked;
+
+        private string fuel;
+        private int count;
+        private bool chosen;
+
+        public override void Init()
+        {
+            base.Init();
+            XUiController button = GetChildById("btnFuel");
+            if (button != null) button.OnPress += (_sender, _button) => { if (fuel != null) Picked?.Invoke(fuel); };
+        }
+
+        public void Show(string name, int stored, bool isChosen)
+        {
+            fuel = name;
+            count = stored;
+            chosen = isChosen;
+        }
+
+        public override bool GetBindingValueInternal(ref string value, string bindingName)
+        {
+            ItemClass ic = fuel == null ? null : ItemClass.GetItemClass(fuel);
+            switch (bindingName)
+            {
+                case "stashnet_hasfuelitem":
+                    value = ic != null ? "true" : "false";
+                    return true;
+                case "stashnet_fuelicon":
+                    value = ic?.GetIconName() ?? "";
+                    return true;
+                case "stashnet_fueliconcolor":
+                    UnityEngine.Color c = ic?.GetIconTint() ?? UnityEngine.Color.white;
+                    value = $"{(int)(c.r * 255)},{(int)(c.g * 255)},{(int)(c.b * 255)},{(int)(c.a * 255)}";
+                    return true;
+                case "stashnet_fuelcount":
+                    value = ic == null ? "" : count.ToString();
+                    return true;
+                case "stashnet_fuelname":
+                    value = ic == null ? "" : string.Format(Localization.Get("stashnetRefillTip"), ic.GetLocalizedItemName(), count);
+                    return true;
+                case "stashnet_fuelbg":
+                    value = chosen ? "70,105,70,255" : "48,48,48,255";
                     return true;
                 default:
                     return base.GetBindingValueInternal(ref value, bindingName);

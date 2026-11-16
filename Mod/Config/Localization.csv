@@ -72,8 +72,8 @@ stashnetBayNotEmpty,UI,XUi,,,Take the drives out of this bay first.
 stashnetDriveFillLine,UI,XUi,,,{0} / {1} stacks used ({2}) · {3} different items
 stashnetDriveFillEmpty,UI,XUi,,,Empty.
 stashnetDriveFillUnreadable,UI,XUi,,,This drive's data can't be read.
-stashnetFuelManual,UI,XUi,,,Manual
-stashnetFuelAuto,UI,XUi,,,Auto
+stashnetFireMyself,UI,XUi,,,Myself
+stashnetFireAuto,UI,XUi,,,Auto
 stashnetKeepInStock,UI,XUi,,,Keep in stock: {0}
 stashnetPickRecipe,UI,XUi,,,Select a recipe to keep in stock.
 stashnetAddRule,UI,XUi,,,Keep
@@ -85,9 +85,20 @@ stashnetRuleRefused,UI,XUi,,,That can't be automated at this station.
 stashnetRulesFull,UI,XUi,,,This station already keeps {0} items in stock. Remove one first.
 stashnetMeltsFull,UI,XUi,,,This forge already keeps {0} metals melted. Remove one first.
 stashnetRuleCantAuto,UI,XUi,,,"This recipe can't be kept in stock (locked, or it uses tools or weapons as ingredients)."
-stashnetAutomationTab,UI,XUi,,,Automation: keep items in stock and run the fire for you
-stashnetKeptHere,UI,XUi,,,Kept in stock at this station:
-stashnetFuelLabelShort,UI,XUi,,,Fuel:
+stashnetAutomationTab,UI,XUi,,,"Automation: keep items in stock, keep metals melted, run the fire, and choose where finished items go"
+stashnetKeptHere,UI,XUi,,,Kept at this station:
+stashnetFireLabel,UI,XUi,,,Fire:
 stashnetFuelManualTip,UI,XUi,,,"You light it yourself, like a normal {0}."
 stashnetFuelAutoTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle. Uses the fuel you put in."
-stashnetFuelItemTip,UI,XUi,,,"Lights itself when there's a craft or ore to melt, goes out when idle, and refills {0} from storage (one stack)."
+stashnetRefillLabel,UI,XUi,,,Refill:
+stashnetRefillNone,UI,XUi,,,none
+stashnetRefillNoneTip,UI,XUi,,,"Don't refill: it burns the fuel you put in yourself."
+stashnetRefillTip,UI,XUi,,,"Refill {0} from storage (one stack). {1} stored."
+stashnetMeltLabel,UI,XUi,,,Keep melted:
+stashnetMeltedRow,UI,XUi,,,{0} (melted)
+stashnetAddMeltTip,UI,XUi,,,"Feeds raw scrap from storage into the forge (scrap iron, brass, lead; broken glass, then crushed sand; small stones; clay) until this much is melted. Nothing else is ever melted."
+stashnetOutputLabel,UI,XUi,,,Finished items:
+stashnetOutputOn,UI,XUi,,,To storage
+stashnetOutputOff,UI,XUi,,,Stay here
+stashnetOutputOnTip,UI,XUi,,,"Finished items and cancelled crafts go into storage."
+stashnetOutputOffTip,UI,XUi,,,"Finished items stay in Output for you to take; cancelled crafts go back to your backpack."

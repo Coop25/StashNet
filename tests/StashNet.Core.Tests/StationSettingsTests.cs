@@ -160,30 +160,13 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
-        public void FuelModes_Previous_Cycles()
+        public void FuelModes_IsFuelItem()
         {
-            var fuels = new[] { "wood", "coal" };
-            Assert.Equal("wood", FuelModes.Previous("Manual", fuels));
-            Assert.Equal("coal", FuelModes.Previous("wood", fuels));
-            Assert.Equal("Auto", FuelModes.Previous("coal", fuels));
-            Assert.Equal("Manual", FuelModes.Previous("Auto", fuels));
-            Assert.Equal("Manual", FuelModes.Previous("gas", new[] { "coal" }));
-        }
-
-        [Fact]
-        public void FuelModes_Next_Cycles()
-        {
-            var fuels = new[] { "wood", "coal" };
-            Assert.Equal("Auto", FuelModes.Next("Manual", fuels));
-            Assert.Equal("coal", FuelModes.Next("Auto", fuels));
-            Assert.Equal("wood", FuelModes.Next("coal", fuels));
-            Assert.Equal("Manual", FuelModes.Next("wood", fuels));
-            Assert.Equal("Manual", FuelModes.Next("gas", new[] { "coal" }));
-            Assert.Equal("Manual", FuelModes.Next("Auto", new string[0]));
             Assert.True(FuelModes.IsFuelItem("coal"));
             Assert.False(FuelModes.IsFuelItem("Auto"));
             Assert.False(FuelModes.IsFuelItem("Manual"));
         }
+
     }
 
     public class StockMathTests

@@ -21,6 +21,27 @@ namespace StashNet.UI
     }
 
     /// <summary>
+    /// At a Network station with no recipe selected, vanilla shows the empty info panel in the recipe box's
+    /// place. Show the recipe box instead (same frame, so no flicker), so the Automation tab is reachable.
+    /// </summary>
+    [HarmonyPatch(typeof(XUiC_CraftingInfoWindow), nameof(XUiC_CraftingInfoWindow.Update))]
+    public static class AutomationRecipeBoxShownPatch
+    {
+        public static void Postfix(XUiC_CraftingInfoWindow __instance)
+        {
+            if (!Crafting.CraftingNetwork.Active) return;
+            try
+            {
+                XUiC_StashNetAutomation.KeepRecipeBoxShown(__instance);
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning($"[StashNet] automation tab: {e.Message}");
+            }
+        }
+    }
+
+    /// <summary>
     /// Selecting another recipe makes vanilla switch back to Ingredients. With our tab open, keep it open
     /// (you pick the recipe to keep in stock while on it) and keep its button the selected one.
     /// </summary>
