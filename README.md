@@ -5,7 +5,7 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 - **Physical drives** hold your items. Pull a drive out and its contents go with it.
 - **Storage Terminal**: every drive in one window, with search, sort, deposit and withdraw.
 - **Network Workbench**: a real workbench that can use ingredients stored on the network.
-- **Station automation**: Network stations can keep items in stock, refill their own fuel from storage, and put their fire out when idle.
+- **Station automation**: Network stations can keep items in stock, keep the forge's metals melted, refill their own fuel from storage, put their fire out when idle, and keep finished items in the station when you want them.
 - **One code** set on the Core protects the network's Drive Bays and Terminals.
 - **Tiers**: bigger drives, tougher bays that hold more drives, and Cores that reach farther. You upgrade bays and Cores in place with a hammer.
 - **Heat**: a big hoard runs hot and draws screamers, just like a forge does.
@@ -47,10 +47,14 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 Craft a **Network Workbench** (it needs a workbench and a Storage Terminal) and place it near your Core. It works exactly like a workbench, but recipes can use ingredients from the network. If an ingredient is in storage, the workbench pulls it into your backpack when you click Craft.
 
 ### Station automation
-Every Network station (Workbench, Forge, Chemistry Station, Campfire, Cement Mixer) has an **AUTOMATION** panel:
+Every Network station (Workbench, Forge, Chemistry Station, Campfire, Cement Mixer) has an **Automation** tab (the lightning icon) in the recipe box. It opens by itself when no recipe is selected:
 
 - **Keep in stock:** select a recipe, set an amount and click Keep. While someone is nearby, the station crafts from stored ingredients whenever storage holds less than that. Up to 8 items per station. Automatic crafts give no crafting XP.
-- **Fuel** (Forge, Campfire, Chemistry Station): *Manual* is the normal game. *Auto* lights the fire when there's something to craft or smelt and puts it out when idle. Choose a fuel (Wood, Coal and so on) to also refill it from storage.
+- **Keep melted** (Forge): pick a metal and an amount. The forge pulls raw scrap from storage (scrap iron, brass and lead; broken glass, then crushed sand; small stones; clay) until that much is melted, then stops. Nothing else is ever melted.
+- **Fire** (Forge, Campfire, Chemistry Station): *Myself* is the normal game. *Auto* lights the fire when there's something to craft or smelt and puts it out when idle. **Refill** picks a fuel from storage (shown with its icon and count) to keep one stack in the fuel slots.
+- **Finished items:** *To storage* (the default) or *Stay here*, which leaves them in Output and refunds cancelled crafts to your backpack, like a normal station.
+
+Crafting at a Network station can also use stored items that have a quality level, such as vehicle engines and batteries, as long as nothing is attached to them. It takes the lowest quality first.
 
 ### Bigger drives
 | Drive | Holds | Made at |

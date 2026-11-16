@@ -23,7 +23,7 @@ namespace StashNet.UI
 
         private const int RowsPerPage = 6;
         private const float LiveRefreshSeconds = 1f;
-        private const string Selected = "70,105,70,255", Unselected = "48,48,48,255";
+        private const string ChosenColor = "70,105,70,255", OtherColor = "48,48,48,255";
 
         private XUiC_CraftingInfoWindow infoWindow;
         private XUiController tabButton;
@@ -442,22 +442,22 @@ namespace StashNet.UI
                     value = CraftingNetwork.Active && CraftingNetwork.HasFuel && CurrentFuelMode != FuelModes.Manual ? "true" : "false";
                     return true;
                 case "stashnet_sel_myself":
-                    value = CurrentFuelMode == FuelModes.Manual ? Selected : Unselected;
+                    value = CurrentFuelMode == FuelModes.Manual ? ChosenColor : OtherColor;
                     return true;
                 case "stashnet_sel_auto":
-                    value = CurrentFuelMode != FuelModes.Manual ? Selected : Unselected;
+                    value = CurrentFuelMode != FuelModes.Manual ? ChosenColor : OtherColor;
                     return true;
                 case "stashnet_sel_none":
-                    value = CurrentFuelMode == FuelModes.Auto ? Selected : Unselected;
+                    value = CurrentFuelMode == FuelModes.Auto ? ChosenColor : OtherColor;
                     return true;
                 case "stashnet_myselftip":
                     value = string.Format(Localization.Get("stashnetFuelManualTip"), VanillaStationName());
                     return true;
                 case "stashnet_sel_outon":
-                    value = s == null || s.OutputOn ? Selected : Unselected;
+                    value = s == null || s.OutputOn ? ChosenColor : OtherColor;
                     return true;
                 case "stashnet_sel_outoff":
-                    value = s != null && !s.OutputOn ? Selected : Unselected;
+                    value = s != null && !s.OutputOn ? ChosenColor : OtherColor;
                     return true;
                 default:
                     return base.GetBindingValueInternal(ref value, bindingName);
