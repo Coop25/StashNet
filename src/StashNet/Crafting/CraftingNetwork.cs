@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using StashNet.Core.Protocol;
 using StashNet.Core.Stations;
 using StashNet.Network;
@@ -39,6 +40,35 @@ namespace StashNet.Crafting
         public static int Version { get; private set; }
         /// <summary>Plain (non-variant) network stock by item type id.</summary>
         private static readonly Dictionary<int, int> stockByType = new Dictionary<int, int>();
+        /// <summary>
+        /// Stored quality items with nothing attached (engines, batteries ...) by type id: they can be
+        /// recipe ingredients, like vanilla counts unmodded ones in the backpack.
+        /// </summary>
+        private static readonly Dictionary<int, List<(string Variant, int Quality, int Count)>> qualityByType =
+            new Dictionary<int, List<(string Variant, int Quality, int Count)>>();
+
+        private static void ClearStock()
+        {
+            stockByType.Clear();
+            qualityByType.Clear();
+        }
+
+        /// <summary>A stored variant usable as an ingredient: decodes, has quality, no mods or cosmetics attached.</summary>
+        private static bool TryQualityIngredient(ItemAmount a, out ItemValue iv)
+        {
+            if (!Drives.ItemCodec.TryDecode(a.Name, a.Variant, out iv, out _) || iv == null || iv.IsEmpty() || !iv.HasQuality) return false;
+            return !HasAttached(iv.modifications) && !HasAttached(iv.cosmeticMods);
+        }
+
+        private static bool HasAttached(ItemValue[] mods)
+        {
+            if (mods == null) return false;
+            foreach (ItemValue m in mods)
+            {
+                if (m != null && !m.IsEmpty()) return true;
+            }
+            return false;
+        }
 
         /// <summary>A StashNet Crafting Terminal window is open for the local player.</summary>
         public static bool Active { get; private set; }
@@ -73,13 +103,13 @@ namespace StashNet.Crafting
         {
             stationPos = terminalPos;
             RepairMode = true;
-            stockByType.Clear();
+            ClearStock();
         }
 
         public static void CloseRepair()
         {
             RepairMode = false;
-            if (!Active) stockByType.Clear();
+            if (!Active) ClearStock();
         }
 
         /// <summary>Repair needs kits: pull up to <paramref name="want"/> into the backpack. True when they're there now.</summary>
@@ -101,7 +131,7 @@ namespace StashNet.Crafting
             Listing = new List<ItemAmount>();
             HasFuel = Stations.StationRules.HasFuel(GameManager.Instance.World?.GetBlock(pos).Block);
             Version++;
-            stockByType.Clear();
+            ClearStock();
             freeStacks = 0;
             outputTimer = 0f;
             RequestListing();
@@ -113,7 +143,7 @@ namespace StashNet.Crafting
             windowGroup = null;
             Settings = null;
             Listing = new List<ItemAmount>();
-            stockByType.Clear();
+            ClearStock();
             listRequests.Clear();
             settingsRequests.Clear();
         }
@@ -198,13 +228,20 @@ namespace StashNet.Crafting
             if (ours) TakeStationReply(response);
             bool forRepair = RepairMode && !Active && response.HasListing;
             if (!ours && !forRepair) return;
-            stockByType.Clear();
+            ClearStock();
             freeStacks = response.HasListing ? Math.Max(0, response.MaxStacks - response.UsedStacks) : 0;
             if (response.HasListing)
             {
                 foreach (ItemAmount a in response.Listing)
                 {
-                    if (a.Variant != null) continue; // tools/weapons etc. aren't recipe ingredients
+                    if (a.Variant != null)
+                    {
+                        // Quality items count only when nothing is attached (vanilla ignores modded ones too).
+                        if (!TryQualityIngredient(a, out ItemValue q)) continue;
+                        if (!qualityByType.TryGetValue(q.type, out var list)) qualityByType[q.type] = list = new List<(string, int, int)>();
+                        list.Add((a.Variant, q.Quality, a.Count));
+                        continue;
+                    }
                     ItemValue iv = ItemClass.GetItem(a.Name);
                     if (iv == null || iv.IsEmpty()) continue;
                     stockByType.TryGetValue(iv.type, out int n);
@@ -254,13 +291,14 @@ namespace StashNet.Crafting
             TerminalClient.Send(request);
         }
 
-        /// <summary>Network stock of this item (plain items only; 0 when inactive).</summary>
+        /// <summary>Network stock of this item (plain items, or unmodded quality items; 0 when inactive).</summary>
         public static int Count(ItemValue iv) => CountsStock ? Stock(iv) : 0;
 
-        /// <summary>Network stock of this plain item per the last listing (station or repair mode), ignoring the count gates.</summary>
+        /// <summary>Network stock of this item per the last listing (station or repair mode), ignoring the count gates.</summary>
         public static int Stock(ItemValue iv)
         {
-            if (!(Active || RepairMode) || iv == null || iv.HasQuality) return 0;
+            if (!(Active || RepairMode) || iv == null) return 0;
+            if (iv.HasQuality) return qualityByType.TryGetValue(iv.type, out var q) ? q.Sum(e => e.Count) : 0;
             return stockByType.TryGetValue(iv.type, out int n) ? n : 0;
         }
 
@@ -270,6 +308,7 @@ namespace StashNet.Crafting
             var list = new List<ItemStack>();
             if (!Active) return list;
             foreach (var kv in stockByType) list.Add(new ItemStack(new ItemValue(kv.Key), kv.Value));
+            foreach (var kv in qualityByType) list.Add(new ItemStack(new ItemValue(kv.Key), kv.Value.Sum(e => e.Count)));
             return list;
         }
 
@@ -286,8 +325,15 @@ namespace StashNet.Crafting
             {
                 int missing = need.count * multiplier - RawCount(inventory, need.itemValue);
                 if (missing <= 0) continue;
-                if (need.itemValue.HasQuality || Stock(need.itemValue) < missing) return false;
-                shortfalls.Add(new ItemAmount(need.itemValue.ItemClass.GetItemName(), null, missing));
+                if (Stock(need.itemValue) < missing) return false;
+                string name = need.itemValue.ItemClass.GetItemName();
+                if (need.itemValue.HasQuality)
+                {
+                    // Specific stored items, lowest quality first, so the good ones stay.
+                    foreach (var (variant, count) in QualityPick.LowestFirst(qualityByType[need.itemValue.type], missing))
+                        shortfalls.Add(new ItemAmount(name, variant, count));
+                }
+                else shortfalls.Add(new ItemAmount(name, null, missing));
             }
             if (shortfalls.Count == 0) return true;
 
