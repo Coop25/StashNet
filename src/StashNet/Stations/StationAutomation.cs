@@ -219,10 +219,15 @@ namespace StashNet.Stations
         /// </summary>
         private static bool RunMelts(TileEntityWorkstation te, Block block, StationSettings settings, StationStock net)
         {
-            if (settings.Melts.Count == 0 || XUiM_Recipes.DisableSmelter) return false;
             if (!te.isModuleUsed[MaterialInputModule] || te.materialNames == null || te.input == null) return false;
-            int rawCount = te.input.Length - te.materialNames.Length;
-            if (rawCount <= 0) return false;
+            // The game keeps 3 ore slots but the forge window shows only 2 (vanilla windows.xml rows="2"), so
+            // a 3rd would melt out of sight. Automation uses only the shown ones (StashNetOreSlots, owner
+            // 2026-11-16: "something is happening behind the scenes"), and empties any hidden one into storage.
+            int tallyStart = te.input.Length - te.materialNames.Length;
+            int rawCount = Math.Min(tallyStart, StationRules.OreSlots(block));
+            bool returned = ReturnHiddenOre(te, rawCount, tallyStart, net);
+            if (settings.Melts.Count == 0 || XUiM_Recipes.DisableSmelter) return returned;
+            if (rawCount <= 0) return returned;
             Dictionary<string, string[]> feed = StationRules.MeltFeed(block);
 
             // Targets that need feeding right now, in order. Each one may spread over every empty ore slot
@@ -234,7 +239,7 @@ namespace StashNet.Stations
                 int metalIndex = Array.FindIndex(te.materialNames, m => m.Equals(melt.Metal, StringComparison.OrdinalIgnoreCase));
                 ItemClass unit = StationRules.UnitOf(melt.Metal);
                 if (metalIndex < 0 || unit == null || !feed.TryGetValue(melt.Metal, out string[] rawNames)) continue;
-                int tally = te.input[rawCount + metalIndex]?.count ?? 0;
+                int tally = te.input[tallyStart + metalIndex]?.count ?? 0;
                 int pending = Enumerable.Range(0, rawCount).Where(i => IsMetal(te.input[i], melt.Metal))
                     .Sum(i => te.input[i].count * te.input[i].itemValue.ItemClass.GetWeight());
                 int wanted = MeltFeed.UnitsWanted(tally, pending, melt.Target, unit.MaxCount);
@@ -245,7 +250,8 @@ namespace StashNet.Stations
             // 2026-11-16), so a forge never melts clay + clay while iron waits.
             int targets = settings.Melts.Count(m => OwnerAllowed(net, m.Owner));
             int perMetal = MeltFeed.SlotsPerMetal(targets, rawCount);
-            bool changed = perMetal < rawCount && FreeSlotForWaitingMetal(te, rawCount, wanting.Where(w => HasStoredRaw(net, w.Raws)).Select(w => w.Melt.Metal), net);
+            bool changed = returned;
+            changed |= perMetal < rawCount && FreeSlotForWaitingMetal(te, rawCount, wanting.Where(w => HasStoredRaw(net, w.Raws)).Select(w => w.Melt.Metal), net);
 
             for (int k = 0; k < wanting.Count; k++)
             {
@@ -283,6 +289,22 @@ namespace StashNet.Stations
                 }
             }
             return changed;
+        }
+
+        /// <summary>Plain items in ore slots the window doesn't show go back to storage (or a loot bag on the station).</summary>
+        private static bool ReturnHiddenOre(TileEntityWorkstation te, int shownSlots, int tallyStart, StationStock net)
+        {
+            bool any = false;
+            for (int i = Math.Max(0, shownSlots); i < tallyStart; i++)
+            {
+                ItemStack s = te.input[i];
+                if (s == null || s.IsEmpty() || !Drives.ItemCodec.IsPlain(s.itemValue)) continue;
+                net.PutBack(s.itemValue.ItemClass.GetItemName(), s.count);
+                te.input[i] = ItemStack.Empty.Clone();
+                any = true;
+            }
+            if (any) net.SaveDirty();
+            return any;
         }
 
         private static bool HasStoredRaw(StationStock net, string[] rawNames) =>

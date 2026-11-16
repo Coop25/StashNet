@@ -52,6 +52,16 @@ namespace StashNet.Stations
             return int.TryParse(block.Properties.GetString(FuelRefillProperty), out int n) && n > 0 ? n : DefaultFuelRefill;
         }
 
+        public const string OreSlotsProperty = "StashNetOreSlots";
+        public const int DefaultOreSlots = 2;
+
+        /// <summary>Ore slots automation may use: the ones the forge window shows (block property StashNetOreSlots, default 2).</summary>
+        public static int OreSlots(Block block)
+        {
+            if (block == null || !block.Properties.Contains(OreSlotsProperty)) return DefaultOreSlots;
+            return int.TryParse(block.Properties.GetString(OreSlotsProperty), out int n) && n > 0 ? n : DefaultOreSlots;
+        }
+
         public const string MeltFeedProperty = "StashNetMeltFeed";
 
         /// <summary>
