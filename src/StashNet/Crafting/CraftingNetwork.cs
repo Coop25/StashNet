@@ -41,23 +41,30 @@ namespace StashNet.Crafting
         /// <summary>Plain (non-variant) network stock by item type id.</summary>
         private static readonly Dictionary<int, int> stockByType = new Dictionary<int, int>();
         /// <summary>
-        /// Stored quality items with nothing attached (engines, batteries ...) by type id: they can be
-        /// recipe ingredients, like vanilla counts unmodded ones in the backpack.
+        /// Stored non-plain items usable as recipe ingredients, by type id: quality items with nothing
+        /// attached (batteries ...), and quality-less items that only carry a seed (engines, owner
+        /// 2026-11-16), like vanilla counts them in the backpack. Quality-less entries have Quality 0.
         /// </summary>
-        private static readonly Dictionary<int, List<(string Variant, int Quality, int Count)>> qualityByType =
+        private static readonly Dictionary<int, List<(string Variant, int Quality, int Count)>> variantsByType =
             new Dictionary<int, List<(string Variant, int Quality, int Count)>>();
 
         private static void ClearStock()
         {
             stockByType.Clear();
-            qualityByType.Clear();
+            variantsByType.Clear();
         }
 
-        /// <summary>A stored variant usable as an ingredient: decodes, has quality, no mods or cosmetics attached.</summary>
-        private static bool TryQualityIngredient(ItemAmount a, out ItemValue iv)
+        /// <summary>
+        /// A stored variant usable as an ingredient: decodes, no mods or cosmetics attached, and either has
+        /// quality or (no quality) is unworn with no saved data, e.g. an engine that differs only by seed.
+        /// Items holding data (a drive with contents) never count.
+        /// </summary>
+        private static bool TryVariantIngredient(ItemAmount a, out ItemValue iv)
         {
-            if (!Drives.ItemCodec.TryDecode(a.Name, a.Variant, out iv, out _) || iv == null || iv.IsEmpty() || !iv.HasQuality) return false;
-            return !HasAttached(iv.modifications) && !HasAttached(iv.cosmeticMods);
+            if (!Drives.ItemCodec.TryDecode(a.Name, a.Variant, out iv, out _) || iv == null || iv.IsEmpty()) return false;
+            if (HasAttached(iv.modifications) || HasAttached(iv.cosmeticMods)) return false;
+            if (iv.Metadata != null && iv.Metadata.Count > 0) return false;
+            return iv.HasQuality || iv.UseTimes == 0f;
         }
 
         private static bool HasAttached(ItemValue[] mods)
@@ -237,8 +244,8 @@ namespace StashNet.Crafting
                     if (a.Variant != null)
                     {
                         // Quality items count only when nothing is attached (vanilla ignores modded ones too).
-                        if (!TryQualityIngredient(a, out ItemValue q)) continue;
-                        if (!qualityByType.TryGetValue(q.type, out var list)) qualityByType[q.type] = list = new List<(string, int, int)>();
+                        if (!TryVariantIngredient(a, out ItemValue q)) continue;
+                        if (!variantsByType.TryGetValue(q.type, out var list)) variantsByType[q.type] = list = new List<(string, int, int)>();
                         list.Add((a.Variant, q.Quality, a.Count));
                         continue;
                     }
@@ -291,15 +298,16 @@ namespace StashNet.Crafting
             TerminalClient.Send(request);
         }
 
-        /// <summary>Network stock of this item (plain items, or unmodded quality items; 0 when inactive).</summary>
+        /// <summary>Network stock of this item (plain items plus usable variants, see variantsByType; 0 when inactive).</summary>
         public static int Count(ItemValue iv) => CountsStock ? Stock(iv) : 0;
 
         /// <summary>Network stock of this item per the last listing (station or repair mode), ignoring the count gates.</summary>
         public static int Stock(ItemValue iv)
         {
             if (!(Active || RepairMode) || iv == null) return 0;
-            if (iv.HasQuality) return qualityByType.TryGetValue(iv.type, out var q) ? q.Sum(e => e.Count) : 0;
-            return stockByType.TryGetValue(iv.type, out int n) ? n : 0;
+            stockByType.TryGetValue(iv.type, out int plain);
+            int variants = variantsByType.TryGetValue(iv.type, out var q) ? q.Sum(e => e.Count) : 0;
+            return plain + variants;
         }
 
         /// <summary>Network stock as item stacks, for vanilla code that scans a stack list.</summary>
@@ -308,7 +316,7 @@ namespace StashNet.Crafting
             var list = new List<ItemStack>();
             if (!Active) return list;
             foreach (var kv in stockByType) list.Add(new ItemStack(new ItemValue(kv.Key), kv.Value));
-            foreach (var kv in qualityByType) list.Add(new ItemStack(new ItemValue(kv.Key), kv.Value.Sum(e => e.Count)));
+            foreach (var kv in variantsByType) list.Add(new ItemStack(new ItemValue(kv.Key), kv.Value.Sum(e => e.Count)));
             return list;
         }
 
@@ -327,13 +335,17 @@ namespace StashNet.Crafting
                 if (missing <= 0) continue;
                 if (Stock(need.itemValue) < missing) return false;
                 string name = need.itemValue.ItemClass.GetItemName();
-                if (need.itemValue.HasQuality)
+                // Plain copies first, then specific stored items, lowest quality first so the good ones stay
+                // (quality-less ones such as engines are all quality 0).
+                stockByType.TryGetValue(need.itemValue.type, out int plain);
+                int fromPlain = Math.Min(plain, missing);
+                if (fromPlain > 0) shortfalls.Add(new ItemAmount(name, null, fromPlain));
+                missing -= fromPlain;
+                if (missing > 0 && variantsByType.TryGetValue(need.itemValue.type, out var stored))
                 {
-                    // Specific stored items, lowest quality first, so the good ones stay.
-                    foreach (var (variant, count) in QualityPick.LowestFirst(qualityByType[need.itemValue.type], missing))
+                    foreach (var (variant, count) in QualityPick.LowestFirst(stored, missing))
                         shortfalls.Add(new ItemAmount(name, variant, count));
                 }
-                else shortfalls.Add(new ItemAmount(name, null, missing));
             }
             if (shortfalls.Count == 0) return true;
 
