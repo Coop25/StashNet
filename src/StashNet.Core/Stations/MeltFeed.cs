@@ -56,8 +56,11 @@ namespace StashNet.Core.Stations
             return plan;
         }
 
-        /// <summary>Most ore slots one metal may fill: all of them with a single melt target, one each with several (owner, 2026-11-16).</summary>
-        public static int SlotsPerMetal(int meltTargets, int oreSlots) => meltTargets >= 2 ? 1 : oreSlots;
+        /// <summary>
+        /// Most ore slots one metal may fill: all of them while only one melt needs items, one each while
+        /// several do (owner, 2026-11-16; counted by active melts, not melts set up, since 2026-11-17).
+        /// </summary>
+        public static int SlotsPerMetal(int activeMelts, int oreSlots) => activeMelts >= 2 ? 1 : oreSlots;
 
         /// <summary>
         /// The ore slot to hand back to storage so a waiting metal gets its own slot: only when no slot is

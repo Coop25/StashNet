@@ -246,12 +246,14 @@ namespace StashNet.Stations
                 if (wanted > 0) wanting.Add((melt, unit, rawNames, wanted));
             }
 
-            // One melt target may fill every ore slot; with several, each metal gets one slot (owner,
-            // 2026-11-16), so a forge never melts clay + clay while iron waits.
-            int targets = settings.Melts.Count(m => OwnerAllowed(net, m.Owner));
-            int perMetal = MeltFeed.SlotsPerMetal(targets, rawCount);
+            // Counted by melts that need items right now (and have some in storage), not by melts set up
+            // (owner, 2026-11-17): once the others reach their targets, the last one fills every ore slot;
+            // with two or more, each metal gets one slot, so a forge never melts clay + clay while iron waits.
+            List<string> active = wanting.Where(w => HasStoredRaw(net, w.Raws)).Select(w => w.Melt.Metal)
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            int perMetal = MeltFeed.SlotsPerMetal(active.Count, rawCount);
             bool changed = returned;
-            changed |= perMetal < rawCount && FreeSlotForWaitingMetal(te, rawCount, wanting.Where(w => HasStoredRaw(net, w.Raws)).Select(w => w.Melt.Metal), net);
+            changed |= perMetal < rawCount && FreeSlotForWaitingMetal(te, rawCount, active, net);
 
             for (int k = 0; k < wanting.Count; k++)
             {

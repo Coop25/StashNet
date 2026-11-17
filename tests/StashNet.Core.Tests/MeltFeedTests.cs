@@ -157,13 +157,17 @@ namespace StashNet.Core.Tests
     public class MeltSlotShareTests
     {
         [Fact]
-        public void SingleTargetUsesEverySlot() => Assert.Equal(2, MeltFeed.SlotsPerMetal(meltTargets: 1, oreSlots: 2));
+        public void SingleTargetUsesEverySlot() => Assert.Equal(2, MeltFeed.SlotsPerMetal(activeMelts: 1, oreSlots: 2));
+
+        // Owner, 2026-11-17: melts that already reached their target no longer hold a slot back.
+        [Fact]
+        public void NoActiveMeltLeavesEverySlotFree() => Assert.Equal(2, MeltFeed.SlotsPerMetal(activeMelts: 0, oreSlots: 2));
 
         [Fact]
         public void SeveralTargetsGetOneSlotEach()
         {
-            Assert.Equal(1, MeltFeed.SlotsPerMetal(meltTargets: 2, oreSlots: 2));
-            Assert.Equal(1, MeltFeed.SlotsPerMetal(meltTargets: 3, oreSlots: 2));
+            Assert.Equal(1, MeltFeed.SlotsPerMetal(activeMelts: 2, oreSlots: 2));
+            Assert.Equal(1, MeltFeed.SlotsPerMetal(activeMelts: 3, oreSlots: 2));
         }
 
         [Fact]
