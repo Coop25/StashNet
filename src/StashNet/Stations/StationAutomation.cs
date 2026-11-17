@@ -253,7 +253,11 @@ namespace StashNet.Stations
                 .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             int perMetal = MeltFeed.SlotsPerMetal(active.Count, rawCount);
             bool changed = returned;
-            changed |= perMetal < rawCount && FreeSlotForWaitingMetal(te, rawCount, active, net);
+            // A melt waiting with no slot gets one back from a metal holding two, even when that metal
+            // needs nothing more right now (its slots already hold enough). Only slots automation filled,
+            // or a player's items a melt target asks for, are ever handed back (owner, 2026-11-17).
+            var targetMetals = new HashSet<string>(settings.Melts.Where(m => OwnerAllowed(net, m.Owner)).Select(m => m.Metal), StringComparer.OrdinalIgnoreCase);
+            changed |= FreeSlotForWaitingMetal(te, rawCount, active, targetMetals, net);
 
             for (int k = 0; k < wanting.Count; k++)
             {
@@ -313,22 +317,56 @@ namespace StashNet.Stations
             rawNames.Any(n => net.Stored(n, plainOnly: true) > 0);
 
         /// <summary>
-        /// With several melt targets: when every ore slot is full and a metal that can be fed holds none,
-        /// the smaller stack of a metal filling two slots goes back to storage (MeltFeed.SlotToFree).
+        /// Ore slots automation filled, per forge: slot index → item type it put there. In memory only, so
+        /// after a server restart only items a melt target asks for count as automation's.
+        /// </summary>
+        private static readonly Dictionary<Vector3i, Dictionary<int, int>> autoFilled = new Dictionary<Vector3i, Dictionary<int, int>>();
+
+        /// <summary>A station was removed: forget what automation knew about it.</summary>
+        public static void Forget(Vector3i pos)
+        {
+            autoFilled.Remove(pos);
+            nextRun.Remove(pos);
+        }
+
+        private static void MarkAutoFilled(TileEntityWorkstation te, int slot, int type)
+        {
+            Vector3i pos = te.ToWorldPos();
+            if (!autoFilled.TryGetValue(pos, out var slots)) autoFilled[pos] = slots = new Dictionary<int, int>();
+            slots[slot] = type;
+        }
+
+        /// <summary>Automation filled this slot and it still holds that item.</summary>
+        private static bool IsAutoFilled(TileEntityWorkstation te, int slot)
+        {
+            if (!autoFilled.TryGetValue(te.ToWorldPos(), out var slots) || !slots.TryGetValue(slot, out int type)) return false;
+            ItemStack s = te.input[slot];
+            if (s != null && !s.IsEmpty() && s.itemValue.type == type) return true;
+            slots.Remove(slot); // emptied or swapped by a player since
+            return false;
+        }
+
+        /// <summary>
+        /// When every ore slot is full and a melt that can be fed holds none, the smaller stack of a metal
+        /// filling two slots goes back to storage (MeltFeed.SlotToFree). Only stacks automation put there,
+        /// or a player's items whose metal has a melt target; anything else a player put in stays.
         /// What storage can't take stays in the slot.
         /// </summary>
-        private static bool FreeSlotForWaitingMetal(TileEntityWorkstation te, int rawCount, IEnumerable<string> waitingMetals, StationStock net)
+        private static bool FreeSlotForWaitingMetal(TileEntityWorkstation te, int rawCount, IEnumerable<string> waitingMetals, HashSet<string> targetMetals, StationStock net)
         {
             var metals = new string[rawCount];
             var counts = new int[rawCount];
+            var movable = new bool[rawCount];
             for (int i = 0; i < rawCount; i++)
             {
                 ItemStack s = te.input[i];
                 if (s == null || s.IsEmpty()) continue;
-                metals[i] = s.itemValue.ItemClass?.MadeOfMaterial?.ForgeCategory ?? s.itemValue.ItemClass?.GetItemName();
+                string forgeMetal = s.itemValue.ItemClass?.MadeOfMaterial?.ForgeCategory;
+                metals[i] = forgeMetal ?? s.itemValue.ItemClass?.GetItemName();
                 counts[i] = s.count;
+                movable[i] = IsAutoFilled(te, i) || (forgeMetal != null && targetMetals.Contains(forgeMetal));
             }
-            int slot = MeltFeed.SlotToFree(metals, counts, waitingMetals);
+            int slot = MeltFeed.SlotToFree(metals, counts, waitingMetals, movable);
             if (slot < 0) return false;
 
             ItemStack stack = te.input[slot];
@@ -377,6 +415,7 @@ namespace StashNet.Stations
             {
                 if (add[j] <= 0) continue;
                 ItemStack s = te.input[slots[j]];
+                MarkAutoFilled(te, slots[j], item.type);
                 if (s == null || s.IsEmpty()) te.input[slots[j]] = new ItemStack(item.Clone(), add[j]);
                 else
                 {

@@ -186,6 +186,15 @@ namespace StashNet.Core.Tests
         public void NothingFreedWhenNoOtherMetalWaits() =>
             Assert.Equal(-1, MeltFeed.SlotToFree(new[] { "clay", "clay" }, new[] { 40, 10 }, new[] { "clay" }));
 
+        // Owner, 2026-11-17: a player's own items that no melt target asks for stay put.
+        [Fact]
+        public void PlayerItemsAreNeverFreed() =>
+            Assert.Equal(-1, MeltFeed.SlotToFree(new[] { "clay", "clay" }, new[] { 40, 10 }, new[] { "iron" }, new[] { false, false }));
+
+        [Fact]
+        public void OnlyAMovableDuplicateIsFreed() =>
+            Assert.Equal(0, MeltFeed.SlotToFree(new[] { "clay", "clay" }, new[] { 40, 10 }, new[] { "iron" }, new[] { true, false }));
+
         [Fact]
         public void MetalNamesIgnoreCase() =>
             Assert.Equal(0, MeltFeed.SlotToFree(new[] { "Iron", "iron" }, new[] { 5, 9 }, new[] { "brass" }));

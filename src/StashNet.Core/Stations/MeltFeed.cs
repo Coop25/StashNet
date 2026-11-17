@@ -65,9 +65,11 @@ namespace StashNet.Core.Stations
         /// <summary>
         /// The ore slot to hand back to storage so a waiting metal gets its own slot: only when no slot is
         /// empty and some wanting metal holds none, the smallest stack of a metal that fills more than one
-        /// slot. <paramref name="slotMetals"/>: each slot's metal, null = empty. Returns -1 for none.
+        /// slot. <paramref name="slotMetals"/>: each slot's metal, null = empty. <paramref name="movable"/>:
+        /// slots automation may hand back (null = all); a player's own items that no melt target asks for
+        /// are never moved (owner, 2026-11-17). Returns -1 for none.
         /// </summary>
-        public static int SlotToFree(IReadOnlyList<string> slotMetals, IReadOnlyList<int> slotCounts, IEnumerable<string> wantingMetals)
+        public static int SlotToFree(IReadOnlyList<string> slotMetals, IReadOnlyList<int> slotCounts, IEnumerable<string> wantingMetals, IReadOnlyList<bool> movable = null)
         {
             var held = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             foreach (string m in slotMetals)
@@ -84,7 +86,7 @@ namespace StashNet.Core.Stations
             int best = -1;
             for (int i = 0; i < slotMetals.Count; i++)
             {
-                if (held[slotMetals[i]] < 2) continue;
+                if (held[slotMetals[i]] < 2 || (movable != null && !movable[i])) continue;
                 if (best < 0 || slotCounts[i] < slotCounts[best]) best = i;
             }
             return best;

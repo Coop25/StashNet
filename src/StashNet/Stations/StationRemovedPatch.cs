@@ -15,6 +15,7 @@ namespace StashNet.Stations
             if (!SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer) return;
             if (!CraftingNetwork.IsCraftingTerminal(_blockValue.Block)) return;
             StationSettingsStore.Remove(_blockPos);
+            StationAutomation.Forget(_blockPos);
         }
     }
 }
