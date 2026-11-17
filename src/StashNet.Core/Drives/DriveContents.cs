@@ -85,6 +85,26 @@ namespace StashNet.Core.Drives
             TotalCount += count;
         }
 
+        /// <summary>
+        /// Turns variant entries that <paramref name="isPlain"/> says are really plain into plain entries
+        /// (merged with an existing plain entry of the same name). Counts never change and merging only
+        /// frees stacks. Returns true if anything changed.
+        /// </summary>
+        public bool MakePlain(Func<string, string, bool> isPlain)
+        {
+            bool changed = false;
+            for (int i = entries.Count - 1; i >= 0; i--)
+            {
+                DriveEntry e = entries[i];
+                if (e.Variant == null || !isPlain(e.Name, e.Variant)) continue;
+                entries.RemoveAt(i);
+                TotalCount -= e.Count;
+                AddLoaded(e.Name, null, e.Count);
+                changed = true;
+            }
+            return changed;
+        }
+
         /// <summary>Unknown or invalid stack sizes count as 1 (the conservative choice).</summary>
         internal static int SizeOf(Func<string, int> stackSizeOf, string name)
         {

@@ -135,7 +135,11 @@ namespace StashNet.Network
                     // Drives aren't locked to networks (owner's decision, 2026-11-12). Clear any
                     // lock stamp left by v0.5.0 the next time the server saves.
                     var slot = new Slot { Bay = storage, Index = i, ClearStamp = DriveItem.HasStamp(drive) };
-                    drives.Add(new NetworkDrive(contents, cap, slot));
+                    // Items stored as variants that now count as plain (hand-filled murky water, v1.0.1)
+                    // become plain entries; saved with the drive's next change.
+                    var nd = new NetworkDrive(contents, cap, slot);
+                    if (contents.MakePlain(ItemCodec.IsPlainVariant)) nd.Dirty = true;
+                    drives.Add(nd);
                 }
             }
 

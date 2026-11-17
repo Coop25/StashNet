@@ -23,12 +23,36 @@ namespace StashNet.Drives
         {
             ItemClass ic = iv?.ItemClass;
             if (ic == null || !ic.CanStack()) return false;
-            if (iv.Quality != 0 || iv.UseTimes != 0f || iv.Meta != 0) return false;
+            if (iv.Quality != 0 || iv.UseTimes != 0f || (iv.Meta != 0 && MetaMatters(ic))) return false;
             if (iv.Flags != 0 || iv.SelectedAmmoTypeIndex != 0) return false;
             if (iv.Metadata != null && iv.Metadata.Count > 0) return false;
             if (iv.Stats != null && iv.Stats.Length > 0) return false;
             if (HasAnyMod(iv.modifications) || HasAnyMod(iv.cosmeticMods)) return false;
             return true;
+        }
+
+        /// <summary>
+        /// Whether a stackable item's Meta number means anything. Filling a jar at water writes the
+        /// collected amount into Meta (ItemActionCollectWater), but only water containers read it back;
+        /// drinking and crafting ignore it. So jars of murky water filled by hand are plain murky water
+        /// (owner, 2026-11-17: campfire auto-craft never used them). Blocks keep it to be safe.
+        /// </summary>
+        private static bool MetaMatters(ItemClass ic) => ic is ItemClassWaterContainer || ic.IsBlock();
+
+        private static readonly Dictionary<string, bool> plainVariants = new Dictionary<string, bool>();
+
+        /// <summary>
+        /// A stored variant that is really a plain item (stored before an item counted as plain, e.g.
+        /// hand-filled murky water before v1.0.1). Unreadable variants are never plain.
+        /// </summary>
+        public static bool IsPlainVariant(string name, string variant)
+        {
+            if (variant == null) return true;
+            if (plainVariants.TryGetValue(variant, out bool plain)) return plain;
+            plain = TryDecode(name, variant, out ItemValue iv, out _) && IsPlain(iv);
+            if (plainVariants.Count > 4096) plainVariants.Clear();
+            plainVariants[variant] = plain;
+            return plain;
         }
 
         /// <summary>

@@ -13,6 +13,33 @@ namespace StashNet.Core.Tests
         internal static readonly Func<string, int> Sizes = name =>
             name == "stone" ? 6000 : name == "wood" || name == "nails" ? 500 : name.StartsWith("gun") ? 1 : 100;
 
+        // Owner, 2026-11-17: hand-filled murky water was stored as a variant; it becomes plain.
+        [Fact]
+        public void MakePlain_MergesIntoPlainEntryAndKeepsCounts()
+        {
+            var d = new DriveContents();
+            d.AddLoaded("water", null, 5);
+            d.AddLoaded("water", "jarA", 3);
+            d.AddLoaded("water", "jarB", 2);
+            d.AddLoaded("gun", "q6", 1);
+            Assert.True(d.MakePlain((n, v) => v.StartsWith("jar")));
+            Assert.Equal(10, d.CountOf("water", null));
+            Assert.Equal(0, d.CountOf("water", "jarA"));
+            Assert.Equal(1, d.CountOf("gun", "q6"));
+            Assert.Equal(11, d.TotalCount);
+            Assert.Equal(2, d.TypeCount);
+        }
+
+        [Fact]
+        public void MakePlain_NothingToChange()
+        {
+            var d = new DriveContents();
+            d.AddLoaded("water", null, 5);
+            d.AddLoaded("gun", "q6", 1);
+            Assert.False(d.MakePlain((n, v) => false));
+            Assert.Equal(6, d.TotalCount);
+        }
+
         [Fact]
         public void Insert_IntoEmpty_AcceptsAll()
         {
