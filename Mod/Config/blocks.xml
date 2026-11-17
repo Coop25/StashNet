@@ -329,7 +329,7 @@
 			<!-- Refill (Station tab): how much of the chosen fuel automation keeps in the fuel slots. -->
 			<property name="StashNetFuelRefill" value="100" />
 			<!-- Raw items automation may feed into the forge per metal, in priority order (melt targets, Stations/StationAutomation.cs). Nothing else is ever melted automatically. -->
-			<property name="StashNetMeltFeed" value="iron:resourceScrapIron;brass:resourceScrapBrass;lead:resourceScrapLead;glass:resourceBrokenGlass,resourceCrushedSand;stone:resourceRockSmall;clay:resourceClayLump" />
+			<property name="StashNetMeltFeed" value="iron:resourceScrapIron;brass:resourceScrapBrass;lead:resourceScrapLead;glass:resourceCrushedSand;stone:resourceRockSmall;clay:resourceClayLump" />
 			<!-- Ore slots automation may fill: the forge window shows 2 of the game's 3, so never the hidden 3rd (Stations/StationRules.OreSlots). -->
 			<property name="StashNetOreSlots" value="2" />
 			<property name="WorkstationWindow" value="workstation_forge" />

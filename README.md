@@ -60,7 +60,7 @@ Craft a **Network Workbench** (it needs a workbench and a Storage Terminal) and 
 Every Network station (Workbench, Forge, Chemistry Station, Campfire, Cement Mixer) has an **Automation** tab (the lightning icon) in the recipe box. It opens by itself when no recipe is selected:
 
 - **Keep in stock:** select a recipe, set an amount and click Keep. While someone is nearby, the station crafts from stored ingredients whenever storage holds less than that. Up to 8 items per station. Automatic crafts give no crafting XP.
-- **Keep melted** (Forge): pick a metal and an amount. The forge pulls raw scrap from storage (scrap iron, brass and lead; broken glass, then crushed sand; small stones; clay) until that much is melted, then stops. Nothing else is ever melted. With one metal it uses both ore slots; with several, each metal gets one slot, and they take turns when there are more metals than slots.
+- **Keep melted** (Forge): pick a metal and an amount. The forge pulls raw scrap from storage (scrap iron, brass and lead; crushed sand; small stones; clay) until that much is melted, then stops. Nothing else is ever melted. With one metal it uses both ore slots; with several, each metal gets one slot, and they take turns when there are more metals than slots.
 - **Fire** (Forge, Campfire, Chemistry Station): *Myself* is the normal game. *Auto* lights the fire when there's something to craft or smelt and puts it out when idle. **Refill** picks a fuel from storage (shown with its icon and count) to keep 100 of it in the fuel slots.
 - **Finished items:** *To storage* (the default) or *Stay here*, which leaves them in Output and refunds cancelled crafts to your backpack, like a normal station.
 

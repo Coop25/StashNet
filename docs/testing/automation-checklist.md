@@ -17,7 +17,7 @@ the recipe box. At Network stations it opens by itself when no recipe is selecte
 - [ ] **Refill** (only with Fire = Auto): "none" plus the fuels in storage with their icons and counts. Click Coal: it's highlighted and refills like v0.21.0's Coal mode. Click "none": back to plain Auto. Run the coal out of storage: Coal still shows (count 0) while it's chosen.
 - [ ] **Melt targets (Network Forge):** pick Iron with ◄ ►, set 2000, click Keep. "Iron (melted)  N / 2000" appears. Put scrap iron in storage, close the screen: within about 5 seconds scrap iron moves into the ore slots, only as much as needed, and (Fire = Auto) the forge lights. It stops at 2000 and the fire goes out.
 - [ ] Several metals at once (Iron and Clay): both fill. A 7th metal can't exist (only 6 metals).
-- [ ] **Glass:** with both broken glass and crushed sand stored, a Glass target uses broken glass first, then sand.
+- [ ] **Glass:** with both broken glass and crushed sand stored, a Glass target uses only crushed sand (broken glass is never melted automatically, owner 2026-11-17).
 - [ ] Nothing else is ever melted: weapons, tools, nails, cans in storage stay put.
 - [ ] Ore you put in yourself counts: with 1000 scrap iron already in the slots and a 1000 target, nothing more is pulled.
 - [ ] **Finished items: Stay here.** Click it, queue a craft: the result stays in Output; cancelling a craft refunds to your backpack. Click To storage: Output empties into storage again. Each station remembers its own setting after save and reload.
