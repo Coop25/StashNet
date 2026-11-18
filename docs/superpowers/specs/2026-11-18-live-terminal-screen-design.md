@@ -140,7 +140,7 @@ today; they can't be counted as full.
 
 - Along with the clean picture, each network also gets **two damaged copies** drawn at the same time
   (scrambled line bands, color split, static). They're shared by all its TVs, like the clean one.
-- Each TV runs its own timer, with a random quiet gap (Claude's call: 8–30 s). A glitch lasts 0.1–0.4 s
+- Each TV runs its own timer, with a random quiet gap (Claude's call: 8–30 s; owner asked for more often 2026-11-18 → paint.xml 4–15 s). A glitch lasts 0.1–0.4 s
   and does one or more of:
   - nudges the material's texture offset (sideways jolt / vertical roll). This is per TV, costs nothing,
     and needs no redraw;

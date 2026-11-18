@@ -106,7 +106,7 @@
   </block>
 
   <!-- Storage Terminal: the CRT TV, with the green StashNet screen, silenced. -->
-  <block name="stashnetTerminal" screen="crtScreen" mute="true" live="true" glitchMin="8" glitchMax="30" glitchLength="0.4" glitchStrength="0.6">
+  <block name="stashnetTerminal" screen="crtScreen" mute="true" live="true" glitchMin="4" glitchMax="15" glitchLength="0.4" glitchStrength="0.6">
     <texture name="tvCRT" tint="4A503F" strength="0.5" damage="1.0" seed="31">
       <!-- Bezel above the screen, E3-G3. -->
       <stamp sprite="stencilStashnet" u="0.69" v="0.69" w="0.2" h="0.03" />
