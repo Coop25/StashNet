@@ -255,7 +255,21 @@ namespace StashNet.UI
 
         private void Withdraw(ItemGroup group, int count)
         {
-            if (group == null || count <= 0) return;
+            TerminalRequest request = WithdrawRequest(group, count);
+            if (request != null) SendAction(request);
+        }
+
+        /// <summary>Drag out (2026-11-18): one stack (a tool: one item) onto the cursor instead of the backpack.</summary>
+        public void WithdrawToCursor(ItemGroup group)
+        {
+            TerminalRequest request = WithdrawRequest(group, TakeAmount.Stack(group.Count, StackSize(group.Name)));
+            if (request != null) SendAction(request, toCursor: true);
+        }
+
+        /// <summary>The Withdraw request for <paramref name="count"/> items of the group (null when there is nothing to take).</summary>
+        private TerminalRequest WithdrawRequest(ItemGroup group, int count)
+        {
+            if (group == null || count <= 0) return null;
             TerminalRequest request = NewRequest(TerminalOp.Withdraw);
             var left = new List<ItemAmount>(group.Members.Count);
             foreach (ItemAmount m in group.Members)
@@ -264,14 +278,14 @@ namespace StashNet.UI
                 left.Add(new ItemAmount(m.Name, m.Variant, m.Count - asked));
             }
             request.Items.AddRange(ListingGroups.Split(left, count));
-            if (request.Items.Count == 0) return;
+            if (request.Items.Count == 0) return null;
             foreach (ItemAmount s in request.Items)
             {
                 var key = (s.Name, s.Variant ?? "");
                 pendingTaken.TryGetValue(key, out int asked);
                 pendingTaken[key] = asked + s.Count;
             }
-            SendAction(request);
+            return request;
         }
 
         // ---- Selection + info panel (v0.19.0, owner 2026-11-14) ----
@@ -545,14 +559,15 @@ namespace StashNet.UI
             SendAction(request);
         }
 
-        private void SendAction(TerminalRequest request)
+        private void SendAction(TerminalRequest request, bool toCursor = false)
         {
             refreshTimer = 0f;
             status = "";
             // TerminalClient assigns the id; in single-player the reply arrives inside Send, so
             // predict it to recognise the reply either way.
             lastActionRequestId = TerminalClient.NextRequestId;
-            TerminalClient.Send(request);
+            if (toCursor) TerminalClient.SendToCursor(request);
+            else TerminalClient.Send(request);
         }
 
         private TerminalRequest NewRequest(TerminalOp op) =>

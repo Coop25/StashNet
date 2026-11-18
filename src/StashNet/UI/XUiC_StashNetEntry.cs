@@ -17,16 +17,64 @@ namespace StashNet.UI
 
         public XUiC_StashNetTerminal Owner { get; set; }
 
+        /// <summary>Vanilla's pick-up distance (XUiC_ItemStack.PickupSnapDistance): moving further with the button held picks up.</summary>
+        private const float DragDistance = 4f;
+        private XUiController button;
+        private bool pressedHere;
+        private bool dragTaken;
+        private UnityEngine.Vector2 pressPos;
+
+        /// <summary>
+        /// Drag out (owner, 2026-11-18), like picking up a backpack stack: press on this cell and move the mouse with the
+        /// left button held, and one stack (a tool: one item) is taken onto the cursor. Mirrors XUiC_ItemStack.Update.
+        /// </summary>
+        public override void Update(float _dt)
+        {
+            base.Update(_dt);
+            if (Owner == null || button?.ViewComponent == null || xui?.playerUI?.CursorController == null) return;
+            CursorControllerAbs cursor = xui.playerUI.CursorController;
+            bool held = cursor.GetMouseButton(UICamera.MouseButton.LeftButton);
+            if (cursor.GetMouseButtonDown(UICamera.MouseButton.LeftButton))
+            {
+                pressedHere = button.ViewComponent.UiTransformIsHovered;
+                if (pressedHere)
+                {
+                    pressPos = cursor.GetScreenPosition();
+                    dragTaken = false;
+                }
+            }
+            else if (!held)
+            {
+                pressedHere = false;
+            }
+
+            if (!pressedHere || !held || dragTaken || group == null || InputUtils.ShiftKeyPressed) return;
+            XUiC_DragAndDropWindow drag = xui.DragAndDropWindow;
+            if (drag == null || !drag.IsEmpty()) return;
+            UnityEngine.Vector2 now = cursor.GetScreenPosition();
+            if ((now - pressPos).magnitude <= DragDistance) return;
+            dragTaken = true;
+            Owner.WithdrawToCursor(group);
+        }
+
         public override void Init()
         {
             base.Init();
-            XUiController button = GetChildById("clickable");
+            button = GetChildById("clickable");
             if (button == null) return;
             // Holding a picked-up stack: click deposits it (right-click deposits one), on any cell.
             // Otherwise (owner, 2026-11-14): click selects the cell and shows it in the info panel;
             // clicking the selected cell again takes one; shift-click takes a stack; right-click takes one.
+            // Press and drag (2026-11-18): see Update.
             button.OnPress += (_sender, _mouseButton) =>
             {
+                // The release that ends a drag-out: the stack is (or will be) on the cursor; don't store it right
+                // back, select or take more.
+                if (dragTaken)
+                {
+                    dragTaken = false;
+                    return;
+                }
                 if (Owner == null || Owner.TryDepositHeld(false) || group == null) return;
                 if (InputUtils.ShiftKeyPressed) Owner.Withdraw(group, false);
                 else if (Owner.ShowingSelected(group)) Owner.Withdraw(group, true);

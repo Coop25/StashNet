@@ -25,6 +25,20 @@ namespace StashNet.Network
 
         public static void Send(TerminalRequest request) => Send(request, null);
 
+        /// <summary>Requests whose reply should go on the cursor (dragged out of the terminal) instead of the backpack.</summary>
+        private static readonly HashSet<int> cursorRequests = new HashSet<int>();
+
+        /// <summary>
+        /// A Withdraw dragged out of the terminal (2026-11-18): the first stack of the reply goes on the cursor, if
+        /// the cursor is still empty when it arrives; the rest goes into the backpack as usual (CursorTake).
+        /// </summary>
+        public static void SendToCursor(TerminalRequest request)
+        {
+            // Registered before sending: in single-player the reply is applied inside Send.
+            cursorRequests.Add(NextRequestId);
+            Send(request, null);
+        }
+
         /// <summary>Sends a DriveUnload for a drive already emptied and tagged with <paramref name="token"/>.</summary>
         public static void SendDriveUnload(TerminalRequest request, string token) => Send(request, token);
 
@@ -78,7 +92,9 @@ namespace StashNet.Network
             pendingUnloads.Remove(response.RequestId);
 
             EntityPlayerLocal player = GameManager.Instance.World?.GetPrimaryPlayer();
-            var toBag = new List<ItemAmount>(response.Give);
+            var toBag = cursorRequests.Remove(response.RequestId)
+                ? GiveToCursor(player, response.Give)
+                : new List<ItemAmount>(response.Give);
             if (unloadToken != null)
             {
                 if (!RestoreDrive(player, unloadToken, response.ReturnToDrive)) toBag.AddRange(response.ReturnToDrive);
@@ -113,6 +129,30 @@ namespace StashNet.Network
                 ret.Items.AddRange(overflow);
                 Send(ret);
             }
+        }
+
+        /// <summary>
+        /// Puts the first given stack on the cursor while the terminal window is open and the cursor is empty; returns
+        /// what still has to go into the backpack (everything, if the cursor isn't free or the item can't be decoded).
+        /// </summary>
+        private static List<ItemAmount> GiveToCursor(EntityPlayerLocal player, List<ItemAmount> give)
+        {
+            XUiC_DragAndDropWindow drag = player == null ? null : LocalPlayerUI.GetUIForPlayer(player)?.xui?.DragAndDropWindow;
+            bool cursorFree = drag != null && drag.IsEmpty() && XUiC_StashNetTerminal.Current != null;
+            (ItemAmount? cursor, List<ItemAmount> bag) = CursorTake.Split(give, cursorFree);
+            if (cursor is ItemAmount c)
+            {
+                if (ItemCodec.TryDecode(c.Name, c.Variant, out ItemValue value, out _))
+                {
+                    drag.SetCurrentStack(new ItemStack(value, c.Count));
+                    drag.PickUpType = XUiC_ItemStack.StackLocationTypes.Backpack; // vanilla puts it back in the backpack on close
+                }
+                else
+                {
+                    bag.Insert(0, c);
+                }
+            }
+            return bag;
         }
 
         /// <summary>Finds the drive tagged with <paramref name="token"/> (backpack, then toolbelt) and puts the leftovers back on it.</summary>
