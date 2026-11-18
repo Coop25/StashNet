@@ -3,7 +3,7 @@
 A storage network mod for **7 Days to Die**. Cobble together a crude storage network in your first week, then grow it into a big, armored, late-game system.
 
 - **Physical drives** hold your items. Pull a drive out and its contents go with it.
-- **Storage Terminal**: every drive in one window, with search, sort, deposit and withdraw.
+- **Storage Terminal**: every drive in one window, with search, sort, deposit and withdraw. Its CRT screen shows the network live (stacks used, drives, system heat, locked or open), with the odd glitch.
 - **Network Workbench**: a real workbench that can use ingredients stored on the network.
 - **Station automation**: Network stations can keep items in stock, keep the forge's metals melted, refill their own fuel from storage, put their fire out when idle, and keep finished items in the station when you want them.
 - **One code** set on the Core protects the network's Drive Bays and Terminals.
@@ -12,7 +12,7 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 
 **Version 1.0.0.** Tested on 7 Days to Die **V3.4 (b10)**, in single-player and on a multiplayer server.
 
-**[⬇ Download StashNet 1.0.2](https://github.com/Coop25/StashNet/releases/latest)** (the `StashNet-v1.0.2.zip` file under *Assets*).
+**[⬇ Download StashNet 1.1.0](https://github.com/Coop25/StashNet/releases/latest)** (the `StashNet-v1.1.0.zip` file under *Assets*).
 
 ---
 
@@ -24,10 +24,10 @@ A storage network mod for **7 Days to Die**. Cobble together a crude storage net
 
 ## Install
 
-1. Download `StashNet-v1.0.2.zip` from the [latest release](https://github.com/Coop25/StashNet/releases/latest) (or get it from whoever runs your server). Everyone on a server, the server included, needs the same version.
+1. Download `StashNet-v1.1.0.zip` from the [latest release](https://github.com/Coop25/StashNet/releases/latest) (or get it from whoever runs your server). Everyone on a server, the server included, needs the same version.
 2. Extract it into your game's `Mods` folder, so you end up with `7 Days To Die\Mods\StashNet\ModInfo.xml`. (Steam: right-click the game → Manage → Browse local files.)
 3. Start the game **with EasyAntiCheat turned off** (in the game's launcher, switch off EasyAntiCheat before pressing Play).
-4. In the console (F1) you should see `[StashNet] Loaded v1.0.2`.
+4. In the console (F1) you should see `[StashNet] Loaded v1.1.0`.
 
 **Dedicated server:** put the same `StashNet` folder in the server's `Mods` folder, and set `<property name="EACEnabled" value="false"/>` in its `serverconfig.xml`.
 
@@ -50,7 +50,7 @@ Everything stored on drives lives inside StashNet's items. If you remove the mod
 1. **Craft** (from your backpack): a **Scrap Storage Core**, a **Drive Bay**, a few **48-Stack Drives**, and a **Storage Terminal**.
 2. **Place the Core**, then place the Drive Bay and the Terminal **within 6 blocks** of it.
 3. **Put drives in the Drive Bay.** A bay only accepts drives.
-4. **Use the Terminal**: click an item to take one (shift-click for a full stack), shift-click items in your backpack to store them (or pick a stack up and click it onto the terminal's items; right-click drops in just one), or use the backpack's "move all" button to store everything. Tabs under the search box show one kind of item at a time; only kinds you have get a tab. **Hold Shift** to freeze the grid while you shift-click stacks out: nothing slides around until you let go.
+4. **Use the Terminal**: click an item to see it and take one (shift-click for a full stack), **drag** an item out to put a stack (or one tool) on your cursor, shift-click items in your backpack to store them (or pick a stack up and click it onto the terminal's items; right-click drops in just one), or use the backpack's "move all" button to store everything. Tabs under the search box show one kind of item at a time; only kinds you have get a tab. **Hold Shift** to freeze the grid while you shift-click stacks out: nothing slides around until you let go. Typing a search jumps to the All tab. **Pin** items from the item info panel to keep them at the front (your pins are your own, saved on your PC).
 5. **Lock it**: hold E on the Core and set a code. Everyone else needs the code to open your bays and terminals. The Core's owner always gets in.
 
 ### Crafting from storage
