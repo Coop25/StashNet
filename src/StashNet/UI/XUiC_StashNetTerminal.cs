@@ -252,10 +252,10 @@ namespace StashNet.UI
                 SetupCategories();
                 usage = string.Format(Localization.Get("stashnetUsage"), response.DistinctItems, response.UsedStacks, response.MaxStacks, response.Drives);
             }
-            // The reply to the user's own action always sets the message; background refreshes
-            // only replace it when they have something to say.
-            string messages = FormatMessages(response.Messages);
-            if (response.RequestId == lastActionRequestId || !string.IsNullOrEmpty(messages)) status = messages;
+            // The reply to the user's own action always sets the message; background refreshes only replace it when
+            // they have something to say, and the first listing clears "Connecting to storage...".
+            status = TerminalStatus.Next(status, Localization.Get("stashnetLoading"), response.HasListing,
+                response.RequestId == lastActionRequestId, FormatMessages(response.Messages));
             Render();
         }
 
