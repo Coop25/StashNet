@@ -72,6 +72,11 @@ namespace StashNet.UI
             button.OnHover += (_sender, isOver) => Owner?.SetHover(isOver && group != null ? group.Display : (ItemAmount?)null);
         }
 
+        /// <summary>Does this cell show that group (same item and group key)?</summary>
+        public bool Shows(ItemGroup other) =>
+            group != null && other != null && group.Name == other.Name &&
+            ItemCodec.GroupKey(group.Name, group.Display.Variant) == ItemCodec.GroupKey(other.Name, other.Display.Variant);
+
         public void SetItem(ItemGroup newGroup)
         {
             group = newGroup;
@@ -103,6 +108,9 @@ namespace StashNet.UI
                     return true;
                 case "stashnet_count":
                     value = HasItem ? FormatCount(group.Count) : "";
+                    return true;
+                case "stashnet_pinned":
+                    value = HasItem && XUiC_StashNetTerminal.IsPinned(group.Name) ? "true" : "false";
                     return true;
                 // Corner symbol, same rules and colors as backpack slots.
                 case "stashnet_hastypeicon":

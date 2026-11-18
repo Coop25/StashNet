@@ -17,6 +17,8 @@ stashnetCementMixer,blocks,Block,,,Network Cement Mixer
 stashnetCementMixerDesc,blocks,Block,,,"A cement mixer wired into your storage network. Same recipes as a normal one, but it can use ingredients stored on the network's drives. Place it within reach of a Storage Core."
 stashnetFetchingIngredients,UI,XUi,,,Fetching ingredients from storage... click Craft again.
 stashnetTakeStack,UI,XUi,,,Take stack
+stashnetPin,UI,XUi,,,Pin
+stashnetUnpin,UI,XUi,,,Unpin
 stashnetFetchingRepair,UI,XUi,,,Fetching repair kits from storage... click Repair again.
 stashnetDriveBasic,items,Item,,,48-Stack Drive
 stashnetDriveBasicDesc,items,Item,,,"The smallest storage drive. Holds 48 stacks, about one wooden crate. Its contents stay on the drive, even when removed. Only readable inside a StashNet network. Shift-click it while a Storage Terminal is open to empty its contents into the network. The bar under the drive shows how full it is, and the number in the middle is the percent used."

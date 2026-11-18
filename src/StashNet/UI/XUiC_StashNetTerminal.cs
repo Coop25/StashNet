@@ -329,6 +329,7 @@ namespace StashNet.UI
             selectedName = group.Name;
             selectedKey = GroupKeyOf(group);
             selected = group;
+            selectedEntry = entry;
             if (amountCounter != null)
             {
                 amountCounter.MaxCount = Math.Max(1, group.Count);
@@ -358,8 +359,26 @@ namespace StashNet.UI
             info.SetInfo(new ItemStack(iv, Math.Max(1, group.Count)), entry, XUiC_ItemActionList.ItemActionListTypes.None);
             info.mainActionItemList.AddActionListEntry(new StashNetTakeAction(entry, false));
             info.mainActionItemList.AddActionListEntry(new StashNetTakeAction(entry, true));
+            info.mainActionItemList.AddActionListEntry(new StashNetPinAction(entry, IsPinned(group.Name)));
             info.mainActionItemList.RefreshActionList();
             infoShown = true;
+        }
+
+        // ---- Favorites (owner, 2026-11-18): per player, pinned items first, star in the cell ----
+
+        private XUiC_StashNetEntry selectedEntry;
+
+        public static bool IsPinned(string itemName) => FavoritesStore.Current.Contains(itemName);
+
+        /// <summary>Pin button in the info panel: pin or unpin the selected item, re-sort, and refresh the panel's label.</summary>
+        public void TogglePinSelected()
+        {
+            if (selected == null) return;
+            FavoritesStore.Toggle(selected.Name);
+            Render();
+            // The item may have moved to another cell; any cell works as the panel's owner.
+            XUiC_StashNetEntry entry = entries.FirstOrDefault(e => e.Shows(selected)) ?? selectedEntry;
+            if (entry != null) ShowInfo(entry, selected);
         }
 
         /// <summary>After each listing: follow the selected item, or drop the selection when it's gone.</summary>
@@ -598,7 +617,7 @@ namespace StashNet.UI
                 ? items.OrderBy(i => DisplayName(i.Name), StringComparer.CurrentCultureIgnoreCase).ThenByDescending(i => i.Count)
                 : items.OrderByDescending(i => i.Count).ThenBy(i => DisplayName(i.Name), StringComparer.CurrentCultureIgnoreCase);
             shown.Clear();
-            shown.AddRange(items);
+            shown.AddRange(Favorites.PinnedFirst(items, i => i.Name, FavoritesStore.Current));
             if (frozenOrder != null)
             {
                 if (frozenFilter == FilterKey) KeepFrozenOrder();
