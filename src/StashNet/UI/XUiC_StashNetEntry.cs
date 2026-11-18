@@ -17,44 +17,32 @@ namespace StashNet.UI
 
         public XUiC_StashNetTerminal Owner { get; set; }
 
-        /// <summary>Vanilla's pick-up distance (XUiC_ItemStack.PickupSnapDistance): moving further with the button held picks up.</summary>
-        private const float DragDistance = 4f;
         private XUiController button;
-        private bool pressedHere;
-        private bool dragTaken;
-        private UnityEngine.Vector2 pressPos;
+        private readonly DragGesture drag = new DragGesture();
+        /// <summary>Which item this cell shows (name + group key), made once per listing so Update allocates nothing.</summary>
+        private string dragKey;
 
         /// <summary>
         /// Drag out (owner, 2026-11-18), like picking up a backpack stack: press on this cell and move the mouse with the
-        /// left button held, and one stack (a tool: one item) is taken onto the cursor. Mirrors XUiC_ItemStack.Update.
+        /// left button held, and one stack (a tool: one item) is taken onto the cursor. Rules in DragGesture.
         /// </summary>
         public override void Update(float _dt)
         {
             base.Update(_dt);
             if (Owner == null || button?.ViewComponent == null || xui?.playerUI?.CursorController == null) return;
             CursorControllerAbs cursor = xui.playerUI.CursorController;
-            bool held = cursor.GetMouseButton(UICamera.MouseButton.LeftButton);
-            if (cursor.GetMouseButtonDown(UICamera.MouseButton.LeftButton))
+            UnityEngine.Vector2 pos = cursor.GetScreenPosition();
+            XUiC_DragAndDropWindow held = xui.DragAndDropWindow;
+            bool canTake = group != null && !InputUtils.ShiftKeyPressed && held != null && held.IsEmpty();
+            if (drag.Frame(
+                    cursor.GetMouseButtonDown(UICamera.MouseButton.LeftButton),
+                    cursor.GetMouseButton(UICamera.MouseButton.LeftButton),
+                    cursor.GetMouseButtonUp(UICamera.MouseButton.LeftButton),
+                    button.ViewComponent.UiTransformIsHovered,
+                    pos.x, pos.y, dragKey, canTake))
             {
-                pressedHere = button.ViewComponent.UiTransformIsHovered;
-                if (pressedHere)
-                {
-                    pressPos = cursor.GetScreenPosition();
-                    dragTaken = false;
-                }
+                Owner.WithdrawToCursor(group);
             }
-            else if (!held)
-            {
-                pressedHere = false;
-            }
-
-            if (!pressedHere || !held || dragTaken || group == null || InputUtils.ShiftKeyPressed) return;
-            XUiC_DragAndDropWindow drag = xui.DragAndDropWindow;
-            if (drag == null || !drag.IsEmpty()) return;
-            UnityEngine.Vector2 now = cursor.GetScreenPosition();
-            if ((now - pressPos).magnitude <= DragDistance) return;
-            dragTaken = true;
-            Owner.WithdrawToCursor(group);
         }
 
         public override void Init()
@@ -70,11 +58,7 @@ namespace StashNet.UI
             {
                 // The release that ends a drag-out: the stack is (or will be) on the cursor; don't store it right
                 // back, select or take more.
-                if (dragTaken)
-                {
-                    dragTaken = false;
-                    return;
-                }
+                if (drag.ConsumeClick()) return;
                 if (Owner == null || Owner.TryDepositHeld(false) || group == null) return;
                 if (InputUtils.ShiftKeyPressed) Owner.Withdraw(group, false);
                 else if (Owner.ShowingSelected(group)) Owner.Withdraw(group, true);
@@ -91,6 +75,7 @@ namespace StashNet.UI
         public void SetItem(ItemGroup newGroup)
         {
             group = newGroup;
+            dragKey = group == null ? null : group.Name + "\u0001" + ItemCodec.GroupKey(group.Name, group.Display.Variant);
             display = null;
             displayStack = ItemStack.Empty.Clone();
             if (group == null) return;
