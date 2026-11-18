@@ -24,3 +24,10 @@ reach shows `NO SIGNAL`. Every so often the screen glitches for a moment (random
 - [ ] **8. Vanilla TV.** Break a terminal and place a vanilla TV in the same spot: it shows the normal vanilla picture. Run `sn skin reload`: the terminal screens come back live.
 - [ ] **9. Server.** On the supercraft server with a friend (it needs 1.1.0 too): both of you see live screens. `sn perf` shows no rebuilds while nobody touches anything.
 - [ ] **10. Log.** Check the newest `output_log_client__*.txt` for StashNet errors. It should say `Loaded v1.1.0 (N methods patched)` with the same number as v1.0.2 (no new patches were added).
+
+## Also in 1.1.0
+
+11. Open a Storage Terminal: the category tab icons sit fully inside the window (the first one used to hang off the left edge).
+12. A screen's bottom line reads `SYSTEM HEAT` with CALM / WARM / HOT on the right (the heat the network itself gives off).
+13. With the game option "Disable Smelter" on, a Network Forge's automation tab shows no melt row. With it off, the melt row is there as before.
+14. Open a Network station: for a moment, before its settings arrive, none of the Fire or Output buttons is lit; then the saved choice lights up.
