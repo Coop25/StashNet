@@ -47,6 +47,14 @@ namespace StashNet.Core.Skins
         /// <summary>Silence the model's own sounds (the CRT TV's hum).</summary>
         public bool Mute;
 
+        /// <summary>The screen shows live network numbers instead of a fixed sprite.</summary>
+        public bool Live;
+
+        public float GlitchMinGap = 8f;
+        public float GlitchMaxGap = 30f;
+        public float GlitchLength = 0.4f;
+        public float GlitchStrength = 0.6f;
+
         internal readonly Dictionary<string, TexturePaint> Textures = new Dictionary<string, TexturePaint>();
 
         public bool TryGetTexture(string name, out TexturePaint paint) => Textures.TryGetValue(name ?? "", out paint);
@@ -79,6 +87,8 @@ namespace StashNet.Core.Skins
                     BlockName = name,
                     Mute = string.Equals((string)b.Attribute("mute"), "true", System.StringComparison.OrdinalIgnoreCase),
                 };
+                block.Live = string.Equals((string)b.Attribute("live"), "true", System.StringComparison.OrdinalIgnoreCase);
+                ReadGlitch(name, b, block, warnings);
                 string screen = (string)b.Attribute("screen");
                 if (!string.IsNullOrEmpty(screen))
                 {
@@ -94,6 +104,33 @@ namespace StashNet.Core.Skins
                 spec.blocks[name] = block;
             }
             return spec;
+        }
+
+        private static bool ReadGlitchNumber(string block, XElement b, string attr, List<string> warnings, ref float target)
+        {
+            if (b.Attribute(attr) == null) return false;
+            if (!SkinXml.TryNumber(b, attr, out float v) || v < 0f)
+            {
+                warnings.Add($"{block}: {attr} must be a number of 0 or more; default kept");
+                return false;
+            }
+            target = v;
+            return true;
+        }
+
+        private static void ReadGlitch(string block, XElement b, BlockPaint paint, List<string> warnings)
+        {
+            ReadGlitchNumber(block, b, "glitchMin", warnings, ref paint.GlitchMinGap);
+            ReadGlitchNumber(block, b, "glitchMax", warnings, ref paint.GlitchMaxGap);
+            ReadGlitchNumber(block, b, "glitchLength", warnings, ref paint.GlitchLength);
+            ReadGlitchNumber(block, b, "glitchStrength", warnings, ref paint.GlitchStrength);
+            if (paint.GlitchMinGap > paint.GlitchMaxGap)
+            {
+                warnings.Add($"{block}: glitchMin is above glitchMax; swapped");
+                float t = paint.GlitchMinGap;
+                paint.GlitchMinGap = paint.GlitchMaxGap;
+                paint.GlitchMaxGap = t;
+            }
         }
 
         private static TexturePaint ReadTexture(string block, XElement t, SkinAtlas atlas, List<string> warnings)

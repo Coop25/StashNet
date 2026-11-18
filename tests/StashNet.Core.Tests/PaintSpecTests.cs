@@ -16,6 +16,44 @@ namespace StashNet.Core.Tests
             PaintSpec.Parse("<paint>" + body + "</paint>", Atlas, warnings);
 
         [Fact]
+        public void ReadsLiveAndGlitchSettings()
+        {
+            var w = new List<string>();
+            PaintSpec spec = Parse("<block name=\"b\" live=\"True\" glitchMin=\"2\" glitchMax=\"5\" glitchLength=\"0.2\" glitchStrength=\"0.3\" />", w);
+            Assert.Empty(w);
+            Assert.True(spec.TryGet("b", out BlockPaint b));
+            Assert.True(b.Live);
+            Assert.Equal(2f, b.GlitchMinGap, 5);
+            Assert.Equal(5f, b.GlitchMaxGap, 5);
+            Assert.Equal(0.2f, b.GlitchLength, 5);
+            Assert.Equal(0.3f, b.GlitchStrength, 5);
+        }
+
+        [Fact]
+        public void GlitchDefaultsWhenAbsent()
+        {
+            PaintSpec spec = Parse("<block name=\"b\" />", new List<string>());
+            spec.TryGet("b", out BlockPaint b);
+            Assert.False(b.Live);
+            Assert.Equal(8f, b.GlitchMinGap, 5);
+            Assert.Equal(30f, b.GlitchMaxGap, 5);
+            Assert.Equal(0.4f, b.GlitchLength, 5);
+            Assert.Equal(0.6f, b.GlitchStrength, 5);
+        }
+
+        [Fact]
+        public void SwapsReversedGlitchGap()
+        {
+            var w = new List<string>();
+            PaintSpec spec = Parse("<block name=\"b\" glitchMin=\"20\" glitchMax=\"4\" glitchLength=\"-1\" />", w);
+            spec.TryGet("b", out BlockPaint b);
+            Assert.Equal(4f, b.GlitchMinGap, 5);
+            Assert.Equal(20f, b.GlitchMaxGap, 5);
+            Assert.Equal(0.4f, b.GlitchLength, 5);
+            Assert.Equal(2, w.Count);
+        }
+
+        [Fact]
         public void Parse_ReadsBlockTextureAndStamps()
         {
             var warnings = new List<string>();
