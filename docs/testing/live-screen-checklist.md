@@ -54,3 +54,8 @@ F2. Click the item again and press **Unpin**: the star goes away and the item go
 F3. Pin something, then pick a tab it doesn't belong to, or search for something else: it doesn't show there. It still comes first where it does belong.
 F4. Quit and start the game again: your pins are still there (they're saved on your PC, in every world).
 F5. On the server with a friend: your pins are yours only; the friend doesn't see them.
+
+## Footer (1.1.0)
+
+T1. The bottom of the Storage Terminal has only the page arrows (◀ 1/2 ▶); the amount box is gone.
+T2. Click an item: **Take** gives one, **Take stack** gives a stack.

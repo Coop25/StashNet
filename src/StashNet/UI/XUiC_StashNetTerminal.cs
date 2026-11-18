@@ -85,7 +85,6 @@ namespace StashNet.UI
                 page = 0;
                 Render();
             };
-            amountCounter = GetChildById("amount") as XUiC_Counter;
             searchInput = GetChildById("searchInput") as XUiC_TextInput;
             if (searchInput != null) searchInput.OnChangeHandler += (_sender, text, _fromCode) =>
             {
@@ -123,7 +122,6 @@ namespace StashNet.UI
             selectedKey = null;
             selected = null;
             infoShown = false;
-            if (amountCounter != null) { amountCounter.MaxCount = 1; amountCounter.Count = 1; }
             SetupCategories();
             Render();
             RequestListing();
@@ -308,7 +306,6 @@ namespace StashNet.UI
         private string selectedKey;
         private ItemGroup selected;
         private bool infoShown;
-        private XUiC_Counter amountCounter;
 
         public bool IsSelected(ItemGroup group) =>
             group != null && selectedName != null && group.Name == selectedName && GroupKeyOf(group) == selectedKey;
@@ -330,23 +327,17 @@ namespace StashNet.UI
             selectedKey = GroupKeyOf(group);
             selected = group;
             selectedEntry = entry;
-            if (amountCounter != null)
-            {
-                amountCounter.MaxCount = Math.Max(1, group.Count);
-                amountCounter.Count = 1;
-                amountCounter.ForceTextRefresh(); // otherwise the box stays blank until an arrow is pressed
-            }
             ShowInfo(entry, group);
             RefreshBindingsSelfAndChildren();
         }
 
-        /// <summary>Take button in the info panel: the footer amount (or one stack).</summary>
+        /// <summary>Take button in the info panel: one item (owner removed the amount box, 2026-11-18), or one stack.</summary>
         public void TakeSelected(bool stack)
         {
             if (selected == null) return;
             int count = stack
                 ? TakeAmount.Stack(selected.Count, StackSize(selected.Name))
-                : TakeAmount.Clamp(amountCounter?.Count ?? 1, selected.Count);
+                : 1;
             Withdraw(selected, count);
         }
 
@@ -397,16 +388,7 @@ namespace StashNet.UI
         {
             if (selectedName == null) return;
             selected = all.FirstOrDefault(g => g.Name == selectedName && GroupKeyOf(g) == selectedKey);
-            if (selected != null)
-            {
-                if (amountCounter != null && amountCounter.MaxCount != selected.Count)
-                {
-                    amountCounter.MaxCount = Math.Max(1, selected.Count);
-                    amountCounter.Count = TakeAmount.Clamp(amountCounter.Count, selected.Count);
-                    amountCounter.ForceTextRefresh();
-                }
-                return;
-            }
+            if (selected != null) return;
             ClearSelection();
         }
 

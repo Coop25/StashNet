@@ -2,7 +2,7 @@ namespace StashNet.UI
 {
     /// <summary>
     /// "Take" / "Take stack" buttons in the vanilla item info panel while a Storage Terminal cell is
-    /// selected (v0.19.0). Take uses the amount in the terminal's footer box.
+    /// selected (v0.19.0). Take = one item, Take stack = one stack (the footer amount box was removed 2026-11-18).
     /// </summary>
     public class StashNetTakeAction : BaseItemActionEntry
     {
