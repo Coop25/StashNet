@@ -31,3 +31,18 @@ reach shows `NO SIGNAL`. Every so often the screen glitches for a moment (random
 12. A screen's bottom line reads `SYSTEM HEAT` with CALM / WARM / HOT on the right (the heat the network itself gives off).
 13. With the game option "Disable Smelter" on, a Network Forge's automation tab shows no melt row. With it off, the melt row is there as before.
 14. Open a Network station: for a moment, before its settings arrive, none of the Fire or Output buttons is lit; then the saved choice lights up.
+
+## Drag out (1.1.0)
+
+D1. Open a Storage Terminal. Press on a tool and move the mouse a little with the button held: one tool is on your cursor. Click a hotbar slot to place it.
+D2. Do the same on a resource: one full stack is on the cursor (or everything, if there's less than a stack).
+D3. A plain click still only selects the cell, and letting go after a drag doesn't select or take anything else.
+D4. With something already on your cursor, pressing a cell stores it (as before) instead of picking anything up.
+D5. On the server: drag something out, then close the window right away. The item ends up in your backpack; nothing is lost.
+D6. Drag a stack out, then click the terminal grid: it goes back into storage.
+
+## Search and tabs (1.1.0)
+
+S1. Pick a category tab (e.g. Tools), then type in the search box: the All tab is selected and the search looks through everything.
+S2. Type a search, then click any tab other than All: the search box empties and the tab shows all its items.
+S3. Clicking the All tab keeps the search.
