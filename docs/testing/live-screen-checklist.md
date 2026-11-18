@@ -46,3 +46,11 @@ D6. Drag a stack out, then click the terminal grid: it goes back into storage.
 S1. Pick a category tab (e.g. Tools), then type in the search box: the All tab is selected and the search looks through everything.
 S2. Type a search, then click any tab other than All: the search box empties and the tab shows all its items.
 S3. Clicking the All tab keeps the search.
+
+## Favorites (1.1.0)
+
+F1. Click an item in the Storage Terminal: the info panel has a **Pin** button next to Take. Click it: the item jumps to the front of the grid with a small gold star in its bottom-left corner.
+F2. Click the item again and press **Unpin**: the star goes away and the item goes back to its normal place.
+F3. Pin something, then pick a tab it doesn't belong to, or search for something else: it doesn't show there. It still comes first where it does belong.
+F4. Quit and start the game again: your pins are still there (they're saved on your PC, in every world).
+F5. On the server with a friend: your pins are yours only; the friend doesn't see them.
