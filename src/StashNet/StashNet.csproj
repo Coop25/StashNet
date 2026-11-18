@@ -88,6 +88,11 @@
     <PropertyGroup>
       <DeployDir Condition="'$(DeployDir)' == ''">$(GameDir)\Mods\StashNet</DeployDir>
     </PropertyGroup>
+    <!-- Never deploy while the game is running (owner's rule; broken once, 2026-11-18). -p:AllowRunningGame=true overrides. -->
+    <Exec Condition="'$(AllowRunningGame)' != 'true' and '$(OS)' == 'Windows_NT'" Command="tasklist /FI &quot;IMAGENAME eq 7DaysToDie.exe&quot; /NH" ConsoleToMSBuild="true" StandardOutputImportance="low" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="DeployGameProcesses" />
+    </Exec>
+    <Error Condition="$(DeployGameProcesses.Contains('7DaysToDie.exe'))" Text="Refusing to deploy: 7 Days to Die is running. Close the game first." />
     <!-- Never install an older StashNet over a newer one (it happened twice, 2026-11-16 and 2026-11-17: another worktree
          deployed 1.0.0 / 0.19.4 over the owner's newer install). Override only on purpose with -p:AllowDowngrade=true. -->
     <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)..\..\Mod\ModInfo.xml" Query="/xml/Version/@value">
