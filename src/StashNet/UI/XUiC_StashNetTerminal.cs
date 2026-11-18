@@ -376,6 +376,17 @@ namespace StashNet.UI
             if (selected == null) return;
             FavoritesStore.Toggle(selected.Name);
             Render();
+            // Follow the item to its new page (pinned = page 1), unless shift holds the layout still.
+            if (frozenOrder == null)
+            {
+                ItemGroup now = selected;
+                int? target = TerminalPaging.PageOf(shown.FindIndex(g => g.Name == now.Name && GroupKeyOf(g) == GroupKeyOf(now)), entries.Length);
+                if (target is int p && p != page)
+                {
+                    page = p;
+                    Render();
+                }
+            }
             // The item may have moved to another cell; any cell works as the panel's owner.
             XUiC_StashNetEntry entry = entries.FirstOrDefault(e => e.Shows(selected)) ?? selectedEntry;
             if (entry != null) ShowInfo(entry, selected);
