@@ -5,7 +5,7 @@ with drives, and Storage Terminals near the Core.
 
 ## What's new
 The Storage Terminal's TV screen is now live. It shows stacks used / total with a fill bar, the number of
-drives and how many are full, a heat bar with a word (calm, warm, hot...), and `[LOCKED]` or `[OPEN]`.
+drives and how many are full, "SYSTEM HEAT" with a word (CALM, WARM or HOT: the heat the network itself gives off, not your whole area), and `[LOCKED]` or `[OPEN]`.
 Players the Core's code doesn't let through see only `[LOCKED]`, no numbers. A terminal with no Core in
 reach shows `NO SIGNAL`. Every so often the screen glitches for a moment (random, on purpose).
 

@@ -17,7 +17,7 @@ sees no flicker on our TV, so the glitch is ours to build.
  STACKS  1,284 / 2,304
  [██████████████░░░░░░░] 56%
  DRIVES  14   (3 FULL)
- HEAT    ▮▮▮▯▯▯  WARM
+ SYSTEM HEAT         WARM
 ```
 
 - **Stacks used / total, with a fill bar.** Bar colors match the drive fill bar (`DriveFill`): green,
@@ -25,7 +25,7 @@ sees no flicker on our TV, so the glitch is ours to build.
 - **Drives: count, and how many are full.** A drive counts as full at 100% of its stacks, the point where
   its own fill bar turns red. *(Claude's call: the screen fits about five lines, and a network can have
   30+ drives, so it shows a summary instead of a list.)*
-- **Heat:** a 6-segment bar plus a word (CALM / WARM / HOT), measured as the Core's reported heat over its
+- **Heat:** *(Revision 2026-11-18, owner: the bar read like the area's heat, which also counts forges etc.; now the label "SYSTEM HEAT" and only the word, right-aligned.)* Originally a 6-segment bar plus a word (CALM / WARM / HOT), measured as the Core's reported heat over its
   cap (`StashNetHeatPerDrive` × weight, capped at `StashNetHeatCap`, the same numbers as `sn heat`).
   *(Claude's call: thresholds CALM < 40% ≤ WARM < 80% ≤ HOT.)*
 - **Lock:** `[LOCKED]` when the Core's lock is locked, otherwise `[OPEN]`. It shows whether a code is

@@ -78,6 +78,29 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void HeatLineIsSystemHeatLabelAndWordOnly()
+        {
+            // Owner, 2026-11-18: "SYSTEM HEAT" left, the word (CALM/WARM/HOT) right, no boxes. The label (x 10-140)
+            // must not depend on the heat, the middle (where boxes used to be) stays dark, the word on the right changes.
+            var calm = ScreenPainter.Draw(new ScreenView(true, false, false, 10, 100, 14, 3, 0));
+            var hot = ScreenPainter.Draw(new ScreenView(true, false, false, 10, 100, 14, 3, 6));
+            bool rightDiffers = false;
+            for (int y = 162; y < 176; y++)
+            {
+                for (int x = 10; x <= 140; x++)
+                    Assert.Equal(Px(calm, x, y), Px(hot, x, y));
+                for (int x = 141; x < 190; x++)
+                {
+                    Assert.NotEqual(ScreenPainter.Text, Px(calm, x, y));
+                    Assert.NotEqual(ScreenPainter.Text, Px(hot, x, y));
+                }
+                for (int x = 190; x < 246; x++)
+                    if (Px(calm, x, y) != Px(hot, x, y)) rightDiffers = true;
+            }
+            Assert.True(rightDiffers);
+        }
+
+        [Fact]
         public void WideStacksLineStaysOnScreen()
         {
             // "1,234,567 / 1,234,567" (21 chars) is 250 px at scale 2: it must not run past the right margin.

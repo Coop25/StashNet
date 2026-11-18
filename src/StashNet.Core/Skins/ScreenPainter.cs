@@ -54,15 +54,9 @@ namespace StashNet.Core.Skins
             TextAt(buf, "DRIVES " + v.Drives, 2, Margin, LineY(5), Text);
             if (v.FullDrives > 0) TextRight(buf, v.FullDrives + " FULL", 2, LineY(5), Text);
 
-            int x = Margin + TextWidth("HEAT", 2) + 12;
-            int y = LineY(6);
-            TextAt(buf, "HEAT", 2, Margin, y, Text);
-            for (int i = 0; i < 6; i++)
-            {
-                Rect(buf, x, y, 12, 14, i < v.HeatSegments ? Text : Dim);
-                x += 16;
-            }
-            TextAt(buf, ScreenView.HeatWord(v.HeatSegments), 2, x + 8, y, Text);
+            // The network's own heat, not the area's (forges etc. add to that), hence "SYSTEM HEAT" (owner, 2026-11-18).
+            TextAt(buf, "SYSTEM HEAT", 2, Margin, LineY(6), Text);
+            TextRight(buf, ScreenView.HeatWord(v.HeatSegments), 2, LineY(6), Text);
             return buf;
         }
 
