@@ -60,3 +60,4 @@ F5. On the server with a friend: your pins are yours only; the friend doesn't se
 T1. The bottom of the Storage Terminal has only the page arrows (◀ 1/2 ▶); the amount box is gone.
 T2. Click an item: **Take** gives one, **Take stack** gives a stack.
 T3. Open a Storage Terminal: "Connecting to storage..." shows briefly and disappears once the items appear.
+T4. Terminal screens glitch every few seconds, and the glitches differ: quick blinks, sideways shakes, a vertical roll, broken-picture tears, a squash; sometimes two in a row.

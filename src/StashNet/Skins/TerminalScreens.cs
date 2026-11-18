@@ -206,13 +206,11 @@ namespace StashNet.Skins
         /// <summary>The network's own set, drawn (or redrawn in place) to match its last view.</summary>
         private static Texture2D[] CoreSet(CoreScreen cs, float strength)
         {
-            if (cs.Set == null) cs.Set = NewSet("Network");
+            if (cs.Set == null) cs.Set = NewSet("Network", PictureFrames);
             if (cs.Drawn != cs.View || !Mathf.Approximately(cs.DrawnStrength, strength))
             {
                 byte[] clean = ScreenPainter.Draw(cs.View);
-                Upload(cs.Set[0], clean);
-                Upload(cs.Set[1], ScreenGlitch.Damage(clean, W, H, 1, strength));
-                Upload(cs.Set[2], ScreenGlitch.Damage(clean, W, H, 2, strength));
+                Fill(cs.Set, clean, strength);
                 cs.Drawn = cs.View;
                 cs.DrawnStrength = strength;
             }
@@ -222,11 +220,9 @@ namespace StashNet.Skins
         private static Texture2D[] ShutSet(float strength)
         {
             if (shutSet != null) return shutSet;
-            shutSet = NewSet("Locked");
+            shutSet = NewSet("Locked", PictureFrames);
             byte[] clean = ScreenPainter.Draw(ScreenView.ShutOut());
-            Upload(shutSet[0], clean);
-            Upload(shutSet[1], ScreenGlitch.Damage(clean, W, H, 1, strength));
-            Upload(shutSet[2], ScreenGlitch.Damage(clean, W, H, 2, strength));
+            Fill(shutSet, clean, strength);
             return shutSet;
         }
 
@@ -234,7 +230,7 @@ namespace StashNet.Skins
         private static Texture2D[] NoSignalSet()
         {
             if (noSignalSet != null) return noSignalSet;
-            noSignalSet = NewSet("NoSignal");
+            noSignalSet = NewSet("NoSignal", 3);
             byte[] text = ScreenPainter.Draw(ScreenView.NoSignal);
             var bg = ScreenPainter.Background;
             for (int f = 0; f < 3; f++)
@@ -250,9 +246,21 @@ namespace StashNet.Skins
             return noSignalSet;
         }
 
-        private static Texture2D[] NewSet(string name)
+        /// <summary>Clean picture + 4 broken copies of rising damage, so glitches vary (owner, 2026-11-18).</summary>
+        private const int PictureFrames = 5;
+        private static readonly float[] DamageLevels = { 0.6f, 0.9f, 1.2f, 1.5f };
+
+        /// <summary>Frame 0 = the clean picture, then one broken copy per damage level (strength x level, capped at 1).</summary>
+        private static void Fill(Texture2D[] set, byte[] clean, float strength)
         {
-            var set = new Texture2D[3];
+            Upload(set[0], clean);
+            for (int i = 1; i < set.Length; i++)
+                Upload(set[i], ScreenGlitch.Damage(clean, W, H, i, strength * DamageLevels[(i - 1) % DamageLevels.Length]));
+        }
+
+        private static Texture2D[] NewSet(string name, int frames)
+        {
+            var set = new Texture2D[frames];
             for (int i = 0; i < set.Length; i++)
                 set[i] = new Texture2D(W, H, TextureFormat.RGBA32, false)
                 {

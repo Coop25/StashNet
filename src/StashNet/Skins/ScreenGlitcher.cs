@@ -6,9 +6,10 @@ namespace StashNet.Skins
 {
     /// <summary>
     /// PLAYER'S GAME: one per live terminal TV (on its model, next to SkinOwner). Shows the TV's current
-    /// picture set (clean, damaged 1, damaged 2) on the TV's own per-renderer screen materials and runs the
-    /// glitch: between glitches it only counts down; during one (a fraction of a second) it jolts or rolls the
-    /// texture offset and/or flashes a damaged copy every 0.05 s, then puts frame 0 and offset 0 back.
+    /// picture set (clean + broken copies) on the TV's own per-renderer screen materials and runs the glitch:
+    /// between glitches it only counts down; each glitch is a random GlitchRun (flicker, jolt, roll, tear or
+    /// stretch, random strength, sometimes a quick second one), applied every 0.05 s as a texture swap and
+    /// offset/scale, then frame 0, offset 0 and scale 1 go back.
     /// A NO SIGNAL set (static frames) is cycled through constantly instead, every 0.1 s.
     /// Added and removed by TerminalScreens; never on a dedicated server.
     /// </summary>
@@ -16,8 +17,6 @@ namespace StashNet.Skins
     {
         private const string Prop = "_Albedo";
         private const float Step = 0.05f;
-        private const float JoltX = 0.05f;
-        private const float RollY = 0.3f;
 
         private readonly List<Material> materials = new List<Material>();
         private Texture2D[] set;
@@ -28,6 +27,8 @@ namespace StashNet.Skins
         private float wait;        // seconds until the next glitch
         private float glitchLeft;  // > 0 while glitching
         private float stepLeft;
+        private GlitchRun run;     // the current glitch
+        private int stepIndex;
 
         private const float CycleStep = 0.1f;
         private bool cycling;      // NO SIGNAL: the frames are static, stepped through all the time
@@ -121,30 +122,25 @@ namespace StashNet.Skins
                 }
                 wait -= dt;
                 if (wait > 0f) return;
-                glitchLeft = ScreenGlitch.NextLength(rng, length);
+                run = new GlitchRun(rng, length, strength, set.Length - 1);
+                glitchLeft = run.Length;
                 stepLeft = 0f;
+                stepIndex = 0;
             }
 
             glitchLeft -= dt;
             if (glitchLeft <= 0f)
             {
                 Paint(RestFrame, Vector2.zero);
-                wait = NextGap();
+                wait = run?.FollowUpGap ?? NextGap(); // about a third come in bursts
                 return;
             }
             stepLeft -= dt;
             if (stepLeft > 0f) return;
             stepLeft = Step;
 
-            int pick = rng.Next(3); // 0 offset only, 1 damaged frame only, 2 both
-            Vector2 offset = Vector2.zero;
-            if (pick != 1)
-            {
-                if (rng.Next(10) < 7) offset.x = ((float)rng.NextDouble() * 2f - 1f) * JoltX * strength;
-                else offset.y = ((float)rng.NextDouble() * 2f - 1f) * RollY * strength;
-            }
-            int frame = pick != 0 ? 1 + rng.Next(2) : RestFrame;
-            Paint(frame, offset);
+            GlitchFrame g = run.Step(stepIndex++, rng);
+            Paint(g.Frame == GlitchFrame.Rest ? RestFrame : g.Frame, new Vector2(g.OffsetX, g.OffsetY), g.ScaleY);
         }
 
         private float NextGap()
@@ -153,12 +149,12 @@ namespace StashNet.Skins
             return restless ? gap / 3f : gap;
         }
 
-        private void Paint(int frame, Vector2 offset)
+        private void Paint(int frame, Vector2 offset, float scaleY = 1f)
         {
-            if (set != null && frame < set.Length) Paint(set[frame], offset);
+            if (set != null && frame < set.Length) Paint(set[frame], offset, scaleY);
         }
 
-        private void Paint(Texture2D tex, Vector2 offset)
+        private void Paint(Texture2D tex, Vector2 offset, float scaleY = 1f)
         {
             if (tex == null) return;
             for (int i = materials.Count - 1; i >= 0; i--)
@@ -170,7 +166,7 @@ namespace StashNet.Skins
                     continue;
                 }
                 m.SetTexture(Prop, tex);
-                m.SetTextureScale(Prop, Vector2.one);
+                m.SetTextureScale(Prop, new Vector2(1f, scaleY));
                 m.SetTextureOffset(Prop, offset);
             }
         }
