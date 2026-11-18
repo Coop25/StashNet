@@ -76,6 +76,12 @@ namespace StashNet.UI
             if (categories != null) categories.CategoryChanged += entry =>
             {
                 category = entry?.CategoryName ?? "";
+                // Owner, 2026-11-18: a tab other than All clears the search (the change below comes "from code").
+                if (TerminalFilterRules.TabClearsSearch(category, search))
+                {
+                    search = "";
+                    if (searchInput != null) searchInput.Text = "";
+                }
                 page = 0;
                 Render();
             };
@@ -84,6 +90,12 @@ namespace StashNet.UI
             if (searchInput != null) searchInput.OnChangeHandler += (_sender, text, _fromCode) =>
             {
                 search = text ?? "";
+                // Owner, 2026-11-18: typing a search looks through everything, so jump to the All tab.
+                if (TerminalFilterRules.SearchSwitchesToAll(text, _fromCode) && category.Length > 0)
+                {
+                    category = "";
+                    if (categories != null) categories.CurrentCategory = categories.GetCategoryByIndex(0);
+                }
                 page = 0;
                 Render();
             };
