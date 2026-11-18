@@ -456,7 +456,7 @@ namespace StashNet.UI
                     value = Localization.Get(exists ? "stashnetUpdateRule" : "stashnetAddRule");
                     return true;
                 case "stashnet_hasmelt":
-                    value = !broken && AtNetworkStation() && Metals().Length > 0 ? "true" : "false";
+                    value = !broken && AtNetworkStation() && !XUiM_Recipes.DisableSmelter && Metals().Length > 0 ? "true" : "false"; // the server ignores melt targets with Disable Smelter on
                     return true;
                 case "stashnet_metal":
                     string metal = CurrentMetal();
@@ -482,10 +482,10 @@ namespace StashNet.UI
                     value = CraftingNetwork.Active && CraftingNetwork.HasFuel && CurrentFuelMode != FuelModes.Manual ? "true" : "false";
                     return true;
                 case "stashnet_sel_myself":
-                    value = CurrentFuelMode == FuelModes.Manual ? ChosenColor : OtherColor;
+                    value = s != null && CurrentFuelMode == FuelModes.Manual ? ChosenColor : OtherColor;
                     return true;
                 case "stashnet_sel_auto":
-                    value = CurrentFuelMode != FuelModes.Manual ? ChosenColor : OtherColor;
+                    value = s != null && CurrentFuelMode != FuelModes.Manual ? ChosenColor : OtherColor;
                     return true;
                 case "stashnet_sel_none":
                     value = CurrentFuelMode == FuelModes.Auto ? ChosenColor : OtherColor;
@@ -500,7 +500,7 @@ namespace StashNet.UI
                     value = Localization.Get(s != null && !s.OutputOn ? "stashnetOutputOffTip" : "stashnetOutputOnTip");
                     return true;
                 case "stashnet_sel_outon":
-                    value = s == null || s.OutputOn ? ChosenColor : OtherColor;
+                    value = s != null && s.OutputOn ? ChosenColor : OtherColor; // nothing lit until the server has answered
                     return true;
                 case "stashnet_sel_outoff":
                     value = s != null && !s.OutputOn ? ChosenColor : OtherColor;
