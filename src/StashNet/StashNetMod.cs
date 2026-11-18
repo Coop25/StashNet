@@ -17,6 +17,8 @@ namespace StashNet
             var harmony = new Harmony("com.coop25.stashnet");
             harmony.PatchAll(typeof(StashNetMod).Assembly);
             Network.VersionCheck.Init();
+            Network.ScreenWatch.Init();
+            Network.ScreenLink.Init();
             Log.Out($"[StashNet] Loaded v{Version} ({harmony.GetPatchedMethods().Count()} methods patched)");
         }
     }

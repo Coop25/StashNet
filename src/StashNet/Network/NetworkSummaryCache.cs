@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using StashNet.Blocks;
 using StashNet.Core.Network;
@@ -55,15 +56,7 @@ namespace StashNet.Network
         {
             summary = null;
             float now = UnityEngine.Time.time;
-            if (!coreOf.TryGetValue(stationPos, out var c) || now > c.Until)
-            {
-                c.Found = StashNetNetwork.TryFindCore(world, stationPos, out c.Core, out _);
-                c.Until = now + LookupSeconds;
-                if (coreOf.Count > 512) coreOf.Clear();
-                coreOf[stationPos] = c;
-            }
-            corePos = c.Core;
-            if (!c.Found) return false;
+            if (!TryFindCore(world, stationPos, out corePos)) return false;
 
             if (entries.TryGetValue(corePos, out Entry e) && !NetworkSummary.NeedsRebuild(e.Stale, e.BuiltAt, now, BackstopSeconds))
             {
@@ -79,6 +72,48 @@ namespace StashNet.Network
             if (!entries.TryGetValue(corePos, out e)) return false;
             summary = e.Summary;
             return true;
+        }
+
+        /// <summary>
+        /// Raised (SERVER) at the end of every Record, after the entry is updated, with the Core whose
+        /// summary was just refreshed (live terminal screens push the new numbers).
+        /// </summary>
+        public static event Action<Vector3i> Recorded;
+
+        /// <summary>
+        /// The Core serving <paramref name="stationPos"/>, from a lookup kept 10 s per position (a scan
+        /// per call would be too slow). False when there is none.
+        /// </summary>
+        public static bool TryFindCore(World world, Vector3i stationPos, out Vector3i corePos)
+        {
+            float now = UnityEngine.Time.time;
+            if (!coreOf.TryGetValue(stationPos, out var c) || now > c.Until)
+            {
+                c.Found = StashNetNetwork.TryFindCore(world, stationPos, out c.Core, out _);
+                c.Until = now + LookupSeconds;
+                if (coreOf.Count > 512) coreOf.Clear();
+                coreOf[stationPos] = c;
+            }
+            corePos = c.Core;
+            return c.Found;
+        }
+
+        /// <summary>
+        /// The summary already kept for this Core, without any drive read. <paramref name="stale"/> is
+        /// true when TryGet would rebuild it (drives changed outside StashNet, or the 1-minute backstop).
+        /// False when none is kept.
+        /// </summary>
+        public static bool TryPeek(Vector3i corePos, out NetworkSummary summary, out bool stale)
+        {
+            if (entries.TryGetValue(corePos, out Entry e) && e.Summary != null)
+            {
+                summary = e.Summary;
+                stale = NetworkSummary.NeedsRebuild(e.Stale, e.BuiltAt, UnityEngine.Time.time, BackstopSeconds);
+                return true;
+            }
+            summary = null;
+            stale = false;
+            return false;
         }
 
         /// <summary>
@@ -116,6 +151,7 @@ namespace StashNet.Network
                 if (!ours) e.OtherCoreBays.Add(pos);
                 else e.Bays[pos] = storage == null ? null : Prints(storage);
             }
+            Recorded?.Invoke(net.CorePos);
         }
 
         /// <summary>SERVER, from the bay feature's OnRemove: its network's summary no longer matches.</summary>
