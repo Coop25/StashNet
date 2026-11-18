@@ -78,6 +78,22 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void WideStacksLineStaysOnScreen()
+        {
+            // "1,234,567 / 1,234,567" (21 chars) is 250 px at scale 2: it must not run past the right margin.
+            var buf = ScreenPainter.Draw(new ScreenView(true, false, false, 1234567, 1234567, 14, 3, 2));
+            bool lit = false;
+            for (int y = 102; y < 116; y++) // line 4
+            {
+                for (int x = 246; x < ScreenPainter.Width; x++)
+                    Assert.NotEqual(ScreenPainter.Text, Px(buf, x, y));
+                for (int x = 10; x < 246; x++)
+                    if (Px(buf, x, y) == ScreenPainter.Text) lit = true;
+            }
+            Assert.True(lit); // still drawn
+        }
+
+        [Fact]
         public void ZeroMaxDoesNotThrow()
         {
             Assert.Equal(256 * 192 * 4, ScreenPainter.Draw(Live(5, 0)).Length);

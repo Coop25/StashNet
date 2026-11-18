@@ -102,14 +102,34 @@ namespace StashNet.Core.Network
             return true;
         }
 
+        /// <summary>
+        /// Forget the view last sent to this player for this network, so the next ShouldSend sends it again
+        /// (a new Watch: the player's game may have dropped its copy of that network's numbers).
+        /// </summary>
+        public void ForgetSent(int player, Pos3 core) => _sent.Remove((player, core));
+
         public void MarkDirty(Pos3 core)
         {
             if (_state.TryGetValue(core, out var s)) s.Dirty = true;
         }
 
+        /// <summary>True when a watched network waits to be pushed (cheap, no allocation): only then is TakeDue worth calling.</summary>
+        public bool HasDirty
+        {
+            get
+            {
+                foreach (var s in _state.Values)
+                    if (s.Dirty) return true;
+                return false;
+            }
+        }
+
+        readonly List<Pos3> _due = new List<Pos3>();
+
+        /// <summary>Dirty networks whose 1 s push throttle has passed (marked clean). The list is reused by the next call.</summary>
         public List<Pos3> TakeDue(float now)
         {
-            var due = new List<Pos3>();
+            _due.Clear();
             foreach (var kv in _state)
             {
                 var s = kv.Value;
@@ -118,11 +138,12 @@ namespace StashNet.Core.Network
                 s.Dirty = false;
                 s.Flushed = true;
                 s.LastFlush = now;
-                due.Add(kv.Key);
+                _due.Add(kv.Key);
             }
-            return due;
+            return _due;
         }
 
+        /// <summary>True when the lock print differs from the last one; the first print for a network counts as a change.</summary>
         public bool LockChanged(Pos3 core, string lockPrint)
         {
             if (!_state.TryGetValue(core, out var s)) return false;
@@ -130,7 +151,7 @@ namespace StashNet.Core.Network
             {
                 s.HasLockPrint = true;
                 s.LockPrint = lockPrint;
-                return false;
+                return true;
             }
             if (s.LockPrint == lockPrint) return false;
             s.LockPrint = lockPrint;

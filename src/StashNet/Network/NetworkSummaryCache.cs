@@ -48,6 +48,36 @@ namespace StashNet.Network
 
         private static bool IsServer => SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer;
 
+        public static void Init()
+        {
+            ModEvents.WorldShuttingDown.RegisterHandler(OnWorldShuttingDown);
+        }
+
+        /// <summary>Leaving a game: nothing of this session is kept (a host or single player never sees an old summary).</summary>
+        private static void OnWorldShuttingDown(ref ModEvents.SWorldShuttingDownData data)
+        {
+            entries.Clear();
+            coreOf.Clear();
+            nextBayCheck.Clear();
+            freshNet = null;
+            freshFrame = -1;
+        }
+
+        /// <summary>
+        /// SERVER: true when any bay recorded for this Core's summary is open now (a player or the server
+        /// holds it). False when no summary is kept for it (then nothing is known about its bays).
+        /// </summary>
+        public static bool AnyBayOpen(World world, Vector3i corePos)
+        {
+            if (world == null || !entries.TryGetValue(corePos, out Entry e)) return false;
+            foreach (Vector3i pos in e.Bays.Keys)
+            {
+                TEFeatureStorage storage = (world.GetTileEntity(pos) as TileEntityComposite)?.GetFeature<TEFeatureStorage>();
+                if (storage != null && StashNetNetwork.BayIsOpen(storage)) return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// The live summary for the network serving <paramref name="stationPos"/>. Reads the real network
         /// only to build a missing, stale or minute-old summary. False when there is no Core.

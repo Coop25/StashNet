@@ -49,7 +49,7 @@ namespace StashNet.Core.Skins
 
             DrawBar(buf, LineY(3), used, max);
 
-            TextAt(buf, Thousands(v.UsedStacks) + " / " + Thousands(v.MaxStacks), 2, Margin, LineY(4), Text);
+            TextFitted(buf, Thousands(v.UsedStacks) + " / " + Thousands(v.MaxStacks), 2, LineY(4), Text);
 
             TextAt(buf, "DRIVES " + v.Drives, 2, Margin, LineY(5), Text);
             if (v.FullDrives > 0) TextRight(buf, v.FullDrives + " FULL", 2, LineY(5), Text);
@@ -81,6 +81,20 @@ namespace StashNet.Core.Skins
         }
 
         static int TextWidth(string s, int scale) => s.Length == 0 ? 0 : s.Length * 6 * scale - scale;
+
+        /// <summary>
+        /// Left-aligned at the margin; a line too wide for the space between the margins (huge networks) is
+        /// drawn at scale 1 instead, centered in the line's height, so it is never clipped.
+        /// </summary>
+        static void TextFitted(byte[] buf, string s, int scale, int y, (byte R, byte G, byte B) c)
+        {
+            if (scale > 1 && TextWidth(s, scale) > Width - 2 * Margin)
+            {
+                y += (scale - 1) * ScreenFont.GlyphHeight / 2;
+                scale = 1;
+            }
+            TextAt(buf, s, scale, Margin, y, c);
+        }
 
         static void TextCentered(byte[] buf, string s, int scale, int y, (byte R, byte G, byte B) c) =>
             TextAt(buf, s, scale, (Width - TextWidth(s, scale)) / 2, y, c);

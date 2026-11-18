@@ -15,7 +15,7 @@ namespace StashNet.Skins
     ///  - one texture set per network (clean + 2 damaged copies), shared by all its TVs, redrawn in place
     ///    when its numbers change and destroyed when its last TV leaves;
     ///  - one shared "locked out" set and one shared "no signal" set (static), made on first use, kept until
-    ///    the world shuts down; those screens glitch 3x as often.
+    ///    the world shuts down; those screens glitch 3x as often, and NO SIGNAL's static frames cycle constantly.
     /// Until the first answer a TV keeps the plain crtScreen picture. Never runs on a dedicated server.
     /// </summary>
     internal static class TerminalScreens
@@ -170,22 +170,23 @@ namespace StashNet.Skins
         {
             if (tv.Glitcher == null) return;
             Texture2D[] set = null;
-            bool restless = false;
+            bool restless = false, staticNoise = false;
             if (assigned.TryGetValue(tv.Pos, out Pos3? core))
             {
                 if (!core.HasValue)
                 {
                     set = NoSignalSet();
-                    restless = true;
+                    restless = staticNoise = true;
                 }
                 else if (cores.TryGetValue(core.Value, out CoreScreen cs) && cs.View != null)
                 {
-                    if (!cs.View.HasCore) { set = NoSignalSet(); restless = true; }
+                    if (!cs.View.HasCore) { set = NoSignalSet(); restless = staticNoise = true; }
                     else if (cs.View.Shut) { set = ShutSet(tv.Strength); restless = true; }
                     else set = CoreSet(cs, tv.Strength);
                 }
             }
-            if (set != null) tv.Glitcher.Show(set, restless);
+            // NO SIGNAL is static all the time (its 3 frames cycled); the others rest on their clean frame.
+            if (set != null) tv.Glitcher.Show(set, restless, staticNoise);
             // No numbers yet (or any more): the plain crtScreen picture, never a destroyed set.
             else tv.Glitcher.ShowStill(tv.Fallback != null ? SkinPainter.ScreenTexture(tv.Fallback) : null);
         }

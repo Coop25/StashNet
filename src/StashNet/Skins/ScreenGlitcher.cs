@@ -9,6 +9,7 @@ namespace StashNet.Skins
     /// picture set (clean, damaged 1, damaged 2) on the TV's own per-renderer screen materials and runs the
     /// glitch: between glitches it only counts down; during one (a fraction of a second) it jolts or rolls the
     /// texture offset and/or flashes a damaged copy every 0.05 s, then puts frame 0 and offset 0 back.
+    /// A NO SIGNAL set (static frames) is cycled through constantly instead, every 0.1 s.
     /// Added and removed by TerminalScreens; never on a dedicated server.
     /// </summary>
     public class ScreenGlitcher : MonoBehaviour
@@ -27,6 +28,11 @@ namespace StashNet.Skins
         private float wait;        // seconds until the next glitch
         private float glitchLeft;  // > 0 while glitching
         private float stepLeft;
+
+        private const float CycleStep = 0.1f;
+        private bool cycling;      // NO SIGNAL: the frames are static, stepped through all the time
+        private int cycleFrame;
+        private float cycleLeft;
 
         internal Texture2D[] Set => set;
 
@@ -50,8 +56,12 @@ namespace StashNet.Skins
             materials.AddRange(mats);
         }
 
-        /// <summary>Shows a picture set (frame 0, no offset) and glitches it. The countdown keeps running unless the TV had no set or its restlessness changed.</summary>
-        internal void Show(Texture2D[] newSet, bool newRestless)
+        /// <summary>
+        /// Shows a picture set (frame 0, no offset) and glitches it. The countdown keeps running unless the TV
+        /// had no set or its restlessness changed. <paramref name="newCycling"/> (NO SIGNAL static) steps through
+        /// the set's frames all the time, every 0.1 s (a texture swap, no redraw), glitches on top.
+        /// </summary>
+        internal void Show(Texture2D[] newSet, bool newRestless, bool newCycling = false)
         {
             if (newSet == null)
             {
@@ -61,10 +71,20 @@ namespace StashNet.Skins
             bool timerReset = set == null || restless != newRestless;
             set = newSet;
             restless = newRestless;
+            if (cycling != newCycling)
+            {
+                cycling = newCycling;
+                cycleFrame = 0;
+                cycleLeft = CycleStep;
+            }
+            if (cycleFrame >= set.Length) cycleFrame = 0;
             glitchLeft = 0f;
-            Paint(0, Vector2.zero);
+            Paint(RestFrame, Vector2.zero);
             if (timerReset) wait = NextGap();
         }
+
+        /// <summary>The frame shown between glitches: 0, or the current static frame while cycling.</summary>
+        private int RestFrame => cycling ? cycleFrame : 0;
 
         /// <summary>A still picture, no glitching (the crtScreen fallback). Null leaves the materials as they are.</summary>
         internal void ShowStill(Texture2D tex)
@@ -89,6 +109,16 @@ namespace StashNet.Skins
             float dt = Time.deltaTime;
             if (glitchLeft <= 0f)
             {
+                if (cycling)
+                {
+                    cycleLeft -= dt;
+                    if (cycleLeft <= 0f)
+                    {
+                        cycleLeft = CycleStep;
+                        cycleFrame = (cycleFrame + 1) % set.Length;
+                        Paint(cycleFrame, Vector2.zero);
+                    }
+                }
                 wait -= dt;
                 if (wait > 0f) return;
                 glitchLeft = ScreenGlitch.NextLength(rng, length);
@@ -98,7 +128,7 @@ namespace StashNet.Skins
             glitchLeft -= dt;
             if (glitchLeft <= 0f)
             {
-                Paint(0, Vector2.zero);
+                Paint(RestFrame, Vector2.zero);
                 wait = NextGap();
                 return;
             }
@@ -113,7 +143,7 @@ namespace StashNet.Skins
                 if (rng.Next(10) < 7) offset.x = ((float)rng.NextDouble() * 2f - 1f) * JoltX * strength;
                 else offset.y = ((float)rng.NextDouble() * 2f - 1f) * RollY * strength;
             }
-            int frame = pick != 0 ? 1 + rng.Next(2) : 0;
+            int frame = pick != 0 ? 1 + rng.Next(2) : RestFrame;
             Paint(frame, offset);
         }
 

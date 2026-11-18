@@ -50,6 +50,9 @@ namespace StashNet.Network
                     if (CubeDistance(World.worldToBlockPos(player.position), terminal) > MaxWatchRange) return;
                     book.Watch(player.entityId, m.Terminal);
                     Pos3? core = ResolveCore(world, terminal);
+                    // A new Watch always gets the numbers again: the player's game may have dropped its copy
+                    // (another TV of that network unloaded meanwhile), so what it was last sent doesn't count.
+                    if (core.HasValue) book.ForgetSent(player.entityId, core.Value);
                     // Others watching this terminal only hear about it when its Core changed; this player always.
                     var tell = new HashSet<int>(book.SetCore(m.Terminal, core)) { player.entityId };
                     foreach (int id in tell) Tell(world, id, m.Terminal, core);
@@ -80,7 +83,7 @@ namespace StashNet.Network
             try
             {
                 float now = UnityEngine.Time.time;
-                if (book.HasWatchedCores)
+                if (book.HasDirty) // idle (nothing changed): no TakeDue, no allocation
                 {
                     foreach (Pos3 core in book.TakeDue(now)) PushCore(world, core);
                 }
@@ -121,10 +124,12 @@ namespace StashNet.Network
                 if (book.LockChanged(core, LockPrint(NetworkLock.GetCoreLock(world, ScreenPos.ToVector(core)))))
                     book.MarkDirty(core);
                 // Rebuilt only when missing or marked stale (drives changed outside StashNet), never for age
-                // alone, and at most every 5 s per network. A real read; its Record marks the network dirty.
-                bool kept = NetworkSummaryCache.TryPeek(ScreenPos.ToVector(core), out _, out bool stale);
-                if ((!kept || stale) && book.StaleRebuildAllowed(core, now))
-                    NetworkSummaryCache.TryGet(world, ScreenPos.ToVector(core), out _, out _);
+                // alone, never while one of the network's bays is open (spec §2; the throttle isn't used up
+                // then), and at most every 5 s per network. A real read; its Record marks the network dirty.
+                Vector3i corePos = ScreenPos.ToVector(core);
+                bool kept = NetworkSummaryCache.TryPeek(corePos, out _, out bool stale);
+                if ((!kept || stale) && !NetworkSummaryCache.AnyBayOpen(world, corePos) && book.StaleRebuildAllowed(core, now))
+                    NetworkSummaryCache.TryGet(world, corePos, out _, out _);
             }
         }
 

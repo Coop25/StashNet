@@ -127,7 +127,7 @@ namespace StashNet.Core.Tests
             b.SetCore(A, C);
             Assert.True(b.ShouldSend(1, C, Live(5)));
             Assert.True(b.ShouldSend(2, C, ScreenView.ShutOut()));
-            Assert.False(b.LockChanged(C, "a"));
+            Assert.True(b.LockChanged(C, "a")); // first print counts (the push is deduped by ShouldSend)
             Assert.True(b.LockChanged(C, "b"));
             Assert.False(b.ShouldSend(1, C, Live(5)));
             Assert.True(b.ShouldSend(2, C, Live(5)));
@@ -156,10 +156,11 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
-        public void LockChangedFirstCallFalse()
+        public void LockChangedFirstCallTrue()
         {
+            // A lock change between a Core's first watch and its first 2 s check must still be pushed.
             var b = Two();
-            Assert.False(b.LockChanged(C, "x"));
+            Assert.True(b.LockChanged(C, "x"));
             Assert.False(b.LockChanged(C, "x"));
             Assert.True(b.LockChanged(C, "y"));
         }
@@ -182,8 +183,46 @@ namespace StashNet.Core.Tests
             b.DropPlayer(1);
             b.Watch(1, A);
             b.SetCore(A, C);
-            Assert.False(b.LockChanged(C, "y"));
+            Assert.True(b.LockChanged(C, "x")); // forgotten: the same print counts as a first one again
             Assert.True(b.StaleRebuildAllowed(C, 1f));
+        }
+
+        [Fact]
+        public void HasDirtyOnlyWhileSomethingIsDirty()
+        {
+            var b = Two();
+            Assert.False(b.HasDirty); // idle: the server skips TakeDue
+            b.MarkDirty(C);
+            Assert.True(b.HasDirty);
+            Assert.Equal(new[] { C }, b.TakeDue(0f).ToArray());
+            Assert.False(b.HasDirty);
+            b.MarkDirty(C);
+            Assert.Empty(b.TakeDue(0.5f)); // throttled: still dirty
+            Assert.True(b.HasDirty);
+            b.MarkDirty(C2); // not watched: ignored
+            b.DropPlayer(1);
+            Assert.False(b.HasDirty);
+        }
+
+        [Fact]
+        public void TakeDueReusesItsList()
+        {
+            var b = Two();
+            b.MarkDirty(C);
+            var first = b.TakeDue(0f);
+            Assert.Same(first, b.TakeDue(5f));
+        }
+
+        [Fact]
+        public void ForgetSentResendsTheSameView()
+        {
+            var b = Two();
+            Assert.True(b.ShouldSend(1, C, Live(5)));
+            Assert.False(b.ShouldSend(1, C, Live(5)));
+            b.ForgetSent(1, C);
+            Assert.True(b.ShouldSend(1, C, Live(5)));
+            b.ForgetSent(2, C); // never sent: no-op
+            Assert.False(b.ShouldSend(1, C, Live(5)));
         }
     }
 }

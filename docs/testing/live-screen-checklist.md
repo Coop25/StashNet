@@ -16,7 +16,7 @@ reach shows `NO SIGNAL`. Every so often the screen glitches for a moment (random
 ## Steps
 - [ ] **1. Load the world.** Every terminal screen switches from the old green picture to live numbers within a few seconds.
 - [ ] **2. Numbers match.** Open a terminal. Stacks used / total and the drive count on the screen match the terminal window.
-- [ ] **3. Big deposit.** Shift-click about 40 stacks into the terminal. The screen keeps up and ends on the right number.
+- [ ] **3. Big deposit.** Shift-click about 40 stacks into the terminal. The screen keeps up (it updates within about 1–2 seconds) and ends on the right number.
 - [ ] **4. Drive out by hand.** Take a drive out of a bay. The screen updates within about 5 seconds.
 - [ ] **5. Lock.** Set a code on the Core: the screen shows `[LOCKED]`. A second player who is not on the list sees only `[LOCKED]` (no numbers). After they enter the code they see numbers within about 2 seconds.
 - [ ] **6. No Core.** Break the Core: the screen shows `NO SIGNAL` within about 10 seconds. Place it back: numbers return.
