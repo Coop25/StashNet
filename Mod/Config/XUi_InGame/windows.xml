@@ -21,8 +21,10 @@
 				<label depth="4" name="sortLabel" pos="0,-4" width="176" height="24" font_size="20" justify="center" text="{stashnet_sort}" />
 			</rect>
 
-			<!-- Category tabs (All + the game's own item categories, as in the backpack filter). 14 slots = All + the 13 vanilla trader categories. Filled in code. -->
-			<grid depth="3" name="categories" pos="6,-99" rows="1" cols="14" cell_width="34" cell_height="34" repeat_content="true" controller="CategoryList" allow_key_paging="false" hide_gamepad_callouts="true">
+			<!-- Category tabs (All + the game's own item categories, as in the backpack filter). 14 slots = All + the 13 vanilla trader categories. Filled in code.
+			     category_icon has pivot="center": each 28 px icon is centered on its cell's corner, so x = 8 margin + 14 half icon = 22
+			     (row spans x 8-478 of 486 with all 14 tabs). x=6 put half the first icon outside the window's left edge. -->
+			<grid depth="3" name="categories" pos="22,-99" rows="1" cols="14" cell_width="34" cell_height="34" repeat_content="true" controller="CategoryList" allow_key_paging="false" hide_gamepad_callouts="true">
 				<category_icon size="28" collider_scale="1" />
 			</grid>
 
