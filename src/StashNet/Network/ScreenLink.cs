@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using StashNet.Core.Protocol;
 using StashNet.Skins;
@@ -16,6 +17,11 @@ namespace StashNet.Network
         private static readonly HashSet<Vector3i> wanted = new HashSet<Vector3i>();
         /// <summary>Wanted but not sent to the server yet.</summary>
         private static readonly HashSet<Vector3i> pending = new HashSet<Vector3i>();
+        /// <summary>Pending watches whose last send threw: the server may have them, so an Unwatch is still sent.</summary>
+        private static readonly HashSet<Vector3i> failed = new HashSet<Vector3i>();
+        /// <summary>After a failed send, pending watches wait this long before the next try (no retry every frame).</summary>
+        private const float RetrySeconds = 3f;
+        private static float retryAt;
 
         public static void Init()
         {
@@ -32,8 +38,15 @@ namespace StashNet.Network
         public static void Unwatch(Vector3i terminal)
         {
             if (GameManager.IsDedicatedServer || !wanted.Remove(terminal)) return;
-            if (pending.Remove(terminal)) return; // never sent: nothing to take back
-            Send(new ScreenMessage { Op = ScreenOp.Unwatch, Terminal = ScreenPos.ToPos3(terminal) });
+            if (pending.Remove(terminal) && !failed.Remove(terminal)) return; // never sent: nothing to take back
+            try
+            {
+                Send(new ScreenMessage { Op = ScreenOp.Unwatch, Terminal = ScreenPos.ToPos3(terminal) });
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"[StashNet] Screen unwatch for the terminal at {terminal} failed: {e}");
+            }
         }
 
         /// <summary>A server answer (package, or directly from ScreenWatch on a host).</summary>
@@ -58,16 +71,38 @@ namespace StashNet.Network
             if (pending.Count == 0 || GameManager.IsDedicatedServer) return;
             if (!VersionCheck.ClientMayUse(out _)) return;
             if (SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer && GameManager.Instance.World?.GetPrimaryPlayer() == null) return;
-            var toSend = new List<Vector3i>(pending);
-            pending.Clear();
-            foreach (Vector3i terminal in toSend)
-                Send(new ScreenMessage { Op = ScreenOp.Watch, Terminal = ScreenPos.ToPos3(terminal) });
+            float now = UnityEngine.Time.realtimeSinceStartup;
+            if (now < retryAt) return;
+            // A watch that throws goes back to pending (retried after RetrySeconds) and doesn't stop the others.
+            // It leaves pending just before its send, so an Unwatch arriving during the send (host: the answer
+            // runs synchronously) counts it as sent and tells the server.
+            foreach (Vector3i terminal in new List<Vector3i>(pending))
+            {
+                if (!pending.Remove(terminal)) continue; // unwatched meanwhile
+                failed.Remove(terminal);
+                try
+                {
+                    Send(new ScreenMessage { Op = ScreenOp.Watch, Terminal = ScreenPos.ToPos3(terminal) });
+                }
+                catch (Exception e)
+                {
+                    if (wanted.Contains(terminal))
+                    {
+                        pending.Add(terminal);
+                        failed.Add(terminal);
+                    }
+                    retryAt = now + RetrySeconds;
+                    Log.Warning($"[StashNet] Screen watch for the terminal at {terminal} failed (retrying in {RetrySeconds} s): {e}");
+                }
+            }
         }
 
         private static void OnWorldShuttingDown(ref ModEvents.SWorldShuttingDownData data)
         {
             wanted.Clear();
             pending.Clear();
+            failed.Clear();
+            retryAt = 0f;
             if (!GameManager.IsDedicatedServer) TerminalScreens.Clear();
         }
 

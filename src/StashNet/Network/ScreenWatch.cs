@@ -74,13 +74,16 @@ namespace StashNet.Network
 
         private static void OnGameUpdate(ref ModEvents.SGameUpdateData data)
         {
-            if (!IsServer) return;
+            if (book.IsEmpty || !IsServer) return; // nothing watched: no work, no allocation
             World world = GameManager.Instance.World;
             if (world == null) return;
             try
             {
                 float now = UnityEngine.Time.time;
-                foreach (Pos3 core in book.TakeDue(now)) PushCore(world, core);
+                if (book.HasWatchedCores)
+                {
+                    foreach (Pos3 core in book.TakeDue(now)) PushCore(world, core);
+                }
                 if (now < nextCheck) return;
                 nextCheck = now + CheckSeconds;
                 Check(world, now);
@@ -117,8 +120,9 @@ namespace StashNet.Network
             {
                 if (book.LockChanged(core, LockPrint(NetworkLock.GetCoreLock(world, ScreenPos.ToVector(core)))))
                     book.MarkDirty(core);
+                // Rebuilt only when missing or marked stale (drives changed outside StashNet), never for age
+                // alone, and at most every 5 s per network. A real read; its Record marks the network dirty.
                 bool kept = NetworkSummaryCache.TryPeek(ScreenPos.ToVector(core), out _, out bool stale);
-                // A real read; its Record marks the network dirty, so watchers get the new numbers.
                 if ((!kept || stale) && book.StaleRebuildAllowed(core, now))
                     NetworkSummaryCache.TryGet(world, ScreenPos.ToVector(core), out _, out _);
             }

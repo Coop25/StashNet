@@ -100,15 +100,15 @@ namespace StashNet.Network
 
         /// <summary>
         /// The summary already kept for this Core, without any drive read. <paramref name="stale"/> is
-        /// true when TryGet would rebuild it (drives changed outside StashNet, or the 1-minute backstop).
-        /// False when none is kept.
+        /// true only when it was marked stale (drives changed outside StashNet), never for age alone:
+        /// the 1-minute backstop stays TryGet's own rule. False when none is kept.
         /// </summary>
         public static bool TryPeek(Vector3i corePos, out NetworkSummary summary, out bool stale)
         {
             if (entries.TryGetValue(corePos, out Entry e) && e.Summary != null)
             {
                 summary = e.Summary;
-                stale = NetworkSummary.NeedsRebuild(e.Stale, e.BuiltAt, UnityEngine.Time.time, BackstopSeconds);
+                stale = e.Stale;
                 return true;
             }
             summary = null;

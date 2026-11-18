@@ -34,6 +34,12 @@ namespace StashNet.Core.Network
 
         public IReadOnlyCollection<Pos3> Terminals => _watchers.Keys.ToList();
 
+        /// <summary>True when no terminal is watched at all (cheap, no allocation).</summary>
+        public bool IsEmpty => _watchers.Count == 0;
+
+        /// <summary>True when at least one watched terminal has a Core (cheap, no allocation): TakeDue can do something.</summary>
+        public bool HasWatchedCores => _state.Count > 0;
+
         public void Watch(int player, Pos3 terminal)
         {
             if (!_watchers.TryGetValue(terminal, out var set))

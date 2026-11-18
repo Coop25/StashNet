@@ -22,6 +22,24 @@ namespace StashNet.Core.Tests
         static ScreenView Live(int used) => new ScreenView(true, false, false, used, 100, 4, 0, 1);
 
         [Fact]
+        public void EmptyAndWatchedCoreFlags()
+        {
+            var b = new ScreenWatchBook();
+            Assert.True(b.IsEmpty);
+            Assert.False(b.HasWatchedCores);
+            b.Watch(1, A);
+            Assert.False(b.IsEmpty);
+            Assert.False(b.HasWatchedCores); // core not answered yet
+            b.SetCore(A, null);
+            Assert.False(b.HasWatchedCores); // no network
+            b.SetCore(A, C);
+            Assert.True(b.HasWatchedCores);
+            b.Unwatch(1, A);
+            Assert.True(b.IsEmpty);
+            Assert.False(b.HasWatchedCores);
+        }
+
+        [Fact]
         public void PlayerListedOncePerCore()
         {
             var b = Two();
