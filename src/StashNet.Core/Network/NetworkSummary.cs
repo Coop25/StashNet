@@ -15,6 +15,10 @@ namespace StashNet.Core.Network
         private readonly Dictionary<string, int> total = new Dictionary<string, int>(StringComparer.Ordinal);
 
         public int FreeStacks { get; private set; }
+        public int UsedStacks { get; private set; }
+        public int MaxStacks { get; private set; }
+        /// <summary>Drives with no free stack left (used at or over capacity).</summary>
+        public int FullDrives { get; private set; }
         public int DriveCount { get; private set; }
         public float HeatWeight { get; private set; }
 
@@ -26,7 +30,19 @@ namespace StashNet.Core.Network
                 Add(s.total, item.Name, item.Count);
                 if (item.Variant == null) Add(s.plain, item.Name, item.Count);
             }
-            s.FreeStacks = Math.Max(0, storage.MaxStacks - storage.UsedStacks);
+            int used = 0, max = 0, full = 0;
+            foreach (NetworkDrive d in storage.Drives)
+            {
+                int u = storage.UsedStacksOf(d);
+                int m = d.Capacity.MaxStacks;
+                used += u;
+                max += m;
+                if (m > 0 && u >= m) full++;
+            }
+            s.UsedStacks = used;
+            s.MaxStacks = max;
+            s.FullDrives = full;
+            s.FreeStacks = Math.Max(0, max - used);
             return s;
         }
 

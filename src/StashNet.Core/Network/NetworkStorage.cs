@@ -54,6 +54,9 @@ namespace StashNet.Core.Network
         public int MaxStacks => drives.Sum(d => d.Capacity.MaxStacks);
         public int UsedStacks => drives.Sum(d => d.Contents.UsedStacks(stackSizeOf));
 
+        /// <summary>Stacks one drive's contents use, with this network's stack sizes.</summary>
+        public int UsedStacksOf(NetworkDrive d) => d.Contents.UsedStacks(stackSizeOf);
+
         /// <summary>Different items in the network, each counted once however many drives hold it.</summary>
         public int DistinctItems => Aggregate().Count;
 
