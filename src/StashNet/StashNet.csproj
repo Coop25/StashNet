@@ -84,12 +84,25 @@
   </Target>
 
   <Target Name="DeployMod" AfterTargets="StageMod" Condition="'$(Deploy)' == 'true'">
+    <PropertyGroup>
+      <DeployDir Condition="'$(DeployDir)' == ''">$(GameDir)\Mods\StashNet</DeployDir>
+    </PropertyGroup>
+    <!-- Never install an older StashNet over a newer one (it happened twice, 2026-11-16 and 2026-11-17: another worktree
+         deployed 1.0.0 / 0.19.4 over the owner's newer install). Override only on purpose with -p:AllowDowngrade=true. -->
+    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)..\..\Mod\ModInfo.xml" Query="/xml/Version/@value">
+      <Output TaskParameter="Result" PropertyName="DeployBuildVersion" />
+    </XmlPeek>
+    <XmlPeek Condition="Exists('$(DeployDir)\ModInfo.xml')" XmlInputPath="$(DeployDir)\ModInfo.xml" Query="/xml/Version/@value">
+      <Output TaskParameter="Result" PropertyName="DeployInstalledVersion" />
+    </XmlPeek>
+    <Error Condition="'$(DeployInstalledVersion)' != '' and '$(AllowDowngrade)' != 'true' and $([System.Version]::Parse('$(DeployInstalledVersion)').CompareTo($([System.Version]::Parse('$(DeployBuildVersion)')))) &gt; 0"
+           Text="Refusing to deploy StashNet $(DeployBuildVersion) over the installed, newer $(DeployInstalledVersion). Pass -p:AllowDowngrade=true only if that is really wanted." />
     <ItemGroup>
       <StagedFiles Include="$(ModStageDir)**\*" />
     </ItemGroup>
-    <RemoveDir Directories="$(GameDir)\Mods\StashNet" />
-    <Copy SourceFiles="@(StagedFiles)" DestinationFiles="@(StagedFiles->'$(GameDir)\Mods\StashNet\%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Message Importance="high" Text="StashNet deployed to $(GameDir)\Mods\StashNet" />
+    <RemoveDir Directories="$(DeployDir)" />
+    <Copy SourceFiles="@(StagedFiles)" DestinationFiles="@(StagedFiles->'$(DeployDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Importance="high" Text="StashNet deployed to $(DeployDir)" />
   </Target>
 
 </Project>
