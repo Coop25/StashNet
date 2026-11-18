@@ -56,6 +56,7 @@ namespace StashNet.Core.Skins
 
             int x = Margin + TextWidth("HEAT", 2) + 12;
             int y = LineY(6);
+            TextAt(buf, "HEAT", 2, Margin, y, Text);
             for (int i = 0; i < 6; i++)
             {
                 Rect(buf, x, y, 12, 14, i < v.HeatSegments ? Text : Dim);

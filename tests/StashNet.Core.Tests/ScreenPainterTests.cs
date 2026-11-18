@@ -67,6 +67,17 @@ namespace StashNet.Core.Tests
         }
 
         [Fact]
+        public void HeatLabelIsDrawn()
+        {
+            var buf = ScreenPainter.Draw(Live(10, 100));
+            bool lit = false;
+            for (int y = 162; y < 176; y++)
+                for (int x = 10; x <= 56; x++)
+                    if (Px(buf, x, y) == ScreenPainter.Text) lit = true;
+            Assert.True(lit);
+        }
+
+        [Fact]
         public void ZeroMaxDoesNotThrow()
         {
             Assert.Equal(256 * 192 * 4, ScreenPainter.Draw(Live(5, 0)).Length);
