@@ -92,6 +92,7 @@ namespace StashNet.Skins
 
         private void OnDisable()
         {
+            TerminalScreens.Unregister(this); // stop the live screen before the vanilla picture goes back
             Restore();
             live.Remove(this);
         }

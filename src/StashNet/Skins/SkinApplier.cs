@@ -37,7 +37,7 @@ namespace StashNet.Skins
                 if (r == null) continue;
                 r.sharedMaterials = painted ? SkinPainter.Paint(owner.BlockName, paint, owner.Originals[i]) : owner.Originals[i];
             }
-            SetScreens(owner, painted && !SkinPainter.GridMode ? paint.Screen : null);
+            SetScreens(owner, painted && !SkinPainter.GridMode ? paint : null);
             if (painted && paint.Mute)
             {
                 // The CRT's hum comes from the game's AudioPlayer script, which the TV's LightLOD script switches
@@ -71,10 +71,13 @@ namespace StashNet.Skins
 
         /// <summary>
         /// Puts our picture into the TV's own per-renderer screen material (or puts the original back when
-        /// sprite is null). The original picture is remembered on the owner for Restore.
+        /// the paint has no screen sprite). The original picture is remembered on the owner for Restore.
+        /// A live paint (live="true", e.g. the Storage Terminal) then hands the TV to TerminalScreens, which
+        /// swaps the plain picture for the network's numbers once the server answers.
         /// </summary>
-        private static void SetScreens(SkinOwner owner, string sprite)
+        private static void SetScreens(SkinOwner owner, BlockPaint paint)
         {
+            string sprite = paint?.Screen;
             Texture2D picture = sprite != null ? SkinPainter.ScreenTexture(sprite) : null;
             foreach (Material[] mats in owner.Originals)
                 foreach (Material m in mats)
@@ -90,6 +93,8 @@ namespace StashNet.Skins
                     m.SetTextureScale("_Albedo", Vector2.one);
                     m.SetTextureOffset("_Albedo", Vector2.zero);
                 }
+            if (picture != null && paint.Live) TerminalScreens.Register(owner, paint);
+            else TerminalScreens.Unregister(owner); // not live (any more): plain picture or vanilla, put back above
         }
 
         /// <summary>Redo every live block of one type (its repaint just finished).</summary>

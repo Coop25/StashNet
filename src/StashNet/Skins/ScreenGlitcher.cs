@@ -1,0 +1,148 @@
+using System.Collections.Generic;
+using StashNet.Core.Skins;
+using UnityEngine;
+
+namespace StashNet.Skins
+{
+    /// <summary>
+    /// PLAYER'S GAME: one per live terminal TV (on its model, next to SkinOwner). Shows the TV's current
+    /// picture set (clean, damaged 1, damaged 2) on the TV's own per-renderer screen materials and runs the
+    /// glitch: between glitches it only counts down; during one (a fraction of a second) it jolts or rolls the
+    /// texture offset and/or flashes a damaged copy every 0.05 s, then puts frame 0 and offset 0 back.
+    /// Added and removed by TerminalScreens; never on a dedicated server.
+    /// </summary>
+    public class ScreenGlitcher : MonoBehaviour
+    {
+        private const string Prop = "_Albedo";
+        private const float Step = 0.05f;
+        private const float JoltX = 0.05f;
+        private const float RollY = 0.3f;
+
+        private readonly List<Material> materials = new List<Material>();
+        private Texture2D[] set;
+        private bool restless;
+        private System.Random rng;
+        private float minGap = 8f, maxGap = 30f, length = 0.4f, strength = 0.6f;
+
+        private float wait;        // seconds until the next glitch
+        private float glitchLeft;  // > 0 while glitching
+        private float stepLeft;
+
+        internal Texture2D[] Set => set;
+
+        internal void Init(int seed)
+        {
+            if (rng == null) rng = new System.Random(seed);
+        }
+
+        internal void Configure(BlockPaint paint)
+        {
+            minGap = paint.GlitchMinGap;
+            maxGap = paint.GlitchMaxGap;
+            length = paint.GlitchLength;
+            strength = Mathf.Clamp01(paint.GlitchStrength);
+        }
+
+        /// <summary>The screen materials this TV owns (replaces the list).</summary>
+        internal void SetMaterials(IEnumerable<Material> mats)
+        {
+            materials.Clear();
+            materials.AddRange(mats);
+        }
+
+        /// <summary>Shows a picture set (frame 0, no offset) and glitches it. The countdown keeps running unless the TV had no set or its restlessness changed.</summary>
+        internal void Show(Texture2D[] newSet, bool newRestless)
+        {
+            if (newSet == null)
+            {
+                ShowStill(null);
+                return;
+            }
+            bool timerReset = set == null || restless != newRestless;
+            set = newSet;
+            restless = newRestless;
+            glitchLeft = 0f;
+            Paint(0, Vector2.zero);
+            if (timerReset) wait = NextGap();
+        }
+
+        /// <summary>A still picture, no glitching (the crtScreen fallback). Null leaves the materials as they are.</summary>
+        internal void ShowStill(Texture2D tex)
+        {
+            set = null;
+            glitchLeft = 0f;
+            Paint(tex, Vector2.zero);
+        }
+
+        /// <summary>Forget the materials and picture; does not touch the materials (the owner restores them).</summary>
+        internal void Drop()
+        {
+            materials.Clear();
+            set = null;
+            glitchLeft = 0f;
+            enabled = false;
+        }
+
+        private void Update()
+        {
+            if (set == null || materials.Count == 0) return;
+            float dt = Time.deltaTime;
+            if (glitchLeft <= 0f)
+            {
+                wait -= dt;
+                if (wait > 0f) return;
+                glitchLeft = ScreenGlitch.NextLength(rng, length);
+                stepLeft = 0f;
+            }
+
+            glitchLeft -= dt;
+            if (glitchLeft <= 0f)
+            {
+                Paint(0, Vector2.zero);
+                wait = NextGap();
+                return;
+            }
+            stepLeft -= dt;
+            if (stepLeft > 0f) return;
+            stepLeft = Step;
+
+            int pick = rng.Next(3); // 0 offset only, 1 damaged frame only, 2 both
+            Vector2 offset = Vector2.zero;
+            if (pick != 1)
+            {
+                if (rng.Next(10) < 7) offset.x = ((float)rng.NextDouble() * 2f - 1f) * JoltX * strength;
+                else offset.y = ((float)rng.NextDouble() * 2f - 1f) * RollY * strength;
+            }
+            int frame = pick != 0 ? 1 + rng.Next(2) : 0;
+            Paint(frame, offset);
+        }
+
+        private float NextGap()
+        {
+            float gap = ScreenGlitch.NextGap(rng, minGap, maxGap);
+            return restless ? gap / 3f : gap;
+        }
+
+        private void Paint(int frame, Vector2 offset)
+        {
+            if (set != null && frame < set.Length) Paint(set[frame], offset);
+        }
+
+        private void Paint(Texture2D tex, Vector2 offset)
+        {
+            if (tex == null) return;
+            for (int i = materials.Count - 1; i >= 0; i--)
+            {
+                Material m = materials[i];
+                if (m == null)
+                {
+                    materials.RemoveAt(i); // deleted by the game: forget it
+                    continue;
+                }
+                m.SetTexture(Prop, tex);
+                m.SetTextureScale(Prop, Vector2.one);
+                m.SetTextureOffset(Prop, offset);
+            }
+        }
+    }
+}
